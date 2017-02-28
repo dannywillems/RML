@@ -38,7 +38,7 @@ and ('bn, 'fn) typ =
   (* T ∨ T *)
   | TypeUnion of ('bn, 'fn) typ * ('bn, 'fn) typ
   (* { z => T^{z} } *)
-  | TypeRecursive of 'bn * (('bn, 'fn) typ) list
+  | TypeRecursive of ('bn, ('bn, 'fn) typ) abs
   (* L : S..T *)
   | TypeTypeMember of type_label * ('bn, 'fn) typ * ('bn, 'fn) typ
   (* m(x : S) : T *)
@@ -46,25 +46,27 @@ and ('bn, 'fn) typ =
   (* x.L *)
   | TypePathDependent of 'fn * type_label
 
+
 [@@deriving
-  visitors {
-    variety = "map";
-    ancestors = ["BindingForms.map"]
-  },
   visitors {
     variety = "iter";
     ancestors = ["BindingForms.iter"]
   },
   visitors {
+    variety = "map";
+    ancestors = ["BindingForms.map"]
+  },
+  visitors {
     variety = "iter2";
     ancestors = ["BindingForms.iter2"]
   }
-
 ]
 
-#include "AlphaLibMacros.cppo.ml"
+type raw_term = (string, string) term
 
+type raw_typ = (string, string) typ
+
+#include "AlphaLibMacros.cppo.ml"
 __ALL
 ALL(term)
 ALL(typ)
-(* ------------------------------------------------------ *)
