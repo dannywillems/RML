@@ -1,3 +1,5 @@
+open Grammar
+(*
 let term1 : Grammar.raw_term =
   Grammar.TermVar "x"
 
@@ -18,7 +20,8 @@ let type2 : Grammar.raw_typ =
                              Grammar.TypePathDependent ("z", "T")
                            )
       ),
-      Grammar.TypeMethodMember ("x",
+      Grammar.TypeMethodMember ("he",
+                                "x",
                                 Grammar.TypePathDependent ("z", "T"),
                                 Grammar.TypePathDependent ("z", "T2")
                                )
@@ -29,3 +32,4 @@ let () =
   Print.print_raw_term term1;
   Print.print_raw_typ type1;
   Print.print_raw_typ type2
+*)
