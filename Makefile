@@ -27,6 +27,13 @@ test: all
 
 include $(shell ocamlfind query visitors)/Makefile.preprocess
 
+MLI := \
+  $(patsubst %.ml,%.inferred.mli,ls src/*.ml | grep -v cppo | grep -v myocamlbuild)) \
+  $(patsubst %.cppo.ml,%.inferred.mli,$(shell ls src/*.cppo.ml)) \
+
+mli:
+	@ $(OCAMLBUILD) src/grammar.inferred.mli
+
 processed:
 	make all || true
 	make -C _build/src -f $(shell ocamlfind query visitors)/Makefile.preprocess grammar.processed.ml
