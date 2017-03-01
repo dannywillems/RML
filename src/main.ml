@@ -1,35 +1,20 @@
-open Grammar
-
-let term1 : Grammar.raw_term =
-  Grammar.TermVar "x"
-
-let type1 : Grammar.raw_typ =
-  Grammar.TypeUnion (Grammar.TypeBottom, Grammar.TypeTop)
-
-let type2 : Grammar.raw_typ =
-  Grammar.TypeRecursive (
-    "z",
-    Grammar.TypeIntersection (
-      Grammar.TypeIntersection (
-        Grammar.TypeTypeMember ("T2",
-                             Grammar.TypePathDependent ("z", "T"),
-                             Grammar.TypePathDependent ("z", "T2")
-                           ),
-        Grammar.TypeTypeMember ("T",
-                             Grammar.TypePathDependent ("z", "T2"),
-                             Grammar.TypePathDependent ("z", "T")
-                           )
-      ),
-      Grammar.TypeMethodMember ("he",
-                                Grammar.TypePathDependent ("z", "T"),
-                                ("x", Grammar.TypePathDependent ("z", "T2"))
-                               )
-    )
-  )
+let rec eval_file f =
+  try
+    let raw_term = Parser.top_level Lexer.prog f in
+    let nominal_term = Grammar.import_term AlphaLib.KitImport.empty raw_term in
+    print_endline "Raw term";
+    Print.raw_term raw_term;
+    print_endline "\nNominal term";
+    Print.raw_term (Grammar.show_term nominal_term);
+    print_endline "";
+    eval_file f
+  with End_of_file -> ()
 
 let () =
-  let n_type1 = Grammar.import_typ AlphaLib.KitImport.empty type1 in
-  let n_type2 = Grammar.import_typ AlphaLib.KitImport.empty type2 in
-  Printf.printf "%a\n" AlphaLib.Atom.Set.print (Grammar.ba_typ n_type2);
-  Printf.printf "%d\n" (Grammar.size_typ n_type1);
-  Printf.printf "%d\n" (Grammar.size_typ n_type2)
+  let argc = Array.length Sys.argv in
+  if argc > 1
+  then
+    let f = open_in (Array.get Sys.argv 1) in
+    (eval_file (Lexing.from_channel f); close_in f)
+  else
+    (print_endline "You must give a file"; exit 1)

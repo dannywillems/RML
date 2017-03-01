@@ -13,12 +13,12 @@ let rec string_of_raw_term t = match t with
       (string_of_raw_term term2)
 
 and string_of_raw_obj t = match t with
-  | Grammar.TermTypeAssignment (x, typ) ->
+  | Grammar.DeclarationType (x, typ) ->
     Printf.sprintf
       "%s = %s"
       x
       (string_of_raw_typ typ)
-  | Grammar.TermMethodAssignment (method_name, var, typ, term) ->
+  | Grammar.DeclarationMethod (method_name, typ, (var, term)) ->
     Printf.sprintf
       "%s(%s : %s) = %s"
       method_name
@@ -39,18 +39,18 @@ and string_of_raw_typ t = match t with
       "%s ∨ %s"
       (string_of_raw_typ typ1)
       (string_of_raw_typ typ2)
-  | Grammar.TypeRecursiveRecord (x, typ1) ->
+  | Grammar.TypeRecursive (x, typ1) ->
     Printf.sprintf
       "{ %s ⇒ %s }"
       x
       (string_of_raw_typ typ1)
-  | Grammar.TypeMember (x, typ1, typ2) ->
+  | Grammar.TypeTypeMember (type_label, typ1, typ2) ->
     Printf.sprintf
       "%s : %s .. %s"
-      x
+      type_label
       (string_of_raw_typ typ1)
       (string_of_raw_typ typ2)
-  | Grammar.TypeMethodMember (method_name, var, typ1, typ2) ->
+  | Grammar.TypeMethodMember (method_name, typ1, (var, typ2)) ->
     Printf.sprintf
       "%s(%s : %s) : %s"
       method_name
@@ -63,20 +63,8 @@ and string_of_raw_typ t = match t with
       x
       typ
 
-let string_of_term f term =
-  string_of_raw_term (Grammar_converters.raw_term_of_term f term)
-
-let string_of_typ f typ =
-  string_of_raw_typ (Grammar_converters.raw_typ_of_typ f typ)
-
-let print_raw_term raw_term =
+let raw_term raw_term =
   print_endline @@ string_of_raw_term raw_term
 
-let print_raw_typ raw_typ =
+let raw_typ raw_typ =
   print_endline @@ string_of_raw_typ raw_typ
-
-let print_term f term =
-  print_raw_term (Grammar_converters.raw_term_of_term f term)
-
-let print_typ f typ =
-  print_raw_typ (Grammar_converters.raw_typ_of_typ f typ)
