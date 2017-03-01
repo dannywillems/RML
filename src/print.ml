@@ -15,12 +15,12 @@ let rec string_of_raw_term t = match t with
 and string_of_raw_obj t = match t with
   | Grammar.DeclarationType (x, typ) ->
     Printf.sprintf
-      "%s = %s"
+      "%s = %s ; "
       x
       (string_of_raw_typ typ)
   | Grammar.DeclarationMethod (method_name, typ, (var, term)) ->
     Printf.sprintf
-      "%s(%s : %s) = %s"
+      "%s(%s : %s) = %s ; "
       method_name
       var
       (string_of_raw_typ typ)
