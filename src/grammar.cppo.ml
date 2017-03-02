@@ -66,6 +66,10 @@ type raw_term = (string, string) term
 
 type raw_typ = (string, string) typ
 
+type nominal_term = (string, string) term
+
+type nominal_typ = (AlphaLib.Atom.t, AlphaLib.Atom.t) typ
+
 #include "AlphaLibMacros.cppo.ml"
 __ALL
 ALL(term)
