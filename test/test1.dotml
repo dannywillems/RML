@@ -1,0 +1,20 @@
+{ int =>
+  T = int.T ;
+  plus(x : int.T) = { int' => plus(y : int.T) = x } ;
+  moins(x : int.T) = { int' => moins(y : int.T) = y }
+};;
+
+(* A more complex example. No real meaning. *)
+{ z =>
+  T2 = z.T ;
+  T = z.T2 ;
+  hello(x : z.T) = x ;
+  T3 = {z' =>
+   (L1 : z.T .. Any) &
+   (L2 : z.T .. Any) &
+   (L3 : z.T .. Any) &
+   (L4 : Nothing .. Any) &
+   world(x' : z'.L1) : z'.L2 &
+   {z'' => L : z'.L1 .. z'.L2 }
+ }
+};;

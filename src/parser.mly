@@ -34,7 +34,9 @@ rule_term:
 | t1 = rule_term ;
   DOT ;
   method_label = ID ;
-  t2 = rule_term {
+  LEFT_PARENT ;
+  t2 = rule_term ;
+  RIGHT_PARENT {
            Grammar.TermMethodApp(t1, method_label, t2)
          }
 
@@ -109,3 +111,7 @@ rule_type:
   type_label = ID_CAPITALIZE {
                    Grammar.TypePathDependent(var, type_label)
                  }
+| LEFT_PARENT ;
+  t = rule_type ;
+  RIGHT_PARENT {
+      t }

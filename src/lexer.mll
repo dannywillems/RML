@@ -23,6 +23,10 @@ rule prog = parse
   | newline { next_line lexbuf;
               prog lexbuf
             }
+  | "(*" {
+      comment lexbuf;
+      prog lexbuf
+    }
   | ':' { Parser.COLON }
   | '.' { Parser.DOT }
   | '=' { Parser.EQUAL }
@@ -31,7 +35,7 @@ rule prog = parse
   | '(' { Parser.LEFT_PARENT }
   | ')' { Parser.RIGHT_PARENT }
   | ';' { Parser.SEMICOLON }
-  | "=>" as l { Parser.DOUBLE_RIGHT_ARROW }
+  | "=>" { Parser.DOUBLE_RIGHT_ARROW }
   (* Top and bottom types *)
   | top { Parser.TYPE_TOP }
   | bottom { Parser.TYPE_BOTTOM }
@@ -46,7 +50,12 @@ rule prog = parse
       }
   *)
   (* Method and type labels, variable *)
-  | alpha_capitalize alpha_num* as l { Parser.ID_CAPITALIZE l }
-  | alpha alpha_num* as l { Parser.ID l }
+  | alpha_capitalize (alpha_num | ''')* as l { Parser.ID_CAPITALIZE l }
+  | alpha (alpha_num | ''')* as l { Parser.ID l }
   | _ { failwith "Illegal character" }
   | eof { Parser.EOF }
+
+and comment = parse
+  | "*)" { () }
+  | eof { failwith "Unterminated comment" }
+  | _ { comment lexbuf }
