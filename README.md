@@ -1,1 +1,1 @@
-CML is a partial implementation of DOT in OCaml.
+DOTML is a partial implementation of DOT in OCaml.
