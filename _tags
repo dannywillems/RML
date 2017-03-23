@@ -2,4 +2,5 @@ true: \
   use_menhir, \
   package(visitors.ppx), \
   package(visitors.runtime), \
-  package(alphaLib)
+  package(alphaLib), \
+  package(ANSITerminal)
