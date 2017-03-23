@@ -17,6 +17,11 @@ OCAMLBUILD := \
   -tag "cppo_I($(ALPHALIB))" \
   -tag "cppo_I($(PWD))"
 
+# Replace all files ending with .cppo.ml by .inferred.mli which is the
+# extension of generated interfaces by ocamlbuild.
+MLI := \
+  $(patsubst %.cppo.ml,%.inferred.mli,$(shell ls $(SRC_DIR)/*.cppo.ml)) \
+
 .PHONY: all test clean
 
 all:
@@ -25,18 +30,8 @@ all:
 test: all
 	@ ./$(TARGET)
 
-include $(shell ocamlfind query visitors)/Makefile.preprocess
-
-MLI := \
-  $(patsubst %.ml,%.inferred.mli,ls src/*.ml | grep -v cppo | grep -v myocamlbuild)) \
-  $(patsubst %.cppo.ml,%.inferred.mli,$(shell ls src/*.cppo.ml)) \
-
 mli:
-	@ $(OCAMLBUILD) src/grammar.inferred.mli
-
-processed:
-	make all || true
-	make -C _build/src -f $(shell ocamlfind query visitors)/Makefile.preprocess grammar.processed.ml
+	@ $(OCAMLBUILD) $(MLI)
 
 clean:
 	@ rm -f *~
