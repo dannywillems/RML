@@ -1,8 +1,0 @@
-Oublie d'utilisation de visitors.
-A la place, on va passer par différentes phases.
-1. On utilise un raw_tree pour le parsing. Tous les noeuds sont que des chaines de caractères. Un raw tree est de type `string term`.
-Il ne faut pas oublier que certains termes ont des annotations de types (comme pour la méthode d'assignement, il y a un type pour le paramètre.
-Les types possèdent aussi des représentations différentes. On va utiliser un type raw_type pour cela, qui sera de type `string typ`.
-
-2. Ensuite, il est nécessaire de faire les alpha conversions. On va utiliser pour ça une fonction appelé nominal_term_of_raw_term.
-Celle-ci va utiliser la méthode nominales (c'est-à-dire qu'à chaque nouvelle variable liée, on assigne un identifiant unique). Cette fonction retourne un arbre de syntaxe où les toutes les variables ont un identifiant différent.
