@@ -1,6 +1,9 @@
 (** Returns a string representation of a raw term *)
 val string_of_raw_term : Grammar.raw_term -> string
 
+(** Returns a string representation of a raw declaration *)
+val string_of_raw_decl : Grammar.raw_decl -> string
+
 (** Returns a string representation of a raw typ *)
 val string_of_raw_typ : Grammar.raw_typ -> string
 
@@ -8,6 +11,11 @@ val string_of_raw_typ : Grammar.raw_typ -> string
     annotation about variables (coming from AlphaLib)
 *)
 val string_of_nominal_term : Grammar.nominal_term -> string
+
+(** Returns a string representation of a nominal term with some additional
+    annotation about variables (coming from AlphaLib)
+*)
+val string_of_nominal_decl : Grammar.nominal_decl -> string
 
 (** Returns a string representation of a nominal typ with some additional
     annotation about variables (coming from AlphaLib)
