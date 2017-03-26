@@ -69,10 +69,10 @@ and string_of_raw_typ t = match t with
   | Grammar.TypeTop -> "⊤"
   (* Bottom type : ⟂ *)
   | Grammar.TypeBottom -> "⟂"
-  (* { L : S..T } --> (L, S, T) *)
+  (* L : S..T --> (L, S, T) *)
   | Grammar.TypeDeclaration (type_label, typ1, typ2) ->
     Printf.sprintf
-      "%s : %s .. %s ;"
+      "%s : %s .. %s"
       type_label
       (string_of_raw_typ typ1)
       (string_of_raw_typ typ2)
@@ -102,10 +102,10 @@ and string_of_raw_typ t = match t with
       "{ %s ⇒ %s }"
       x
       (string_of_raw_typ typ1)
-  (* { a : T } *)
+  (* a : T *)
   | Grammar.TypeFieldDeclaration(a, t) ->
     Printf.sprintf
-      "%s : %s ;"
+      "%s : %s"
       a
       (string_of_raw_typ t)
 
