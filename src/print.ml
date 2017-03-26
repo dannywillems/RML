@@ -113,6 +113,9 @@ and string_of_raw_typ t = match t with
 let string_of_nominal_term t =
   string_of_raw_term (Grammar.show_term t)
 
+let string_of_nominal_decl t =
+  string_of_raw_decl (Grammar.show_decl t)
+
 let string_of_nominal_typ t =
   string_of_raw_typ (Grammar.show_typ t)
 
