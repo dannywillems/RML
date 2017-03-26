@@ -6,10 +6,14 @@ type subtyping_node = {
   t : Grammar.nominal_typ;
 }
 
+type term_typing_node =
+  | Declaration of Grammar.nominal_decl
+  | Term of Grammar.nominal_term
+
 type typing_node = {
   rule : string;
   env : ContextType.context;
-  term : Grammar.nominal_term;
+  term : term_typing_node;
   typ : Grammar.nominal_typ;
 }
 
@@ -42,12 +46,16 @@ let rec string_of_subtyping_derivation_tree level (t : subtyping_node t) = match
 let rec string_of_typing_derivation_tree level t = match t with
   | Empty -> ""
   | Node(v, children) ->
+    let string_of_term_or_decl = match v.term with
+      | Declaration decl -> (Print.string_of_nominal_decl decl)
+      | Term term -> (Print.string_of_nominal_term term)
+    in
     Printf.sprintf
       "%s%s (%s ⊦ %s : %s)\n%s"
       (" " ^* (level * 2))
       v.rule
       (ContextType.Style.string_of_context [ANSITerminal.magenta] v.env)
-      (Print.Style.string_of_raw_term [ANSITerminal.cyan] (Grammar.show_term v.term))
+      (ANSITerminal.sprintf [ANSITerminal.cyan] "%s" string_of_term_or_decl)
       (Print.Style.string_of_raw_typ [ANSITerminal.blue] (Grammar.show_typ v.typ))
       (String.concat "\n" (List.map (string_of_typing_derivation_tree (level + 1)) children))
 

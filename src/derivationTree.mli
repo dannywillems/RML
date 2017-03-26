@@ -6,10 +6,14 @@ type subtyping_node = {
   t : Grammar.nominal_typ;
 }
 
+type term_typing_node =
+  | Declaration of Grammar.nominal_decl
+  | Term of Grammar.nominal_term
+
 type typing_node = {
   rule : string;
   env : ContextType.context;
-  term : Grammar.nominal_term;
+  term : term_typing_node;
   typ : Grammar.nominal_typ;
 }
 
