@@ -19,6 +19,8 @@ exception AvoidanceProblem of string * AlphaLib.Atom.t * Grammar.nominal_typ
 exception TypeMismatch of string * (Grammar.nominal_typ * Grammar.nominal_typ)
 
 exception AggregationIntersectionNotEmpty of
-    string * Grammar.nominal_term * Grammar.nominal_term
+    string * Grammar.nominal_decl * Grammar.nominal_decl
+
+exception NotADependentFunction of Grammar.nominal_typ
 
 val print : exn -> unit
