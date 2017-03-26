@@ -4,6 +4,9 @@ exception AvoidanceProblem of string * AlphaLib.Atom.t * Grammar.nominal_typ
 
 exception TypeMismatch of string * (Grammar.nominal_typ * Grammar.nominal_typ)
 
+exception AggregationIntersectionNotEmpty of
+    string * Grammar.nominal_term * Grammar.nominal_term
+
 let print e =
   let string_of_e = match e with
   | SubtypeError (str, _, _) -> str
