@@ -9,6 +9,9 @@ exception AggregationIntersectionNotEmpty of
 
 exception NotADependentFunction of Grammar.nominal_typ
 
+exception MultipleDefinitionOfField of
+    string * Grammar.nominal_typ * Grammar.nominal_typ
+
 let print e =
   let string_of_e = match e with
   | SubtypeError (str, _, _) -> str
