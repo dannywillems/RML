@@ -1,0 +1,15 @@
+let int = { i =>
+            T = Nothing ;
+            identity = fun (x : i.T) x
+          };;
+
+let string = { s =>
+               T = Nothing ;
+               length = fun (str : s.T) Unimplemented : s.T -> int.T
+};;
+
+let y = { z =>
+  T = Nothing ;
+  x = Unimplemented ;
+  f = lambda(x : z.T) x
+} in y.x;;
