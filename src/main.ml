@@ -1,5 +1,3 @@
-open Typer
-
 (* ------------------------------------------------- *)
 (* References for arguments *)
 let file_name = ref ""
@@ -41,12 +39,69 @@ let print_error lexbuf =
     (pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1)
 (* ------------------------------------------------- *)
 
+let read_top_level_let x raw_term =
+  (* Convert raw term/type to nominal term/type using the import environment. *)
+  let nominal_term =
+    Grammar.import_term
+      (!kit_import_env)
+      raw_term
+  in
+  Printf.printf
+    "%s\n"
+    (Print.string_of_nominal_term nominal_term);
+  (*
+  let history, raw_typ =
+    Typer.type_of
+      ~context:(!typing_env)
+      nominal_term
+  in
+  let nominal_typ =
+    Grammar.import_typ
+      (!kit_import_env)
+      raw_typ
+  in
+  *)
+  let extended_kit_import_env, atom_x =
+    AlphaLib.KitImport.extend
+      (!kit_import_env)
+      x
+  in
+  kit_import_env := extended_kit_import_env
+  (*
+  typing_env := ContextType.add atom_x nominal_typ (!typing_env)
+  *)
+
 let check_typing lexbuf = ()
+
 let well_formed lexbuf = ()
-let read_term_file lexbuf = ()
+
+let read_term_file lexbuf =
+  let raw_term = Parser.top_level_term Lexer.prog lexbuf in
+  match raw_term with
+  | Grammar.TopLevelLet(x, raw_term) ->
+    read_top_level_let x raw_term
+  | Grammar.TopLevelTerm(raw_term) ->
+    let nominal_term =
+      Grammar.import_term
+      (!kit_import_env)
+      raw_term
+    in
+    Printf.printf
+      "%s\n"
+      (Print.string_of_nominal_term nominal_term);
+    let history, raw_typ =
+      Typer.type_of
+        ~context:(!typing_env)
+        nominal_term
+    in
+    ()
+
 let read_type_file lexbuf = ()
+
 let eval lexbuf = ()
+
 let check_subtype lexbuf = ()
+
 let typing lexbuf = ()
 
 let rec execute action lexbuf =
