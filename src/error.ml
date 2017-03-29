@@ -12,6 +12,11 @@ exception NotADependentFunction of Grammar.nominal_typ
 exception MultipleDefinitionOfField of
     string * Grammar.nominal_typ * Grammar.nominal_typ
 
+exception NotWellFormed of
+    Grammar.nominal_term * Grammar.nominal_typ
+
+exception NotARecord of Grammar.nominal_term
+
 let print e =
   let string_of_e = match e with
   | SubtypeError (str, _, _) -> str
