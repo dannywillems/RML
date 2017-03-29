@@ -51,7 +51,8 @@ let record_of_variable context x =
     let type_of_y = ContextType.find y context in
     let y_as_record = record_of_variable context y in
     let field_type_of_x = field_type_of_record a y_as_record in
-    match field_type_of_x with
-    | None -> raise (NotWellFormed(x, type_of_x))
-    | Some t ->
+    (match field_type_of_x with
+    | None -> raise (Error.NotWellFormed(Grammar.TermVariable(x), type_of_x))
+    | Some t -> t)
+  | _ -> raise (Error.NotARecord(Grammar.TermVariable(x)))
 
