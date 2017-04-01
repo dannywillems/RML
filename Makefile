@@ -24,7 +24,7 @@ OCAMLBUILD := \
 # Replace all files ending with .cppo.ml by .inferred.mli which is the
 # extension of generated interfaces by ocamlbuild.
 MLI := \
-  $(patsubst %.cppo.ml,%.inferred.mli,$(shell ls $(SRC_DIR)/*.cppo.ml)) \
+  $(patsubst %.cppo.ml,%.inferred.mli,$(shell ls $(SRC_DIR)/grammar/*.cppo.ml)) \
 
 .PHONY: all test clean
 
