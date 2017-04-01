@@ -13,6 +13,10 @@ OCAMLBUILD := \
   ocamlbuild \
   -use-ocamlfind \
   -classic-display \
+  -I $(SRC_DIR)/grammar \
+  -I $(SRC_DIR)/print \
+  -I $(SRC_DIR)/typing \
+  -I $(SRC_DIR)/utils \
   -plugin-tag 'package(cppo_ocamlbuild)' \
   -tag "cppo_I($(ALPHALIB))" \
   -tag "cppo_I($(PWD))"
