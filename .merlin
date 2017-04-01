@@ -1,9 +1,16 @@
-B _build/src
-PKG alphaLib
-PKG visitors
-PKG ANSITerminal
 S src
 S src/grammar
 S src/print
 S src/typing
 S src/utils
+
+B _build/src
+B _build/grammar
+B _build/print
+B _build/typing
+B _build/utils
+
+PKG alphaLib
+PKG visitors
+PKG ANSITerminal
+PKG pprint
