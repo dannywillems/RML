@@ -1,15 +1,34 @@
-let int = { i =>
-            T = Nothing ;
-            identity = fun (x : i.T) x
-          };;
+let simple = sig type A = Nothign end : struct type A = Nothing end;;
 
-let string = { s =>
-               T = Nothing ;
-               length = fun (str : s.T) Unimplemented : s.T -> int.T
-};;
+(*
+let int =
+  sig
+    type T = Nothing
+    val identity : self.T -> self.T
+  end
+  :
+  struct
+    type T = Nothing
+    let identity = fun (x : self.T) -> x
+  end;;
 
-let y = { z =>
-  T = Nothing ;
-  x = Unimplemented ;
-  f = lambda(x : z.T) x
+let string = sig
+               type T = Nothing
+               val length : self.T -> int.T
+             end : struct
+  type T = Nothing
+  let length = fun (str : self.T) -> Unimplemented : self.T -> int.T
+end;;
+
+let y = z : z =>
+        sig
+          type T = Nothing
+          val x : Nothing
+          val f : z.T -> z.T
+        end => struct
+  type T = Nothing
+  let x = Unimplemented
+  let f = fun (x : z.T) -> x
 } in y.x;;
+*)
+

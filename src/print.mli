@@ -78,3 +78,14 @@ module Style : sig
   (** Print a nominal typ using {!string_of_nominal_typ} with the given styles list. *)
   val nominal_typ : ANSITerminal.style list -> Grammar.nominal_typ -> unit
 end
+
+module Pretty : sig
+  val nominal_term : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_term -> unit
+
+  val nominal_typ : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_typ -> unit
+
+  val nominal_term_declaration : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_decl -> unit
+
+  val nominal_typ_declaration : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_typ -> unit
+end
+

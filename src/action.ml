@@ -21,6 +21,7 @@ let t_of_string = function
 
 let available = [
   "check_typing";
+  "eval";
   "read_term";
   "read_type";
   "subtype";

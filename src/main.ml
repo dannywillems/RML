@@ -31,12 +31,30 @@ let typing_env = ref (ContextType.empty ())
 let print_info string =
   if !verbose then (ANSITerminal.print_string [ANSITerminal.cyan] string)
 
+let print_term_color t =
+  Printf.printf
+    "\x1b[32m%a\x1b[0m\n"
+    (Print.Pretty.nominal_term ()) t
+
+let print_type_color t =
+  Printf.printf
+    "\x1b[36m%a\x1b[0m\n"
+    (Print.Pretty.nominal_typ ()) t
+
 let print_error lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
   Printf.printf
     "Syntax error %d:%d\n"
     pos.Lexing.pos_lnum
     (pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1)
+
+let print_typing_derivation_tree history =
+  if (!show_derivation_tree)
+  then DerivationTree.print_typing_derivation_tree history
+
+let print_subtyping_derivation_tree history =
+  if (!show_derivation_tree)
+  then DerivationTree.print_subtyping_derivation_tree history
 (* ------------------------------------------------- *)
 
 let read_top_level_let x raw_term =
@@ -46,30 +64,22 @@ let read_top_level_let x raw_term =
       (!kit_import_env)
       raw_term
   in
-  Printf.printf
-    "%s\n"
-    (Print.string_of_nominal_term nominal_term);
-  (*
-  let history, raw_typ =
+  let history, nominal_typ =
     Typer.type_of
       ~context:(!typing_env)
       nominal_term
   in
-  let nominal_typ =
-    Grammar.import_typ
-      (!kit_import_env)
-      raw_typ
-  in
-  *)
   let extended_kit_import_env, atom_x =
     AlphaLib.KitImport.extend
       (!kit_import_env)
       x
   in
-  kit_import_env := extended_kit_import_env
-  (*
+  print_term_color nominal_term;
+  print_type_color nominal_typ;
+  print_typing_derivation_tree history;
+  print_endline "-----------------------";
+  kit_import_env := extended_kit_import_env;
   typing_env := ContextType.add atom_x nominal_typ (!typing_env)
-  *)
 
 let check_typing lexbuf = ()
 
@@ -86,14 +96,7 @@ let read_term_file lexbuf =
       (!kit_import_env)
       raw_term
     in
-    Printf.printf
-      "%s\n"
-      (Print.string_of_nominal_term nominal_term);
-    let history, raw_typ =
-      Typer.type_of
-        ~context:(!typing_env)
-        nominal_term
-    in
+    print_term_color nominal_term;
     ()
 
 let read_type_file lexbuf = ()
@@ -102,7 +105,28 @@ let eval lexbuf = ()
 
 let check_subtype lexbuf = ()
 
-let typing lexbuf = ()
+let typing lexbuf =
+  let raw_term = Parser.top_level_term Lexer.prog lexbuf in
+  match raw_term with
+  | Grammar.TopLevelLet(x, raw_term) ->
+    read_top_level_let x raw_term
+  | Grammar.TopLevelTerm(raw_term) ->
+    let nominal_term =
+      Grammar.import_term
+      (!kit_import_env)
+      raw_term
+    in
+    let history, nominal_typ =
+      Typer.type_of
+        ~context:(!typing_env)
+        nominal_term
+    in
+    print_typing_derivation_tree history;
+    Printf.printf
+      "%s\n%s\n"
+      (Print.string_of_nominal_term nominal_term)
+      (Print.string_of_nominal_typ nominal_typ);
+    ()
 
 let rec execute action lexbuf =
   try
@@ -113,7 +137,7 @@ let rec execute action lexbuf =
   | Parser.Error ->
     print_error lexbuf;
     exit 1
-  | Error.SubtypeError(_) | Error.AvoidanceProblem(_) as e ->
+  | Error.Subtype(_) | Error.AvoidanceProblem(_) as e ->
     Error.print e;
     execute action lexbuf
 

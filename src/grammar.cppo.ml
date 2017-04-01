@@ -26,19 +26,21 @@ and ('bn, 'fn) term =
   | TermUnimplemented
 
   (* ----- Beginning of DOT terms ----- *)
-  (* {x => t^{x}} *)
-  | TermRecursiveRecord of ('bn, ('bn, 'fn) decl) abs
+  (* ν(x : T) d *)
+  | TermRecursiveRecord of ('bn, 'fn) typ * ('bn, ('bn, 'fn) decl) abs
+  (* Unofficiql -- ν(x) d *)
+  | TermRecursiveRecordUntyped of ('bn, ('bn, 'fn) decl) abs
   (* x.a *)
   | TermFieldSelection of 'fn * string
 
 (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
 and ('bn, 'fn) decl =
   (* L = T *)
-  | DeclarationType of type_label * ('bn, 'fn) typ
+  | TermTypeDeclaration of type_label * ('bn, 'fn) typ
   (* a = t *)
-  | DeclarationField of field_label * ('bn, 'fn) term
+  | TermFieldDeclaration of field_label * ('bn, 'fn) term
   (* d ∧ d' *)
-  | DeclarationAggregate of ('bn, 'fn) decl * ('bn, 'fn) decl
+  | TermAggregateDeclaration of ('bn, 'fn) decl * ('bn, 'fn) decl
 
 and ('bn, 'fn) typ =
   (* Top type : ⊤ *)
