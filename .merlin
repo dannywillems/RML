@@ -3,3 +3,7 @@ PKG alphaLib
 PKG visitors
 PKG ANSITerminal
 S src
+S src/grammar
+S src/print
+S src/typing
+S src/utils
