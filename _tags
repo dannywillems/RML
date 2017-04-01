@@ -3,4 +3,5 @@ true: \
   package(visitors.ppx), \
   package(visitors.runtime), \
   package(alphaLib), \
-  package(ANSITerminal)
+  package(ANSITerminal), \
+  package(pprint)
