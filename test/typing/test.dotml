@@ -1,4 +1,10 @@
-let x = { z => {
+let x = z => struct
+  S = sig z' =>
+    L ;
+    U ;
+    A : z'.L .. z'.U
+  end
+end =>
     S = { z' => 
       L = Nothing .. Any ;
       U = Nothing .. Any ;

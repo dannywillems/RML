@@ -1,22 +1,42 @@
-module SetFieldDeclaration : sig
-  include Set.S with type elt = string
-end
+(** Utilities about types and terms. *)
 
-val extract_label_from_declaration :
-  Grammar.nominal_decl ->
-  SetFieldDeclaration.t
+(** [least_upper_bound_of_type_declaration ~label context typ] returns the least upper bound
+    (as an option) appearing in a type declaration
+    for the given type [typ]. If no such type exists, it returns [None].
 
-val domain : Grammar.nominal_term -> SetFieldDeclaration.t
+    In other words, this algorithm returns
+    the least U such as [typ] <: { A : L .. U }.
 
-(** [tuple_of_dependent_function typ] returns the tuple (s, (x, t)) if the
-    given type [typ] is a dependent function (TypeDependentFunction) where [s]
-    is the type of the parameter [x] and [t] the return type.
-    If it's not a dependent function, an exception [NotADependentFunction] is
-    raised with [typ] as parameter.
+    The parameter [~label] is to check the type label.
 *)
-val tuple_of_dependent_function :
+val least_upper_bound_of_type_declaration :
+  label:Grammar.type_label ->
+  ContextType.context ->
   Grammar.nominal_typ ->
-  (Grammar.nominal_typ * (AlphaLib.Atom.atom * Grammar.nominal_typ))
+  Grammar.nominal_typ option
+
+(** [greatest_lower_bound_of_type_declaration ~label context typ] returns the greatest lower bound
+    (as an option) appearing in a type declaration for the given type [typ]. If
+    no such type exists, it returns [None].
+
+    In other words, this algorithm returns
+    the greatest L such as { A : L .. U } <: [typ].
+
+    The parameter [~label] is to check the type label.
+*)
+val greatest_lower_bound_of_type_declaration :
+  label:Grammar.type_label ->
+  ContextType.context ->
+  Grammar.nominal_typ ->
+  Grammar.nominal_typ option
+
+(** [least_upper_bound_of_dependent_function ctx L] returns the least upper
+    bound of L which has the form ∀(x : S) T.
+*)
+val least_upper_bound_of_dependent_function :
+  ContextType.context ->
+  Grammar.nominal_typ ->
+  (Grammar.nominal_typ * (AlphaLib.Atom.atom * Grammar.nominal_typ)) option
 
 (** [is_value term] returns [true] if [term] is a value (a lambda abstraction or
     a type tag).
@@ -24,3 +44,20 @@ val tuple_of_dependent_function :
 val is_value :
   Grammar.nominal_term ->
   bool
+
+module SetFieldDeclaration : sig
+  include Set.S with type elt = string
+end
+
+(** [domain decl] returns all labels in the nominal term decl *)
+val domain : Grammar.nominal_term -> SetFieldDeclaration.t
+
+val extract_label_from_declaration :
+  Grammar.nominal_decl ->
+  SetFieldDeclaration.t
+
+val is_type_intersection :
+  Grammar.nominal_typ -> bool
+
+val is_term_intersection :
+  Grammar.nominal_decl -> bool

@@ -15,3 +15,10 @@ let fa_raw_term nominal_term =
       fa_term
       []
   )
+
+let remove_type_ascription t =
+  match t with
+  | Grammar.TermAscription(t, _) -> t
+  | Grammar.TermRecursiveRecord(_, z, d) ->
+    Grammar.TermRecursiveRecordUntyped(z, d)
+  | _ -> t

@@ -27,6 +27,14 @@ let rec ( ^* ) s n = match n with
   | n when n > 0 -> s ^ (s ^* (n - 1))
   | _ -> s
 
+let create_subtyping_node ~rule ~is_true ~env ~s ~t ~history =
+  let subtyping_node = { rule; is_true; env; s; t } in
+  Node (subtyping_node, history), is_true
+
+let create_typing_node ~rule ~env ~term ~typ ~history =
+  let typing_node = { rule; env; term; typ } in
+  Node(typing_node, history), typ
+
 let rec string_of_subtyping_derivation_tree level (t : subtyping_node t) = match t with
   | Empty -> ""
   | Node (v, children) ->

@@ -2,9 +2,10 @@
    This exception is raised when a type s is used as a subtype of t but s is not
    a subtype of t.
 *)
-exception SubtypeError of string * Grammar.nominal_typ * Grammar.nominal_typ
+exception Subtype of string * Grammar.nominal_typ * Grammar.nominal_typ
 
-(** The avoidance problem is a special case of using a variable x inside the type of x in a dependent function type or in the type of a let expression.
+(** The avoidance problem is a special case of using a variable x inside the
+    type of x in a dependent function type or in the type of a let expression.
     Why do we need to give importance to the avoidance problem?
     Suppose we have let x = t in u : U avec U qui est le type x.A.
     Le binding de la variable x n'est pas que local: il ne pourra pas être
@@ -27,7 +28,7 @@ exception MultipleDefinitionOfField of
     string * Grammar.nominal_typ * Grammar.nominal_typ
 
 exception NotWellFormed of
-    Grammar.nominal_term * Grammar.nominal_typ
+    ContextType.context * Grammar.nominal_typ
 
 exception NotARecord of Grammar.nominal_term
 
