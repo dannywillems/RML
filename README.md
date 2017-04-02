@@ -1,6 +1,8 @@
 RML - ML modules as ML records with subtyping.
 ===
 
+**WIP: Don't trust lines below.**
+
 RML mixes ML Records and ML modules in a single type called recursive records
 with dependent types. RML is simple lambda-calculus with subtyping and
 parametric polymorphism, recursive type, record and dependent type.
