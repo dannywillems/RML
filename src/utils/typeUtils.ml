@@ -4,28 +4,34 @@ type direction =
   | Upper
   | Lower
 
-let rec best_bound_for_type_declaration ~direction ~label context t = match t with
+let rec best_bound_of_recursive_type ~direction ~label context t = match t with
+  (* Bottom type : ⟂ *)
   (* The least upper bound is the type declaration { A : Bottom .. Bottom }.
   And there is no greatest lower bound in the form { A : L .. U } *)
   | Grammar.TypeBottom ->
     (match direction with
     | Upper -> Some Grammar.TypeBottom
     | Lower -> None)
+  (* Top type : ⊤ *)
   (* The greatest lower bound is the type declaration { A : Top .. Top }.
   And there is no least upper bound in the form { A : L .. U } *)
   | Grammar.TypeTop ->
     (match direction with
     | Lower -> Some Grammar.TypeTop
     | Upper -> None)
+  (* ∀(x : S) T --> (S, (x, T)) *)
   (* No comparable *)
   | Grammar.TypeDependentFunction(_) ->
     None
+  (* { L : S..T } --> (L, S, T) *)
   (* The type of the given variable is a module. *)
   | Grammar.TypeDeclaration(l, s, t) ->
-    assert (String.equal l label);
-    (match direction with
-     | Lower -> Some s
-     | Upper -> Some t)
+    if String.equal l label then
+      match direction with
+      | Lower -> Some s
+      | Upper -> Some t
+    else None
+  (* x.L *)
   (* Else, it's a path selection type. *)
   | Grammar.TypeProjection(x, label_selected) ->
     let type_of_x = ContextType.find x context in
@@ -35,23 +41,45 @@ let rec best_bound_for_type_declaration ~direction ~label context t = match t wi
        [u'] is the best bound for the type of [x].
     *)
     let u' =
-      best_bound_for_type_declaration
+      best_bound_of_recursive_type
         ~direction
         ~label:label_selected
         context
         type_of_x
     in
     (match u' with
-    | Some u' -> best_bound_for_type_declaration ~direction ~label context u'
+    | Some u' -> best_bound_of_recursive_type ~direction ~label context u'
     | None -> None
     )
-  | _ -> None
+  (* ----- Beginning of DOT types ----- *)
+  (* { z => T^{z} } *)
+  | Grammar.TypeRecursive(z, t) ->
+    best_bound_of_recursive_type ~direction ~label context t
+  (* T ∧ T *)
+  | Grammar.TypeIntersection(t1, t2) ->
+    let best_bound_for_t1 =
+      best_bound_of_recursive_type ~direction ~label context t1
+    in
+    let best_bound_for_t2 =
+      best_bound_of_recursive_type ~direction ~label context t1
+    in
+    (match (best_bound_for_t1, best_bound_for_t2) with
+    | (None, None) -> None
+    | (Some t, None) | (None, Some t) -> Some t
+    (* If a same field is defined two times, we take the last definition, i.e.
+       in the type in the right *)
+    | (Some _, Some t) -> Some t)
+  (* { a : T } *)
+  | Grammar.TypeFieldDeclaration(a, t) ->
+    if String.equal a label
+    then Some t
+    else None
 
-let least_upper_bound_of_type_declaration ~label context t =
-  best_bound_for_type_declaration ~direction:Upper ~label context t
+let least_upper_bound_of_recursive_type ~label context t =
+  best_bound_of_recursive_type ~direction:Upper ~label context t
 
-let greatest_lower_bound_of_type_declaration ~label context t =
-  best_bound_for_type_declaration ~direction:Lower ~label context t
+let greatest_lower_bound_of_recursive_type ~label context t =
+  best_bound_of_recursive_type ~direction:Lower ~label context t
 
 let rec least_upper_bound_of_dependent_function context t = match t with
   | Grammar.TypeDependentFunction(s, (x, t)) ->
@@ -69,7 +97,7 @@ let rec least_upper_bound_of_dependent_function context t = match t with
       ContextType.find x context
     in
     let least_upper_bound =
-      least_upper_bound_of_type_declaration ~label context type_of_x
+      least_upper_bound_of_recursive_type ~label context type_of_x
     in
     (match least_upper_bound with
     | None -> None
@@ -77,23 +105,63 @@ let rec least_upper_bound_of_dependent_function context t = match t with
     )
   | _ -> None
 
+let rec labels_of_recursive_type context recursive_type =
+  match recursive_type with
+  (* Top type : ⊤ *)
+  | Grammar.TypeTop ->
+    SetFieldDeclaration.empty
+  (* Bottom type : ⟂ *)
+  | Grammar.TypeBottom ->
+    SetFieldDeclaration.empty
+  (* { L : S..T } --> (L, S, T) *)
+  | Grammar.TypeDeclaration(a, s, t) ->
+    SetFieldDeclaration.singleton a
+  (* x.L *)
+  (* Need to proof it's correct *)
+  | Grammar.TypeProjection(x, l) ->
+    let type_of_x = ContextType.find x context in
+    let u =
+      least_upper_bound_of_recursive_type ~label:l context type_of_x
+    in
+    (match u with
+    | None -> SetFieldDeclaration.empty
+    | Some u -> labels_of_recursive_type context u)
+  (* ∀(x : S) T --> (S, (x, T)) *)
+  | Grammar.TypeDependentFunction(_) ->
+    SetFieldDeclaration.empty
+  (* T ∧ T *)
+  | Grammar.TypeIntersection(t1, t2) ->
+    let labels_of_t1 =
+      labels_of_recursive_type context t1
+    in
+    let labels_of_t2 =
+      labels_of_recursive_type context t1
+    in
+    SetFieldDeclaration.union labels_of_t1 labels_of_t2
+  (* { z => T^{z} } *)
+  | Grammar.TypeRecursive(z, t) ->
+    labels_of_recursive_type context t
+  (* { a : T } *)
+  | Grammar.TypeFieldDeclaration(a, t) ->
+    SetFieldDeclaration.singleton a
+
 let is_value t = match t with
   | Grammar.TermRecursiveRecord(_) | Grammar.TermAbstraction(_) -> true
   | _ -> false
 
-let rec extract_label_from_declaration decl = match decl with
+let rec labels_of_declaration decl = match decl with
   | Grammar.TermTypeDeclaration(label, _) ->
     SetFieldDeclaration.singleton label
   | Grammar.TermFieldDeclaration(label, _) ->
     SetFieldDeclaration.singleton label
   | Grammar.TermAggregateDeclaration(d, d') ->
     SetFieldDeclaration.union
-      (extract_label_from_declaration d)
-      (extract_label_from_declaration d')
+      (labels_of_declaration d)
+      (labels_of_declaration d')
 
 let domain term = match term with
   | Grammar.TermRecursiveRecord(t, (z, decl)) ->
-    extract_label_from_declaration decl
+    labels_of_declaration decl
   | _ -> SetFieldDeclaration.empty
 
 (*
