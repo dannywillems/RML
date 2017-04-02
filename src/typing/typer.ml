@@ -119,9 +119,13 @@ let rec type_of_internal history context term = match term with
      Γ, x : T ⊦ d : T
      =>
      Γ ⊦ ν(x : T) d : μ(x : T)
+
+     TODO Add SUB.
   *)
   | Grammar.TermRecursiveRecord(typ, (z, d)) ->
-    let context' = ContextType.add z typ context in
+    let context' =
+      ContextType.add z typ context
+    in
     let history_d, type_of_d =
       type_of_decl_internal history context' d
     in
@@ -133,10 +137,12 @@ let rec type_of_internal history context term = match term with
       ~typ:typ
       ~history:[history_d]
   (* UN-{}-I
+     TODO Add SUB.
      Γ, x : T ⊦ d : T
      =>
      Γ ⊦ ν(x) d : μ(x : T)
   *)
+  (* How can be infer the type of z? The type is necessary when we have z.a because we need to know the type of z.a depends on the type of z. *)
   | Grammar.TermRecursiveRecordUntyped(z, d) ->
     let history_d, type_of_d =
       type_of_decl_internal history context d
@@ -147,9 +153,14 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term(term))
       ~typ:type_of_d
       ~history:[history_d]
-
   (* FLD-E
      Γ ⊦ x : { a : T}
+     =>
+     Γ ⊦ x.a : T
+
+     TODO add SUB.
+     must become
+     Γ ⊦ x : { a : S} ∧ Γ ⊦ S <: T
      =>
      Γ ⊦ x.a : T
   *)
@@ -158,14 +169,19 @@ let rec type_of_internal history context term = match term with
     let type_of_x =
       ContextType.find x context
     in
-    DerivationTree.create_typing_node
-      ~rule:"FLD-E"
-      ~env:context
-      ~term:(DerivationTree.Term(term))
-      ~typ:type_of_x
-      ~history:[]
+    let t =
+      TypeUtils.least_upper_bound_of_recursive_type ~label:a context type_of_x
+    in
+    (match t with
+    | None -> raise (Error.NotARecord (Grammar.TermVariable x))
+    | Some t ->
+      DerivationTree.create_typing_node
+        ~rule:"FLD-E"
+        ~env:context
+        ~term:(DerivationTree.Term(term))
+        ~typ:t
+        ~history:[])
   (* REC-I with REC-E (both to avoid to recompute the type of x)
-
      REC-I
      Γ ⊦ x : T
      =>
@@ -175,6 +191,8 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ x : μ(x : T)
      =>
      Γ ⊦ x : T
+
+     TODO add SUB.
   *)
   | Grammar.TermVariable(x) ->
     let type_of_x =
@@ -197,6 +215,7 @@ let rec type_of_internal history context term = match term with
 
 and type_of_decl_internal history context decl = match decl with
   (* TYP-I
+     TODO Add SUB
      Γ ⊦ { A = T } : { A : T .. T }
   *)
   | Grammar.TermTypeDeclaration(a, typ) ->
@@ -208,6 +227,7 @@ and type_of_decl_internal history context decl = match decl with
       ~typ
       ~history
   (* FLD-I
+     TODO Add SUB
      Γ ⊦ t : T
      =>
      Γ ⊦ { a = t } : { a : T }
@@ -226,6 +246,7 @@ and type_of_decl_internal history context decl = match decl with
       ~typ
       ~history:[history_type_of_term]
   (* ANDDEF-I
+     TODO Add SUB
      Γ ⊦ d1 : T1 ∧ Γ ⊦ d2 : T2 ∧ dom(d1) ∩ dom(d2) = ∅
      Γ ⊦ d1 ∧ d2 : T1 ∧ T2
   *)
