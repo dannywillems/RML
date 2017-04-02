@@ -1,6 +1,6 @@
 (** Utilities about types and terms. *)
 
-(** [least_upper_bound_of_type_declaration ~label context typ] returns the least upper bound
+(** [least_upper_bound_of_recursive_type ~label context typ] returns the least upper bound
     (as an option) appearing in a type declaration
     for the given type [typ]. If no such type exists, it returns [None].
 
@@ -9,22 +9,22 @@
 
     The parameter [~label] is to check the type label.
 *)
-val least_upper_bound_of_type_declaration :
+val least_upper_bound_of_recursive_type :
   label:Grammar.type_label ->
   ContextType.context ->
   Grammar.nominal_typ ->
   Grammar.nominal_typ option
 
-(** [greatest_lower_bound_of_type_declaration ~label context typ] returns the greatest lower bound
-    (as an option) appearing in a type declaration for the given type [typ]. If
-    no such type exists, it returns [None].
+(** [greatest_lower_bound_of_recursive_type ~label context typ] returns the
+    greatest lower bound (as an option) appearing in a type declaration for the
+    given type [typ]. If no such type exists, it returns [None].
 
     In other words, this algorithm returns
     the greatest L such as { A : L .. U } <: [typ].
 
     The parameter [~label] is to check the type label.
 *)
-val greatest_lower_bound_of_type_declaration :
+val greatest_lower_bound_of_recursive_type :
   label:Grammar.type_label ->
   ContextType.context ->
   Grammar.nominal_typ ->
@@ -52,8 +52,13 @@ end
 (** [domain decl] returns all labels in the nominal term decl *)
 val domain : Grammar.nominal_term -> SetFieldDeclaration.t
 
-val extract_label_from_declaration :
+val labels_of_declaration :
   Grammar.nominal_decl ->
+  SetFieldDeclaration.t
+
+val labels_of_recursive_type :
+  ContextType.context ->
+  Grammar.nominal_typ ->
   SetFieldDeclaration.t
 
 val is_type_intersection :
