@@ -1,4 +1,4 @@
-RML - ML modules as ML modules with subtyping.
+RML - ML modules as ML records with subtyping.
 ===
 
 RML mixes ML Records and ML modules in a single type called recursive records
