@@ -29,12 +29,12 @@ let rec rule_sel rule history context (x, label) t =
   let s =
     match rule with
     | SEL_SUB ->
-      TypeUtils.least_upper_bound_of_type_declaration
+      TypeUtils.least_upper_bound_of_recursive_type
         ~label
         context
         type_of_x
     | SUB_SEL ->
-      TypeUtils.greatest_lower_bound_of_type_declaration
+      TypeUtils.greatest_lower_bound_of_recursive_type
         ~label
         context
         type_of_x
