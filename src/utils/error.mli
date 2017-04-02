@@ -32,4 +32,26 @@ exception NotWellFormed of
 
 exception NotARecord of Grammar.nominal_term
 
+val raise_subtype : Grammar.nominal_typ -> Grammar.nominal_typ -> unit
+
+val raise_not_well_formed : ContextType.context -> Grammar.nominal_typ -> unit
+
+val raise_not_a_record : Grammar.nominal_term -> unit
+
+val raise_avoidance_problem :
+  AlphaLib.Atom.t ->
+  Grammar.nominal_typ ->
+  unit
+
+val raise_aggregate_intersection_not_empty :
+  Grammar.nominal_decl ->
+  Grammar.nominal_decl ->
+  unit
+
+val raise_type_mismatch :
+  Grammar.nominal_term ->
+  Grammar.nominal_typ ->
+  Grammar.nominal_typ ->
+  unit
+
 val print : exn -> unit
