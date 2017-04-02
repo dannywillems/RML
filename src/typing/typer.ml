@@ -19,18 +19,6 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term term)
       ~typ
       ~history:[u_history]
-  (* TYP-I
-     Γ ⊦ { A = T } : { A : T .. T }
-  | Grammar.TermTypeTag(a, typ) ->
-    CheckUtils.check_well_formedness context typ;
-    let typ = Grammar.TypeDeclaration(a, typ, typ) in
-    DerivationTree.create_typing_node
-      ~rule:"TYP-I"
-      ~env:context
-      ~term
-      ~typ
-      ~history:[]
-  *)
   (* LET
      Γ ⊦ t : T ∧
      Γ, x : T ⊦ u : U ∧
@@ -51,7 +39,8 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term term)
       ~typ:u_typ
       ~history:[left_history ; right_history]
-  (* VAR
+  (* USELESS NOW. Use {}-I instead.
+     VAR
      Γ, x : T, Γ' ⊦ x : T
   | Grammar.TermVariable x ->
     let typ = ContextType.find x context in
