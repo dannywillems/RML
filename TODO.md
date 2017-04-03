@@ -20,7 +20,7 @@
 ## Subtyping.
 
 - [ ] Check all results.
-- [ ] Automatic verification for tests.
+- [x] Automatic verification for tests.
 - [x] Add an history to get the derivation tree.
 - [ ] Use `SUB` in select rules.
 - [x] Add an action to check if each algorithm outputs the same result.
@@ -39,7 +39,7 @@
 - [x] In `let x = s in t`, check that the variable doesn't appear in the type of
   `t`. This is the avoidance problem.
 - [x] Add `let x = t`.
-- [ ] tuple_of_dependent_function: call to `best_bounds` and check if it's an
+- [x] least_upper_bound_of_dependent_function: call to `best_bounds` and check if it's an
   arrow. If it's `Nothing`, we need to return `Top -> Nothing` because it's the
   least upper bound which is an arrow.
 - [ ] check `best_bounds`.
@@ -76,8 +76,27 @@
 
 - [x] Add a sugar for dependent function when the variable is not
   needed in the return type.
-- [ ] S : Nothing .. Any (no need to mention bounds) -> S
-- [ ] S : Nothing .. U -> S <: U
-- [ ] S : L .. Any -> S :> L
-- [ ] struct .. end (ou obj .. end) to define terms and sig .. end to define types.
-- [ ] sig S = int end for { S : int .. int } (so S = int is for terms and also for types, the difference is sig .. end and struct .. end)
+- [x] S : Nothing .. Any (no need to mention bounds) -> S
+- [x] S : Nothing .. U -> S <: U
+- [x] S : L .. Any -> S :> L
+- [x] struct .. end (ou obj .. end) to define terms and sig .. end to define types.
+- [x] sig S = int end for { S : int .. int } (so S = int is for terms and also for types, the difference is sig .. end and struct .. end)
+- [ ] Allow to use
+```
+sig
+  type S = int.A
+  type T = S
+end
+```
+instead of 
+```
+sig
+  type S = int.A
+  type T = self.S
+end
+```
+It implies to remember the variable binding in the module.
+- [ ] Instead of `z => sig .. end`, use `module z = struct .. end`.
+- [ ] Instead of `z => sig .. end`, use `module type z = sig .. end`
+- [ ] Top level module definitions.
+- [ ] Top level type definitions.
