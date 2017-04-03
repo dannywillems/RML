@@ -24,6 +24,10 @@ let newline = ['\n']
 let alpha = ['a'-'z' 'A' - 'Z']
 let alpha_capitalize = ['A' - 'Z']
 let alpha_num = ['A' - 'Z' 'a' - 'z' '0' - '9']
+let alpha_lowercase = ['a' - 'z']
+
+let lowercase_ident =
+  (alpha_lowercase | '_')+ (alpha_num | '_' | '\'')*
 
 let let_ = "let"
 let in_ = "in"
@@ -95,7 +99,7 @@ rule prog = parse
   | bottom { Parser.TYPE_BOTTOM }
   (* Method and type labels, variable *)
   | alpha_capitalize (alpha_num | ''')* as l { Parser.ID_CAPITALIZE l }
-  | alpha (alpha_num | ''')* as l { Parser.ID l }
+  | lowercase_ident as l { Parser.ID l }
 
   | _ as l { raise (IllegalCharacter l) }
   | eof { Parser.EOF }
