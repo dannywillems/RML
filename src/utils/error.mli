@@ -32,6 +32,8 @@ exception NotWellFormed of
 
 exception NotARecord of Grammar.nominal_term
 
+exception NotARecordOrUnboundField of Grammar.nominal_term * string
+
 val raise_subtype : Grammar.nominal_typ -> Grammar.nominal_typ -> unit
 
 val raise_not_well_formed : ContextType.context -> Grammar.nominal_typ -> unit
