@@ -99,4 +99,16 @@ It implies to remember the variable binding in the module.
 - [ ] Instead of `z => sig .. end`, use `module z = struct .. end`.
 - [ ] Instead of `z => sig .. end`, use `module type z = sig .. end`
 - [ ] Top level module definitions.
-- [ ] Top level type definitions.
+- [ ] Top level module type definitions.
+- [ ] Top level type definitions. `type T = int` = `let x = struct type T = int end in open x`.
+- [ ] keyword `include` in modules.
+- [ ] keyword `with type S = ...` --> intersection.
+- [ ] Multiple argument.
+- [ ] Remove ;; for top level definitions. It implies to consider a file like a module.
+- [ ] Sugar for polymorphic types like `type 'a t = 'a`.
+- [ ] Recursive functions. How can we implement this?
+- [ ] Allow to write `File.expression`. It searches for the module `File` in the
+  `base_modules`. `base_modules` a list of modules loaded with the command line.
+  It can be files. If `File` is a file, then we can add a directory to search it
+  with the argument `-I`.
+- [ ] `open M` = for all labels `l` in `M`, add `M.l` in the environment with the name `l`
