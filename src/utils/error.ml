@@ -17,6 +17,8 @@ exception NotWellFormed of
 
 exception NotARecord of Grammar.nominal_term
 
+exception NotARecordOrUnboundField of Grammar.nominal_term * string
+
 let raise_not_a_record term =
   raise (NotARecord term)
 
