@@ -170,7 +170,17 @@ let () =
   Arg.parse args_list print_endline "An interpreter for DSub implemented in OCaml"
 (* ------------------------------------------------- *)
 
-let stdlib_files = []
+let stdlib_files = [
+  "stdlib/unit.rml";
+  "stdlib/bool.rml";
+  "stdlib/int.rml";
+  "stdlib/float.rml";
+  "stdlib/char.rml";
+  "stdlib/string.rml";
+  "stdlib/list.rml";
+  "stdlib/condition.rml";
+  "stdlib/pervasives.rml"
+]
 
 let rec add_in_environment files = match files with
   | [] -> ()
