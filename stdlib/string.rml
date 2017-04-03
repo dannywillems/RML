@@ -1,0 +1,6 @@
+let string = Unimplemented : sig type A end;;
+
+let string = struct
+  type T = string.A
+  let string_of_bool = Unimplemented : bool.T -> self.T
+end;;

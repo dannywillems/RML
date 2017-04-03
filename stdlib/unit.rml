@@ -1,0 +1,3 @@
+let unit_t = Unimplemented : sig type A end;;
+
+let unit = Unimplemented : unit_t.A;;
