@@ -1,0 +1,32 @@
+let int_of_string = Unimplemented : string.T -> int.T;;
+let string_of_int = Unimplemented : int.T -> string.T;;
+
+(* Alias for float *)
+let int_of_float = float.int_of_float;;
+let truncate = float.truncate;;
+
+(* On boolean *)
+let string_of_bool = Unimplemented : bool.T -> string.T;;
+let not = Unimplemented : bool.T -> bool.T;;
+
+(* Mathematical functions *)
+let exp = Unimplemented : float.T -> float.T;;
+let log = Unimplemented : float.T -> float.T;;
+let cos = Unimplemented : float.T -> float.T;;
+let sin = Unimplemented : float.T -> float.T;;
+let tan = Unimplemented : float.T -> float.T;;
+
+(*
+Alias for basic types.
+
+type String = string.T
+type Int = int.T
+type Float = float.T
+type Char = char.T
+*)
+
+(*
+open Char
+open String
+open Int
+*)

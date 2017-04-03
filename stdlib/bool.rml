@@ -1,0 +1,5 @@
+let bool = Unimplemented : sig type A end;;
+
+let true = Unimplemented : bool.A;;
+
+let false = Unimplemented : bool.A;;
