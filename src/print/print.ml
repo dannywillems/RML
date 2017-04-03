@@ -406,22 +406,23 @@ module Pretty = struct
       string typ
     (* ∀(x : S) T --> (S, (x, T)) *)
     | Grammar.TypeDependentFunction (typ1, (x, typ2)) ->
-      if String.equal (AlphaLib.Atom.hint x) "_"
-      then (
+      let argument_document =
+        if String.equal (AlphaLib.Atom.hint x) "_"
+        then (
           nominal_typ typ1 ^^
-          arrow_right ^^
-          nominal_typ typ2
+          arrow_right
         )
-      else (
-        forall ^^
-        parens (
+        else (
+          forall ^^
+          lparen ^^
           (binding
              (string (show_atom x))
              (nominal_typ typ1)
-          )
-        ) ^^
-        nominal_typ typ2
-      )
+          ) ^^
+          rparen
+        )
+      in
+      argument_document ^^ nominal_typ typ2
       (* ----- Beginning of DOT types ----- *)
       (* T ∧ T *)
     | Grammar.TypeIntersection (typ1, typ2) ->
