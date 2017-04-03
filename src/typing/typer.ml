@@ -123,11 +123,15 @@ let rec type_of_internal history context term = match term with
      TODO Add SUB.
   *)
   | Grammar.TermRecursiveRecord(typ, (z, d)) ->
+    (* As we do for the untyped introduction of a recursive type, we try to
+       infer the type of z. After that, we check the type of z is a sub-type of the
+       given type [typ] (with this method, we add the rule SUB at the same time).
+    *)
     let context' =
-      ContextType.add z typ context
+      ContextType.add z Grammar.TypeTop context
     in
     let history_d, type_of_d =
-      type_of_decl_internal history context' d
+      type_of_decl_internal z history context' d
     in
     CheckUtils.check_subtype context type_of_d typ;
     DerivationTree.create_typing_node
@@ -138,29 +142,48 @@ let rec type_of_internal history context term = match term with
       ~history:[history_d]
   (* UN-{}-I
      TODO Add SUB.
-     Γ, x : T ⊦ d : T
+     Γ ⊦ d : T
      =>
      Γ ⊦ ν(x) d : μ(x : T)
   *)
-  (* How can be infer the type of z? The type is necessary when we have z.a because we need to know the type of z.a depends on the type of z. *)
+  (* How can be infer the type of z? The type is necessary when we have z.a
+     because we need to know the type of z.a depends on the type of z.
+     [z] must be an intersection, a single type declaration or simple field declaration.
+
+     I suggest to use a step by step type inference using the declarations.
+     At the beginning, [z] is of type [Top]. We call [type_of_decl_internal history
+     context d] which will return the « real » type of z.
+     As [z] is of type [Top] at the beginning, if we try to write z.L in the
+     first declaration, it will fail because L will be not found. The exception
+     {!Error.NotARecord} will be raised.
+  *)
   | Grammar.TermRecursiveRecordUntyped(z, d) ->
+    let context' =
+      ContextType.add z Grammar.TypeTop context
+    in
     let history_d, type_of_d =
-      type_of_decl_internal history context d
+      type_of_decl_internal z history context' d
+    in
+    let type_of_z =
+      Grammar.TypeRecursive(z, type_of_d)
     in
     DerivationTree.create_typing_node
       ~rule:"{}-I"
       ~env:context
       ~term:(DerivationTree.Term(term))
-      ~typ:type_of_d
+      ~typ:type_of_z
       ~history:[history_d]
   (* FLD-E
-     Γ ⊦ x : { a : T}
+     We use {!TypeUtils.least_upper_bound_of_recursive_type} to get the type of
+     x and infer a least upper bound for the type x.a.
+     The initial rule
+     Γ ⊦ x : { a : T }
      =>
      Γ ⊦ x.a : T
 
-     TODO add SUB.
-     must become
-     Γ ⊦ x : { a : S} ∧ Γ ⊦ S <: T
+     becomes
+
+     Γ ⊦ x : S ∧ Γ ⊦ S <: { a : T }
      =>
      Γ ⊦ x.a : T
   *)
@@ -173,7 +196,7 @@ let rec type_of_internal history context term = match term with
       TypeUtils.least_upper_bound_of_recursive_type ~label:a context type_of_x
     in
     (match t with
-    | None -> raise (Error.NotARecord (Grammar.TermVariable x))
+    | None -> raise (Error.NotARecordOrUnboundField (Grammar.TermVariable x, a))
     | Some t ->
       DerivationTree.create_typing_node
         ~rule:"FLD-E"
@@ -198,13 +221,16 @@ let rec type_of_internal history context term = match term with
     let type_of_x =
       ContextType.find x context
     in
-    let (typ, rule) = (match type_of_x with
+    let (typ, rule) =
+     (match type_of_x with
      | Grammar.TypeRecursive(z, type_of_z) ->
-       (* TODO: type_of_z must be the same than type_of_x *)
+       (* TODO: type_of_z must be the same than type_of_x. Or, with SUB, a
+          subtype
+       *)
        type_of_x, "REC-E"
      | _ ->
        Grammar.TypeRecursive(x, type_of_x), "REC-I"
-      )
+    )
     in
     DerivationTree.create_typing_node
       ~rule
@@ -213,7 +239,7 @@ let rec type_of_internal history context term = match term with
       ~typ
       ~history
 
-and type_of_decl_internal history context decl = match decl with
+and type_of_decl_internal z history context decl = match decl with
   (* TYP-I
      TODO Add SUB
      Γ ⊦ { A = T } : { A : T .. T }
@@ -252,11 +278,38 @@ and type_of_decl_internal history context decl = match decl with
   *)
   | Grammar.TermAggregateDeclaration(d1, d2) ->
     CheckUtils.check_disjoint_domains d1 d2;
+    (* We begin with the left. *)
     let history_d1, type_of_d1 =
-      type_of_decl_internal history context d1
+      type_of_decl_internal z history context d1
+    in
+    (* When we have the type of the leftmost declarations, we use this type to
+       infer the type of the rightmost declarations.
+       With this method, we can write
+       struct
+         type T = int
+         type T' = self.T
+       end
+       because the type label T will be added in the type of z with an
+       intersection ==> for the rightmost declaration, z will be at least of
+       type [sig type T = int end]. But we can't write
+       struct
+         type T = self.T'
+         type T' = int
+       end
+       TODO:
+       Allow both.
+    *)
+    let type_of_z =
+      ContextType.find z context
+    in
+    let new_type_of_z =
+      Grammar.TypeIntersection(type_of_z, type_of_d1)
+    in
+    let context' =
+      ContextType.add z new_type_of_z context
     in
     let history_d2, type_of_d2 =
-      type_of_decl_internal history context d2
+      type_of_decl_internal z history context' d2
     in
     let typ =
       Grammar.TypeIntersection(type_of_d1, type_of_d2)
@@ -267,7 +320,6 @@ and type_of_decl_internal history context decl = match decl with
       ~term:(DerivationTree.Declaration(decl))
       ~typ
       ~history:[history_d1 ; history_d2]
-
 
 let type_of ?(context = ContextType.empty ()) term =
   type_of_internal [] context term
