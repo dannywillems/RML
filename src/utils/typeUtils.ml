@@ -61,7 +61,7 @@ let rec best_bound_of_recursive_type ~direction ~label context t = match t with
       best_bound_of_recursive_type ~direction ~label context t1
     in
     let best_bound_for_t2 =
-      best_bound_of_recursive_type ~direction ~label context t1
+      best_bound_of_recursive_type ~direction ~label context t2
     in
     (match (best_bound_for_t1, best_bound_for_t2) with
     | (None, None) -> None
@@ -196,7 +196,7 @@ let record_of_variable context x =
     (match field_type_of_x with
     | None -> raise (Error.NotWellFormed(Grammar.TermVariable(x), type_of_x))
     | Some t -> t)
-  | _ -> raise (Error.NotARecord(Grammar.TermVariable(x)))
+  | _ -> raise (Error.NotARecordOrUnboundField(Grammar.TermVariable(x)))
 
 *)
 
