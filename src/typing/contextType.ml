@@ -55,4 +55,33 @@ module Style = struct
       "%s"
       (string_of_context context)
 end
+
+module Pretty = struct
+  open PPrint
+  open PrettyPrinter
+
+  let pretty_print_of_type_relation k v =
+    group (
+      string (
+        ANSITerminal.sprintf
+          [ANSITerminal.blue]
+          "%s"
+          (AlphaLib.Atom.show k)
+      ) ^^
+      string " : " ^^
+      (Print.Pretty.document_of_nominal_typ v)
+    )
+
+  let document_of_context context =
+    let s = ref [] in
+    ContextModule.iter
+      (fun k v ->
+         s := ((pretty_print_of_type_relation k v) ^^ string "," ^^ break 1) :: (!s)
+      )
+      context;
+    List.fold_right ( ^^ ) (!s) (string "∅")
+
+  let print =
+    adapt document_of_context
+end
 (* ------------------------------------------------- *)
