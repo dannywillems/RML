@@ -128,7 +128,6 @@ and subtype_internal history context s t =
       in
       node_sub_sel, is_subtype_sub_sel
     )
-
   (* TYP <: TYP
      Γ ⊦ S2 <: S1 ∧ Γ ⊦ T1 <: T2 =>
      Γ ⊦ { A : S1 .. T1 } <: { A : S2 .. T2 }
@@ -214,29 +213,41 @@ and subtype_internal history context s t =
       ~history:[left_derivation_tree ; right_derivation_tree]
   (* ----- Beginning of DOT rules ----- *)
   (* AND1 <:
-     Γ ⊦ T ∧ U <: T
+     Γ ⊦ S <: T ∧ Γ ⊦ T ∧ U <: T
+     =>
+     Γ ⊦ S ∧ U <: T
+
+     AND2 <:
+     Γ ⊦ S <: U ∧ Γ ⊦ T ∧ U <: U
+     =>
+     Γ ⊦ T ∧ S <: U
   *)
-  | (Grammar.TypeIntersection(t, u), t')
-    when Grammar.equiv_typ t t' ->
-    DerivationTree.create_subtyping_node
-      ~rule:"AND1 <:"
-      ~is_true:true
-      ~env:context
-      ~s
-      ~t
-      ~history
-  (* AND2 <:
-     Γ ⊦ T ∧ U <: U
-  *)
-  | (Grammar.TypeIntersection(t, u), u')
-    when Grammar.equiv_typ u u' ->
-    DerivationTree.create_subtyping_node
-      ~rule:"AND2 <:"
-      ~is_true:true
-      ~env:context
-      ~s
-      ~t
-      ~history
+  | (Grammar.TypeIntersection(s, u), t) ->
+    let history_left, is_subtype_left =
+      subtype_internal history context s t
+    in
+    if is_subtype_left
+    then (
+      DerivationTree.create_subtyping_node
+        ~rule:"AND1<:"
+        ~is_true:is_subtype_left
+        ~env:context
+        ~s:(Grammar.TypeIntersection(s, u))
+        ~t
+        ~history:[history_left]
+    )
+    else (
+      let history_right, is_subtype_right =
+        subtype_internal history context u t
+      in
+      DerivationTree.create_subtyping_node
+        ~rule:"AND1<:"
+        ~is_true:is_subtype_right
+        ~env:context
+        ~s:(Grammar.TypeIntersection(s, u))
+        ~t
+        ~history:[history_left ; history_right]
+    )
   (* <: AND
      Γ ⊦ S <: T ∧ Γ ⊦ S <: U
      =>
@@ -271,9 +282,31 @@ and subtype_internal history context s t =
       ~s:(Grammar.TypeFieldDeclaration(a, t))
       ~t:(Grammar.TypeFieldDeclaration(b, u))
       ~history:[history_subtype]
+  | (Grammar.TypeRecursive(z, t'), t) ->
+    let history_subtype, is_subtype =
+      subtype_internal history context t' t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REC-I <:"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
+  | (s, Grammar.TypeRecursive(z, t')) ->
+    let history_subtype, is_subtype =
+      subtype_internal history context s t'
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-<: REC-I"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
   | _ ->
     DerivationTree.create_subtyping_node
-      ~rule:"WRONG"
+      ~rule:"NO RULE"
       ~is_true:false
       ~env:context
       ~s
@@ -281,7 +314,7 @@ and subtype_internal history context s t =
       ~history:[]
 
 let subtype ?(with_refl=false) ?(context = ContextType.empty ()) s t =
-  (DerivationTree.Empty, true)
+  subtype_internal [] context s t
 (* subtype_internal (ContextType.empty ()) s t *)
 
 let is_subtype ?(with_refl=false) ?(context = ContextType.empty ()) s t =
