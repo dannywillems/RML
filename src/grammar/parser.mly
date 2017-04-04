@@ -8,6 +8,10 @@
 %token LEFT_PARENT
 %token RIGHT_PARENT
 
+%token LEFT_SQUARE_BRACKET
+%token RIGHT_SQUARE_BRACKET
+%token AT
+
 %token SEMICOLON
 %token DOUBLE_RIGHT_ARROW
 %token TYPE_TOP
@@ -41,43 +45,58 @@
 %token NOT_SUBTYPE
 
 %start <Grammar.raw_top_level> top_level_term
-%start <bool * Grammar.raw_top_level_subtype> top_level_subtype
+%start <bool * Grammar.raw_top_level_subtype * Grammar.ppx_annotation option> top_level_subtype
 %%
 
 (* ------------------------------------------ *)
 (* Entry points *)
 top_level_term:
 | t = rule_term ; SEMICOLON ; SEMICOLON { Grammar.TopLevelTerm(t) }
-| LET ;
-  x = ID ;
-  EQUAL ;
-  t = rule_term ;
+| content = top_level_let ;
   SEMICOLON ;
   SEMICOLON {
+      let x, t = content in
       Grammar.TopLevelLet(x, t)
     }
 | EOF { raise End_of_file }
 
 (* *)
 top_level_subtype:
+| content = top_level_subtype_content ;
+  SEMICOLON ;
+  SEMICOLON {
+      let b, term = content in
+      (b, term, None)
+    }
+| content = top_level_subtype_content ;
+  annotation = rule_annotation ;
+  SEMICOLON ;
+  SEMICOLON {
+      let b, term = content in (b, term, Some(annotation))
+    }
+| EOF { raise End_of_file }
+
+top_level_subtype_content:
+| content = top_level_let {
+                  let x, t = content in
+                  (false, Grammar.TopLevelLetSubtype(x, t))
+                }
+| s = rule_type ;
+  SUBTYPE ;
+  t = rule_type {
+          (true, Grammar.CoupleTypes(s, t))
+        }
+| s = rule_type ;
+  NOT_SUBTYPE ;
+  t = rule_type {
+          (false, Grammar.CoupleTypes(s, t))
+        }
+
+top_level_let:
 | LET ;
   x = ID ;
   EQUAL ;
-  t = rule_term ;
-  SEMICOLON ;
-  SEMICOLON { (false, Grammar.TopLevelLetSubtype(x, t)) }
-| s = rule_type ;
-  SUBTYPE ;
-  t = rule_type ;
-  SEMICOLON ;
-  SEMICOLON { (true, Grammar.CoupleTypes(s, t)) }
-| s = rule_type ;
-  NOT_SUBTYPE ;
-  t = rule_type ;
-  SEMICOLON ;
-  SEMICOLON { (false, Grammar.CoupleTypes(s, t)) }
-| EOF { raise End_of_file }
-
+  t = rule_term { x, t }
 (* ------------------------------------------ *)
 
 rule_term:
@@ -333,3 +352,14 @@ rule_type_declaration:
   t2 = rule_type_declaration {
            Grammar.TypeIntersection(t1, t2)
          }
+
+rule_annotation:
+| LEFT_SQUARE_BRACKET ;
+  AT ;
+  content = rule_annotation_content ;
+  RIGHT_SQUARE_BRACKET {
+      content
+    }
+
+rule_annotation_content:
+| content = ID { content }
