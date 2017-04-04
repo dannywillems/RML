@@ -87,6 +87,15 @@ module Style : sig
 end
 
 module Pretty : sig
+  val document_of_nominal_term :
+    ?remove_identity_of_atom:bool -> Grammar.nominal_term -> PPrint.document
+
+  val document_of_nominal_typ :
+    ?remove_identity_of_atom:bool -> Grammar.nominal_typ -> PPrint.document
+
+  val document_of_nominal_term_declaration :
+    ?remove_identity_of_atom:bool -> Grammar.nominal_decl -> PPrint.document
+
   val nominal_term : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_term -> unit
 
   val nominal_typ : ?remove_identity_of_atom:bool -> unit -> out_channel -> Grammar.nominal_typ -> unit

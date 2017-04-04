@@ -184,114 +184,9 @@ end
 
 module Pretty = struct
   open PPrint
+  open PrettyPrinter
 
-  (* -------------------------------------------------------------------------- *)
-
-  (* A block with indentation. *)
-
-  let indentation = 2
-
-  let block opening contents closing =
-    group (opening ^/^ nest indentation (contents) ^^ closing)
-
-  let module_block opening contents closing =
-    group (opening ^/^ nest indentation (contents) ^/^ closing)
-
-  (* -------------------------------------------------------------------------- *)
-
-  (* Bindings, or annotations: [x : t]. *)
-
-  let spacecolon =
-    string " :"
-
-  let binding x t =
-    block (x ^^ spacecolon) (space ^^ t) empty
-
-  (* -------------------------------------------------------------------------- *)
-
-  (* Parentheses with indentation. *)
-
-  (* We allow breaking a parenthesized thing into several lines by leaving the
-     opening and closing parentheses alone on a line and indenting the content. *)
-
-  let parens d =
-    block
-      lparen
-      (break 0 ^^ d)
-      (break 0 ^^ rparen)
-
-  (* -------------------------------------------------------------------------- *)
-
-  (* Lambda-calculus application. *)
-
-  let app d1 d2 =
-    (* The following definition would reject a large argument on a line of
-       its own, indented: *)
-    (* group (d1 ^^ nest indentation (break 1 ^^ d2)) *)
-    (* However, that would be redundant with the fact that large arguments
-       are usually parenthesized, and we already break lines and indent
-       within the parentheses. So, the following suffices: *)
-    group (d1 ^^ space ^^ d2)
-  (* -------------------------------------------------------------------------- *)
-
-  (* -------------------------------------------------------------------------- *)
-
-  (* Running a buffer printer in a fresh buffer, and sending the result to an
-     output channel. *)
-
-  let run (oc : out_channel) (print : Buffer.t -> 'a -> unit) (x : 'a) =
-    let b = Buffer.create 1024 in
-    print b x;
-    Buffer.output_buffer oc b
-
-  (* -------------------------------------------------------------------------- *)
-
-  (* Printing a document into an output channel, with fixed parameters. *)
-
-  let output (oc : out_channel) (d : document) =
-    run oc (PPrintEngine.ToBuffer.pretty 0.9 80) d
-
-  let adapt (f : 'a -> document) : out_channel -> 'a -> unit =
-    fun oc x ->
-      output oc (f x)
-
-  let arrow_right =
-    string " -> "
-
-  let double_arrow_right =
-    string " => "
-
-  let struct_ =
-    string "struct "
-
-  let end_ =
-    string "end"
-
-  let sig_ =
-    string "sig "
-
-  let type_ =
-    string "type "
-
-  let val_ =
-    string "val "
-
-  let fun_ =
-    string "fun "
-
-  let let_ =
-    string "let "
-
-  let in_ =
-    string "in"
-
-  let forall =
-    string "∀"
-
-  let unimplemented =
-    string "Unimplemented"
-
-  let rec nominal_term ?(remove_identity_of_atom=true)t =
+  let rec document_of_nominal_term ?(remove_identity_of_atom=true)t =
     let show_atom =
       if remove_identity_of_atom
       then AlphaLib.Atom.hint
@@ -304,10 +199,10 @@ module Pretty = struct
       lparen ^^
       string (show_atom x) ^^
       string " : " ^^
-      nominal_typ typ ^^
+      document_of_nominal_typ typ ^^
       rparen ^^
       arrow_right ^^
-      nominal_term term
+      document_of_nominal_term term
     | Grammar.TermVarApplication (x, y) ->
       app
         (string (show_atom x))
@@ -315,14 +210,14 @@ module Pretty = struct
     | Grammar.TermLet (t, (x, u)) ->
       block
         (let_ ^/^ (string (show_atom x)) ^/^ equals ^^ space)
-        (nominal_term t)
+        (document_of_nominal_term t)
         (in_)
       ^/^
-      nominal_term u
+      document_of_nominal_term u
     (* ----- Unofficial terms ----- *)
     (* t : T *)
     | Grammar.TermAscription (t, typ_of_t) ->
-      binding (nominal_term t) (nominal_typ typ_of_t)
+      binding (document_of_nominal_term t) (document_of_nominal_typ typ_of_t)
     (* Add the unimplemented term allows to define terms without given their
        implementation. Useful for testing.
     *)
@@ -332,10 +227,10 @@ module Pretty = struct
     (* ----- Beginning of DOT terms ----- *)
     (* {x : T => t^{x}} *)
     | Grammar.TermRecursiveRecord(t, (x, d)) ->
-      string (show_atom x) ^^ (nominal_typ ~remove_identity_of_atom t) ^^
+      string (show_atom x) ^^ (document_of_nominal_typ ~remove_identity_of_atom t) ^^
       (module_block
          (string " : " ^^ struct_ )
-         (nominal_term_declaration d)
+         (document_of_nominal_term_declaration d)
          (end_)
       )
     (* Unofficial -- {x => t^{x}} *)
@@ -346,7 +241,7 @@ module Pretty = struct
           double_arrow_right ^^
           struct_
         )
-        (nominal_term_declaration d)
+        (document_of_nominal_term_declaration d)
         (end_)
     (* x.a *)
     | Grammar.TermFieldSelection (x, a) ->
@@ -354,47 +249,47 @@ module Pretty = struct
       string a
 
   (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
-  and nominal_term_declaration ?(remove_identity_of_atom=true) t =
+  and document_of_nominal_term_declaration ?(remove_identity_of_atom=true) t =
     match t with
     (* L = T *)
     | Grammar.TermTypeDeclaration (l, typ) ->
-      type_ ^^ string l ^^ string " = " ^^ nominal_typ typ
+      type_ ^^ string l ^^ string " = " ^^ document_of_nominal_typ typ
     (* a = t *)
     | Grammar.TermFieldDeclaration (a, term) ->
-      let_ ^^ string a ^^ string " = " ^^ nominal_term term
+      let_ ^^ string a ^^ string " = " ^^ document_of_nominal_term term
     | Grammar.TermAggregateDeclaration (d, d') ->
-      (nominal_term_declaration d)
+      (document_of_nominal_term_declaration d)
       ^^
       hardline
       ^^
-      (nominal_term_declaration d')
+      (document_of_nominal_term_declaration d')
 
-  and nominal_typ_declaration ?(remove_identity_of_atom=true) t =
+  and document_of_nominal_typ_declaration ?(remove_identity_of_atom=true) t =
     match t with
     (* L : S..T --> (L, S, T) *)
     | Grammar.TypeDeclaration (type_label, typ1, typ2) ->
       type_ ^^
       string type_label ^^
       string " = " ^^
-      nominal_typ ~remove_identity_of_atom typ1 ^^
+      document_of_nominal_typ ~remove_identity_of_atom typ1 ^^
       string " .. " ^^
-      nominal_typ ~remove_identity_of_atom typ2
+      document_of_nominal_typ ~remove_identity_of_atom typ2
     (* T ∧ T *)
     | Grammar.TypeIntersection (typ1, typ2) ->
-      nominal_typ ~remove_identity_of_atom typ1
+      document_of_nominal_typ ~remove_identity_of_atom typ1
       ^^
       hardline
       ^^
-      nominal_typ ~remove_identity_of_atom typ2
+      document_of_nominal_typ ~remove_identity_of_atom typ2
     (* a : T *)
     | Grammar.TypeFieldDeclaration(a, t) ->
       val_ ^^
       string a ^^
       string " : " ^^
-      nominal_typ ~remove_identity_of_atom t
-    | _ -> nominal_typ ~remove_identity_of_atom t
+      document_of_nominal_typ ~remove_identity_of_atom t
+    | _ -> document_of_nominal_typ ~remove_identity_of_atom t
 
-  and nominal_typ ?(remove_identity_of_atom=true) t =
+  and document_of_nominal_typ ?(remove_identity_of_atom=true) t =
     let show_atom =
       if remove_identity_of_atom
       then AlphaLib.Atom.hint
@@ -415,7 +310,7 @@ module Pretty = struct
       let argument_document =
         if String.equal (AlphaLib.Atom.hint x) "_"
         then (
-          nominal_typ typ1 ^^
+          document_of_nominal_typ typ1 ^^
           arrow_right
         )
         else (
@@ -423,37 +318,37 @@ module Pretty = struct
           lparen ^^
           (binding
              (string (show_atom x))
-             (nominal_typ typ1)
+             (document_of_nominal_typ typ1)
           ) ^^
           rparen
         )
       in
-      argument_document ^^ nominal_typ typ2
+      argument_document ^^ document_of_nominal_typ typ2
       (* ----- Beginning of DOT types ----- *)
       (* T ∧ T *)
     | Grammar.TypeIntersection (typ1, typ2) ->
-      nominal_typ typ1
+      document_of_nominal_typ typ1
       ^^
       hardline
       ^^
-      nominal_typ typ2
+      document_of_nominal_typ typ2
     (* { z => T^{z} } *)
     | Grammar.TypeRecursive (x, typ1) ->
       module_block
         ((string (show_atom x)) ^^ double_arrow_right ^^ sig_)
-        (nominal_typ_declaration typ1)
+        (document_of_nominal_typ_declaration typ1)
         (end_)
-    | _ -> nominal_typ_declaration ~remove_identity_of_atom t
+    | _ -> document_of_nominal_typ_declaration ~remove_identity_of_atom t
 
   let nominal_term ?(remove_identity_of_atom=true) () =
-    adapt (nominal_term ~remove_identity_of_atom)
+    adapt (document_of_nominal_term ~remove_identity_of_atom)
 
   let nominal_typ ?(remove_identity_of_atom=true) () =
-    adapt (nominal_typ ~remove_identity_of_atom)
+    adapt (document_of_nominal_typ ~remove_identity_of_atom)
 
   let nominal_term_declaration ?(remove_identity_of_atom=true) () =
-    adapt (nominal_term_declaration ~remove_identity_of_atom)
+    adapt (document_of_nominal_term_declaration ~remove_identity_of_atom)
 
   let nominal_typ_declaration ?(remove_identity_of_atom=true) () =
-    adapt (nominal_typ_declaration ~remove_identity_of_atom)
+    adapt (document_of_nominal_typ_declaration ~remove_identity_of_atom)
 end
