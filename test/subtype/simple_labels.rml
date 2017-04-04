@@ -1,0 +1,32 @@
+(* Abstract type with different names. *)
+sig type T end !<: sig type S end;;
+
+(* Abstract type with same name. As the signature is not binded to a name, it's considered to be the same. *)
+sig type T end <: sig type T end;;
+
+(* Same concrete type but different type alias. *)
+sig type T = Nothing end !<: sig type S = Nothing end;;
+
+sig type T = Nothing end <: sig type T = Nothing end;;
+
+sig
+  type T = int.T
+  val increment : int.T -> int.T
+end
+<:
+sig
+  type T = int.T
+  val increment : int.T -> int.T
+end;;
+
+sig type T : Nothing .. int.T end <: sig type T end;;
+
+sig type T : Nothing .. int.T end !<: sig type T = int.T end;;
+
+let x = struct type T = int.T end;;
+
+let y = struct type T = int.T end;;
+
+sig type T = x.T end <: sig type T = int.T end;;
+
+sig type T = x.T end <: sig type T = y.T end;;
