@@ -28,10 +28,11 @@ and ('bn, 'fn) term =
   (* ----- Beginning of DOT terms ----- *)
   (* ν(x : T) d *)
   | TermRecursiveRecord of ('bn, 'fn) typ * ('bn, ('bn, 'fn) decl) abs
-  (* Unofficiql -- ν(x) d *)
-  | TermRecursiveRecordUntyped of ('bn, ('bn, 'fn) decl) abs
   (* x.a *)
-  | TermFieldSelection of 'fn * string
+  | TermFieldSelection of 'fn * field_label
+  (* Unofficial -- ν(x) d *)
+  | TermRecursiveRecordUntyped of ('bn, ('bn, 'fn) decl) abs
+
 
 (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
 and ('bn, 'fn) decl =
