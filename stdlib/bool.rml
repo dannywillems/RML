@@ -1,6 +1,6 @@
 let bool = struct
   type T = sig type A end
-  let true = Unimplemented : bool.T
-  let false = Unimplemented : bool.T
+  let true = Unimplemented : self.T
+  let false = Unimplemented : self.T
 end;;
 
