@@ -76,7 +76,7 @@
 
 - [x] Add a sugar for dependent function when the variable is not
   needed in the return type.
-- [x] S : Nothing .. Any (no need to mention bounds) -> S
+- [x] type S : Nothing .. Any (no need to mention bounds) -> S
 - [x] S : Nothing .. U -> S <: U
 - [x] S : L .. Any -> S :> L
 - [x] struct .. end (ou obj .. end) to define terms and sig .. end to define types.
@@ -102,7 +102,7 @@ It implies to remember the variable binding in the module.
 - [ ] Top level module type definitions.
 - [ ] Top level type definitions. `type T = int` = `let x = struct type T = int end in open x`.
 - [ ] keyword `include` in modules.
-- [ ] keyword `with type S = ...` --> intersection.
+- [ ] keyword with type S = ... --> intersection.
 - [ ] Multiple argument.
 - [ ] Remove ;; for top level definitions. It implies to consider a file like a module.
 - [ ] Sugar for polymorphic types like `type 'a t = 'a`.
@@ -112,3 +112,4 @@ It implies to remember the variable binding in the module.
   It can be files. If `File` is a file, then we can add a directory to search it
   with the argument `-I`.
 - [ ] `open M` = for all labels `l` in `M`, add `M.l` in the environment with the name `l`
+- [ ] `t => struct .. end` --> `struct(t) .. end`
