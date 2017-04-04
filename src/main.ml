@@ -199,11 +199,8 @@ let typing lexbuf =
         nominal_term
     in
     print_typing_derivation_tree history;
-    Printf.printf
-      "%s\n%s\n"
-      (Print.string_of_nominal_term nominal_term)
-      (Print.string_of_nominal_typ nominal_typ);
-    ()
+    print_term_color nominal_term;
+    print_type_color nominal_typ
 
 let rec execute action lexbuf =
   try
@@ -215,9 +212,17 @@ let rec execute action lexbuf =
     print_error lexbuf;
     exit 1
   | Error.Subtype(str, s, t) ->
-    print_endline str
+    print_endline str;
+    exit 1
   | Error.AvoidanceProblem(str, atom, typ) as e ->
-    print_endline str
+    print_endline str;
+    exit 1
+  | ContextType.NotInEnvironment(key, context) ->
+    Printf.printf
+      "The key %s is not in context :\n%a\n"
+      (ANSITerminal.sprintf [ANSITerminal.blue] "%s" (AlphaLib.Atom.hint key))
+      ContextType.Pretty.print context;
+    exit 1
   | Error.NotWellFormed(context, typ) ->
     Printf.printf
       "%s is not well formed.\n"
