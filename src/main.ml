@@ -55,8 +55,38 @@ let print_typing_derivation_tree history =
 let print_subtyping_derivation_tree history =
   if (!show_derivation_tree)
   then DerivationTree.print_subtyping_derivation_tree history
-(* ------------------------------------------------- *)
 
+(** [print_is_subtyppe s t raw_is_subtype is_subtype] *)
+let print_is_subtype s t raw_is_subtype is_subtype =
+  ANSITerminal.printf
+    (if raw_is_subtype = is_subtype then success_style else error_style)
+    "%s - %s is%s a subtype of %s\n"
+    (if raw_is_subtype = is_subtype then "✓" else "❌")
+    (Print.string_of_raw_typ s)
+    (if raw_is_subtype then "" else " not")
+    (Print.string_of_raw_typ t);
+  if raw_is_subtype <> is_subtype then exit(1)
+
+let print_is_subtype_algorithms
+    raw_s raw_t is_subtype_with_refl is_subtype_without_refl raw_is_subtype
+  =
+  Printf.printf
+    "%s <: %s\n"
+    (Print.string_of_raw_typ raw_s)
+    (Print.string_of_raw_typ raw_t);
+  ANSITerminal.printf
+    (if is_subtype_without_refl = raw_is_subtype then success_style else error_style)
+    "    %s %s\n"
+    (if is_subtype_without_refl = raw_is_subtype then "✓" else "❌")
+    "Without REFL";
+  ANSITerminal.printf
+    (if is_subtype_with_refl = raw_is_subtype then success_style else error_style)
+    "    %s %s\n"
+    (if is_subtype_with_refl = raw_is_subtype then "✓" else "❌")
+    "With REFL"
+
+(* ------------------------------------------------- *)
+(* Functions for actions *)
 let read_top_level_let x raw_term =
   (* Convert raw term/type to nominal term/type using the import environment. *)
   let nominal_term =
@@ -103,7 +133,48 @@ let read_type_file lexbuf = ()
 
 let eval lexbuf = ()
 
-let check_subtype lexbuf = ()
+(** Action to check the subtype algorithm (with or without REFL). It uses the
+    syntax S <: T or S !<: T and automatically check if the answer is the same than
+    we want.
+*)
+let check_subtype ~with_refl lexbuf =
+  let (raw_is_subtype, raw_couple) = Parser.top_level_subtype Lexer.prog lexbuf in
+  match raw_couple with
+  | Grammar.CoupleTypes(raw_s, raw_t) ->
+    let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
+    let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
+    CheckUtils.check_well_formedness (!typing_env) nominal_s;
+    CheckUtils.check_well_formedness (!typing_env) nominal_t;
+    let history, is_subtype =
+      Subtype.subtype ~with_refl ~context:(!typing_env) nominal_s nominal_t
+    in
+    print_subtyping_derivation_tree history;
+    print_is_subtype raw_s raw_t raw_is_subtype is_subtype;
+    print_endline "-------------------------"
+  | Grammar.TopLevelLetSubtype (var, raw_term) ->
+    read_top_level_let var raw_term
+
+let check_subtype_algorithms lexbuf =
+  let (raw_is_subtype, raw_couples) = Parser.top_level_subtype Lexer.prog lexbuf in
+  match raw_couples with
+  | Grammar.CoupleTypes(raw_s, raw_t) ->
+    let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
+    let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
+    CheckUtils.check_well_formedness (!typing_env) nominal_s;
+    CheckUtils.check_well_formedness (!typing_env) nominal_t;
+    let history_with_refl, is_subtype_with_refl =
+      Subtype.subtype ~with_refl:true ~context:(!typing_env) nominal_s nominal_t
+    in
+    let history_without_refl, is_subtype_without_refl =
+      Subtype.subtype ~with_refl:false ~context:(!typing_env) nominal_s nominal_t
+    in
+    print_subtyping_derivation_tree history_with_refl;
+    print_subtyping_derivation_tree history_without_refl;
+    print_is_subtype_algorithms
+      raw_s raw_t is_subtype_with_refl is_subtype_without_refl raw_is_subtype;
+    print_endline "-------------------------"
+  | Grammar.TopLevelLetSubtype (var, raw_term) ->
+    read_top_level_let var raw_term
 
 let typing lexbuf =
   let raw_term = Parser.top_level_term Lexer.prog lexbuf in
@@ -137,7 +208,16 @@ let rec execute action lexbuf =
   | Parser.Error ->
     print_error lexbuf;
     exit 1
-  | Error.Subtype(_) | Error.AvoidanceProblem(_) as e ->
+  | Error.Subtype(str, s, t) ->
+    print_endline str
+  | Error.AvoidanceProblem(str, atom, typ) as e ->
+    print_endline str
+  | Error.NotWellFormed(context, typ) ->
+    Printf.printf
+      "%s is not well formed.\n"
+      (Print.string_of_nominal_typ typ);
+    exit(1)
+  | _ as e ->
     Error.print e;
     execute action lexbuf
 
@@ -167,7 +247,7 @@ let args_list = [
 ]
 
 let () =
-  Arg.parse args_list print_endline "An interpreter for DSub implemented in OCaml"
+  Arg.parse args_list print_endline "An interpreter for RML implemented in OCaml"
 (* ------------------------------------------------- *)
 
 let stdlib_files = [
@@ -211,5 +291,13 @@ let () =
   | Action.Read_term -> execute read_term_file lexbuf
   | Action.Read_type -> execute read_type_file lexbuf
   | Action.Eval -> execute eval lexbuf
-  | Action.Subtype -> execute check_subtype lexbuf
+  | Action.Subtype -> execute (check_subtype ~with_refl:false) lexbuf
+  | Action.Subtype_with_REFL -> execute (check_subtype ~with_refl:true) lexbuf
+  | Action.Subtype_same_output ->
+    ANSITerminal.printf
+      [ANSITerminal.red]
+      "ERROR: Without REFL algorithm not implemented.\n"
+    (*
+    execute check_subtype_algorithms lexbuf
+    *)
   | Action.Typing -> execute typing lexbuf
