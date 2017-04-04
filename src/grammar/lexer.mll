@@ -65,6 +65,7 @@ rule prog = parse
     }
 
   | '.' { Parser.DOT }
+  | ',' { Parser.COMMA }
   | '=' { Parser.EQUAL }
 
   | subtype { Parser.SUBTYPE }

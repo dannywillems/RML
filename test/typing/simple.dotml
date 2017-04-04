@@ -1,3 +1,5 @@
+let f = fun(x : int.T, y : int.T, b : bool.T) -> b;;
+
 let simple = sig type A = Nothing end : struct type A = Nothing end;;
 
 let int = sig

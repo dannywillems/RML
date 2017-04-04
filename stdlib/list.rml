@@ -8,7 +8,7 @@ let l = list => struct
     let tail = fun (x : unit.T) -> Unimplemented (* Must fail... *)
   end
   let cons : int.T -> list.T -> list.T =
-    fun(x : int.T) -> fun(l : list.T) -> struct
+    fun(x : int.T, l : list.T) -> struct
       let head = fun(x' : unit.T) -> x
       let tail = fun(l' : unit.T) -> l
     end

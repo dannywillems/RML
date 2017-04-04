@@ -1,4 +1,16 @@
+%{
+  exception No_argument
+
+  let rec currying args return = match args with
+    | [] -> raise No_argument
+    | [(x, s)] -> Grammar.TermAbstraction(s, (x, return))
+    | head :: tail ->
+       let x, s = head in
+       Grammar.TermAbstraction(s, (x, currying tail return))
+%}
+
 %token COLON
+%token COMMA
 %token DOT
 %token EQUAL
 
@@ -195,28 +207,34 @@ rule_value:
   RIGHT_BRACKET {
       Grammar.TermRecursiveRecordUntyped(x, d)
     }
+| t = rule_abstraction { t }
 
+rule_abstraction:
 (* λ(x : S) t *)
 | ABSTRACTION ;
   LEFT_PARENT ;
-  id = ID ;
-  COLON ;
-  typ = rule_type ;
+  args = rule_arguments_list
   RIGHT_PARENT ;
   t = rule_term {
-          Grammar.TermAbstraction(typ, (id, t))
+          currying args t
         }
 (* fun (x : T) -> t *)
 | FUN ;
   LEFT_PARENT ;
-  x = ID ;
-  COLON ;
-  typ = rule_type ;
+  args = rule_arguments_list ;
   RIGHT_PARENT ;
   ARROW_RIGHT ;
   t = rule_term {
-          Grammar.TermAbstraction(typ, (x, t))
+          currying args t
         }
+
+rule_arguments_list:
+| x = ID ;
+  COLON ;
+  t = rule_type { [(x, t)] }
+| head = rule_arguments_list ;
+  COMMA ;
+  tail = rule_arguments_list { List.concat [head ; tail] }
 
 rule_decl:
 (* type L = T *)

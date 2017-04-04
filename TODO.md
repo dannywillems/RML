@@ -113,3 +113,4 @@ It implies to remember the variable binding in the module.
   with the argument `-I`.
 - [ ] `open M` = for all labels `l` in `M`, add `M.l` in the environment with the name `l`
 - [ ] `t => struct .. end` --> `struct(t) .. end`
+- [x] function with multiple arguments.
