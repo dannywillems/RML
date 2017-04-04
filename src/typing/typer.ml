@@ -42,6 +42,7 @@ let rec type_of_internal history context term = match term with
   (* USELESS NOW. Use {}-I instead.
      VAR
      Γ, x : T, Γ' ⊦ x : T
+  *)
   | Grammar.TermVariable x ->
     let typ = ContextType.find x context in
     DerivationTree.create_typing_node
@@ -50,7 +51,6 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term term)
       ~typ
       ~history:[]
-  *)
   (* ALL-E.
      Γ ⊦ x : ∀(z : S) : T ∧
      Γ ⊦ y : S
@@ -211,12 +211,11 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ x : μ(x : T)
 
      REC-E
-     Γ ⊦ x : μ(x : T)
+     Γ ⊦ x : μ(z : T)
      =>
-     Γ ⊦ x : T
+     Γ ⊦ z : T
 
      TODO add SUB.
-  *)
   | Grammar.TermVariable(x) ->
     let type_of_x =
       ContextType.find x context
@@ -238,6 +237,7 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term(term))
       ~typ
       ~history
+  *)
 
 and type_of_decl_internal z history context decl = match decl with
   (* TYP-I
