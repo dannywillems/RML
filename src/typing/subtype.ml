@@ -241,13 +241,14 @@ and subtype_internal history context s t =
         subtype_internal history context u t
       in
       DerivationTree.create_subtyping_node
-        ~rule:"AND1<:"
+        ~rule:"AND2<:"
         ~is_true:is_subtype_right
         ~env:context
         ~s:(Grammar.TypeIntersection(s, u))
         ~t
-        ~history:[history_left ; history_right]
+        ~history:[history_right]
     )
+
   (* <: AND
      Γ ⊦ S <: T ∧ Γ ⊦ S <: U
      =>
@@ -282,9 +283,15 @@ and subtype_internal history context s t =
       ~s:(Grammar.TypeFieldDeclaration(a, t))
       ~t:(Grammar.TypeFieldDeclaration(b, u))
       ~history:[history_subtype]
+  (* UN-REC-I<: *)
   | (Grammar.TypeRecursive(z, t'), t) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+       TODO fresh z + rename
+    *)
+    let context' = ContextType.add z t' context in
     let history_subtype, is_subtype =
-      subtype_internal history context t' t
+      subtype_internal history context' t' t
     in
     DerivationTree.create_subtyping_node
       ~rule:"UN-REC-I <:"
@@ -293,9 +300,15 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:[history_subtype]
+  (* UN-<: REC-I *)
   | (s, Grammar.TypeRecursive(z, t')) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+       TODO fresh z + rename
+    *)
+    let context' = ContextType.add z t' context in
     let history_subtype, is_subtype =
-      subtype_internal history context s t'
+      subtype_internal history context' s t'
     in
     DerivationTree.create_subtyping_node
       ~rule:"UN-<: REC-I"
