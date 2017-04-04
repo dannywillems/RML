@@ -86,7 +86,6 @@ and ('bn, 'fn) top_level =
   }
 ]
 
-
 type raw_term = (string, string) term
 type raw_typ = (string, string) typ
 type raw_decl = (string, string) decl
@@ -96,6 +95,33 @@ type nominal_term = (Atom.t, Atom.t) term
 type nominal_typ = (Atom.t, Atom.t) typ
 type nominal_decl = (Atom.t, Atom.t) decl
 type nominal_top_level = (Atom.t, Atom.t) top_level
+
+(* --------------------------------------------------------------- *)
+(* ----- Allow to use the syntax [let x : T = t] on the top level. *)
+(* The top level let bindings are separated from the terms. A top level term is
+   either a usual term or a top level term.
+*)
+type ('bn, 'fn) top_level_term =
+  | Term of ('bn, 'fn) term
+  (* let x : T = t -> Top level definition. Must never appear in a term *)
+  | TopLevelLetTerm of 'fn * ('bn, 'fn) term
+
+(* We also allow to use top level let expressions in a file using only types
+   (for example sub-typing or well formed algorithms).
+*)
+type ('bn, 'fn) top_level_typ =
+  | Type of ('bn, 'fn) typ
+  (* let x : T = t -> Top level definition. Must never appear in a term *)
+  | TopLevelLetType of 'fn * ('bn, 'fn) term
+
+type ('bn, 'fn) top_level_subtype =
+  | CoupleTypes of ('bn, 'fn) typ * ('bn, 'fn) typ
+  | TopLevelLetSubtype of 'fn * ('bn, 'fn) term
+
+type raw_top_level_subtype = (string, string) top_level_subtype
+type raw_top_level_typ = (string, string) top_level_typ
+type raw_top_level_term = (string, string) top_level_term
+(* --------------------------------------------------------------- *)
 
 #include "AlphaLibMacros.cppo.ml"
 
