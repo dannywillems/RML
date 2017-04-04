@@ -1,0 +1,11 @@
+let simple = struct type A = Nothing end;;
+
+let int = struct
+  type T = Nothing
+  let identity = fun(x : self.T) -> x
+end;;
+
+let other = struct
+  type S = self.T
+  type T = int.A
+end;;
