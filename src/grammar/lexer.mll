@@ -52,6 +52,9 @@ rule prog = parse
               prog lexbuf
             }
 
+  (* Use for tests *)
+  | "!<:" { Parser.NOT_SUBTYPE }
+
   | "(*" {
       comment lexbuf;
       prog lexbuf
