@@ -37,9 +37,15 @@
 
 %token EOF
 
+(* Use for tests *)
+%token NOT_SUBTYPE
+
 %start <Grammar.raw_top_level> top_level_term
+%start <bool * Grammar.raw_top_level_subtype> top_level_subtype
 %%
 
+(* ------------------------------------------ *)
+(* Entry points *)
 top_level_term:
 | t = rule_term ; SEMICOLON ; SEMICOLON { Grammar.TopLevelTerm(t) }
 | LET ;
@@ -51,6 +57,28 @@ top_level_term:
       Grammar.TopLevelLet(x, t)
     }
 | EOF { raise End_of_file }
+
+(* *)
+top_level_subtype:
+| LET ;
+  x = ID ;
+  EQUAL ;
+  t = rule_term ;
+  SEMICOLON ;
+  SEMICOLON { (false, Grammar.TopLevelLetSubtype(x, t)) }
+| s = rule_type ;
+  SUBTYPE ;
+  t = rule_type ;
+  SEMICOLON ;
+  SEMICOLON { (true, Grammar.CoupleTypes(s, t)) }
+| s = rule_type ;
+  NOT_SUBTYPE ;
+  t = rule_type ;
+  SEMICOLON ;
+  SEMICOLON { (false, Grammar.CoupleTypes(s, t)) }
+| EOF { raise End_of_file }
+
+(* ------------------------------------------ *)
 
 rule_term:
 (* x *)
