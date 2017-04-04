@@ -46,6 +46,10 @@ let forall = "forall"
 
 let unimplemented = "Unimplemented"
 
+let left_square_bracket = '['
+let right_square_bracket = ']'
+let at = '@'
+
 rule prog = parse
   | white { prog lexbuf }
   | newline { next_line lexbuf;
@@ -82,6 +86,9 @@ rule prog = parse
   | '(' { Parser.LEFT_PARENT }
   | ')' { Parser.RIGHT_PARENT }
 
+  | at { Parser.AT }
+  | left_square_bracket { Parser.LEFT_SQUARE_BRACKET }
+  | right_square_bracket { Parser.RIGHT_SQUARE_BRACKET }
   | ';' { Parser.SEMICOLON }
 
   | let_ { Parser.LET }

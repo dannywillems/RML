@@ -118,6 +118,9 @@ type ('bn, 'fn) top_level_subtype =
   | CoupleTypes of ('bn, 'fn) typ * ('bn, 'fn) typ
   | TopLevelLetSubtype of 'fn * ('bn, 'fn) term
 
+
+type ppx_annotation = string
+
 type raw_top_level_subtype = (string, string) top_level_subtype
 type raw_top_level_typ = (string, string) top_level_typ
 type raw_top_level_term = (string, string) top_level_term
