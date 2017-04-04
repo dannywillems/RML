@@ -43,3 +43,9 @@ module Style : sig
   (** Same than {!string_of_context} with a style. *)
   val string_of_context : ANSITerminal.style list -> context -> string
 end
+
+module Pretty : sig
+  val document_of_context : context -> PPrint.document
+
+  val print : out_channel -> context -> unit
+end
