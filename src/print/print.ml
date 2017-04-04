@@ -138,6 +138,12 @@ let nominal_term t =
 let nominal_typ t =
   Printf.printf "%s" (string_of_raw_typ (Grammar.show_typ t))
 
+let nominal_term_endline t =
+  Printf.printf "%s\n" (string_of_raw_term (Grammar.show_term t))
+
+let nominal_typ_endline t =
+  Printf.printf "%s\n" (string_of_raw_typ (Grammar.show_typ t))
+
 module Style = struct
   let string_of_raw_term style t =
     ANSITerminal.sprintf

@@ -34,6 +34,12 @@ val nominal_term : Grammar.nominal_term -> unit
 (** Print a nominal typ using {!string_of_nominal_typ} *)
 val nominal_typ : Grammar.nominal_typ -> unit
 
+(** Print a nominal typ using {!string_of_nominal_typ} and add a newline. *)
+val nominal_term_endline : Grammar.nominal_term -> unit
+
+(** Print a nominal typ using {!string_of_nominal_typ} and add a newline. *)
+val nominal_typ_endline : Grammar.nominal_typ -> unit
+
 (** This module defines the same printing functions than above but allows to use
     color with [ANSITerminal] library.
 *)
@@ -77,6 +83,7 @@ module Style : sig
 
   (** Print a nominal typ using {!string_of_nominal_typ} with the given styles list. *)
   val nominal_typ : ANSITerminal.style list -> Grammar.nominal_typ -> unit
+
 end
 
 module Pretty : sig
