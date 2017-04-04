@@ -7,6 +7,8 @@ type t =
   | Read_term
   | Read_type
   | Subtype
+  | Subtype_with_REFL
+  | Subtype_same_output
   | Typing
 
 val t_of_string : string -> t
