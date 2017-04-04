@@ -27,6 +27,6 @@ let x = struct type T = int.T end;;
 
 let y = struct type T = int.T end;;
 
-sig type T = x.T end <: sig type T = int.T end;;
+sig type T = x.T end <: sig type T = int.T end [@show_derivation_tree];;
 
-sig type T = x.T end <: sig type T = y.T end;;
+sig type T = x.T end <: sig type T = y.T end [@show_derivation_tree];;
