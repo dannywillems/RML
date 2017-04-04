@@ -1,0 +1,15 @@
+let l = list => struct
+  type T = sig
+    val head : unit.T -> int.T
+    val tail : unit.T -> list.T
+  end
+  let empty : list.T = struct
+    let head = fun (x : unit.T) -> Unimplemented (* Must fail... *)
+    let tail = fun (x : unit.T) -> Unimplemented (* Must fail... *)
+  end
+  let cons : int.T -> list.T -> list.T =
+    fun(x : int.T) -> fun(l : list.T) -> struct
+      let head = fun(x' : unit.T) -> x
+      let tail = fun(l' : unit.T) -> l
+    end
+end;;
