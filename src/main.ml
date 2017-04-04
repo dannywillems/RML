@@ -26,6 +26,10 @@ let kit_import_env : AlphaLib.KitImport.env ref = ref AlphaLib.KitImport.empty
 let typing_env = ref (ContextType.empty ())
 (* ------------------------------------------------- *)
 
+let parse_annotation annotation = match annotation with
+  | Some "show_derivation_tree" ->
+    show_derivation_tree := true
+  | _ -> ()
 (* ------------------------------------------------- *)
 (* Printing functions *)
 let print_info string =
@@ -138,7 +142,8 @@ let eval lexbuf = ()
     we want.
 *)
 let check_subtype ~with_refl lexbuf =
-  let (raw_is_subtype, raw_couple) = Parser.top_level_subtype Lexer.prog lexbuf in
+  let (raw_is_subtype, raw_couple, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
+  parse_annotation annotation;
   match raw_couple with
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
@@ -155,7 +160,8 @@ let check_subtype ~with_refl lexbuf =
     read_top_level_let var raw_term
 
 let check_subtype_algorithms lexbuf =
-  let (raw_is_subtype, raw_couples) = Parser.top_level_subtype Lexer.prog lexbuf in
+  let (raw_is_subtype, raw_couples, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
+  parse_annotation annotation;
   match raw_couples with
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
