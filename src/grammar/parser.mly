@@ -233,6 +233,14 @@ rule_decl:
   t = rule_term {
           Grammar.TermFieldDeclaration(field_label, t)
         }
+| LET ;
+  field_label = ID ;
+  COLON ;
+  typ = rule_type ;
+  EQUAL ;
+  t = rule_term {
+          Grammar.TermFieldDeclaration(field_label, Grammar.TermAscription(t, typ))
+        }
 (* d ∧ d' *)
 | d1 = rule_decl ;
   d2 = rule_decl {
