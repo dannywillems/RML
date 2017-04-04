@@ -1,0 +1,3 @@
+let empty = l.empty;;
+let head_of_empty = empty.head;;
+let must_be_unit : int.T = head_of_empty unit.unit;;
