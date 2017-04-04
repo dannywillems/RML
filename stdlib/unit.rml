@@ -1,3 +1,6 @@
-let unit_t = Unimplemented : sig type A end;;
+let unit = Unimplemented : sig type A end;;
 
-let unit = Unimplemented : unit_t.A;;
+let unit = struct
+  type T = unit.A
+  let unit = Unimplemented : self.T
+end;;
