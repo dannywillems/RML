@@ -7,6 +7,8 @@ type t =
   | Read_term
   | Read_type
   | Subtype
+  | Subtype_with_REFL
+  | Subtype_same_output
   | Typing
 
 let t_of_string = function
@@ -15,17 +17,16 @@ let t_of_string = function
   | "read_type" -> Read_type
   | "eval" -> Eval
   | "subtype" -> Subtype
+  | "subtype_with_REFL" -> Subtype_with_REFL
+  | "subtype_same_output" -> Subtype_same_output
   | "typing" -> Typing
   | "wellFormed" -> WellFormed
   | s -> raise (Undefined_action s)
 
 let available = [
-  "check_typing";
-  "eval";
-  "read_term";
-  "read_type";
   "subtype";
+  "subtype_with_REFL";
+  "subtype_same_output";
   "typing";
-  "wellFormed";
 ]
 
