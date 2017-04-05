@@ -82,7 +82,7 @@ let end_ =
   string "end"
 
 let sig_ =
-  string "sig "
+  string "sig"
 
 let type_ =
   string "type "

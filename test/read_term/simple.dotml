@@ -20,8 +20,7 @@ let string = sig
   let length = fun (str : self.T) -> Unimplemented : self.T -> int.T
 end;;
 
-let y = z : z =>
-        sig
+let y = z : sig(z)
           type T = Nothing
           val x : Nothing
           val f : z.T -> z.T

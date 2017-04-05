@@ -1,7 +1,5 @@
-let char = Unimplemented : sig type A end;;
-
 let char = struct
-  type T = char.A
+  type T = sig type A end
   let code = Unimplemented : self.T -> int.T
   let chr = Unimplemented : int.T -> self.T
   let lowercase = Unimplemented : self.T -> self.T

@@ -1,0 +1,15 @@
+let option = struct(opt)
+  type T = sig
+    val content : int.T
+  end
+
+  let some : int.T -> opt.T =
+    fun(x : int.T) -> struct
+      let content = x
+    end
+
+  let none : unit.T -> opt.T =
+    fun(x : unit.T) -> struct
+      let content = Unimplemented
+    end
+end;;
