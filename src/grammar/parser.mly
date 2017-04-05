@@ -56,23 +56,32 @@
 (* Use for tests *)
 %token NOT_SUBTYPE
 
-%start <Grammar.raw_top_level> top_level_term
+%start <Grammar.raw_top_level_term * Grammar.ppx_annotation option> top_level_term
 %start <bool * Grammar.raw_top_level_subtype * Grammar.ppx_annotation option> top_level_subtype
 %%
 
 (* ------------------------------------------ *)
 (* Entry points *)
+
+(* Entry point for typing algorithm *)
 top_level_term:
-| t = rule_term ; SEMICOLON ; SEMICOLON { Grammar.TopLevelTerm(t) }
-| content = top_level_let ;
+| t = top_level_term_content ;
   SEMICOLON ;
-  SEMICOLON {
-      let x, t = content in
-      Grammar.TopLevelLet(x, t)
-    }
+  SEMICOLON { (t, None) }
+| t = top_level_term_content ;
+  annotation = rule_annotation ;
+  SEMICOLON ;
+  SEMICOLON { (t, Some annotation) }
 | EOF { raise End_of_file }
 
-(* *)
+top_level_term_content:
+| t = rule_term { Grammar.Term(t) }
+| content = top_level_let {
+                let x, t = content in
+                Grammar.TopLevelLetTerm(x, t)
+              }
+
+(* Entry point for subtyping algorithm *)
 top_level_subtype:
 | content = top_level_subtype_content ;
   SEMICOLON ;
@@ -88,6 +97,10 @@ top_level_subtype:
     }
 | EOF { raise End_of_file }
 
+(* Content of a subtype statement. It can be a top level let declaration or a
+   statement in the form S <: T or S !<: T. The first is used to say S is a subtype
+   of T and the second is the opposite.
+ *)
 top_level_subtype_content:
 | content = top_level_let {
                   let x, t = content in
@@ -104,13 +117,23 @@ top_level_subtype_content:
           (false, Grammar.CoupleTypes(s, t))
         }
 
+(* A top level let declaration. It can be in the form let x = t
+   or let x : T = t
+*)
 top_level_let:
 | LET ;
   x = ID ;
   EQUAL ;
   t = rule_term { x, t }
+| LET ;
+  x = ID ;
+  COLON ;
+  typ = rule_type ;
+  EQUAL ;
+  term = rule_term { x, Grammar.TermAscription(term, typ) }
 (* ------------------------------------------ *)
 
+(* Rules for terms *)
 rule_term:
 (* x *)
 | id = ID { Grammar.TermVariable ( id ) }
@@ -150,6 +173,7 @@ rule_term:
           Grammar.TermFieldSelection(x, a)
         }
 
+(* Rules for values *)
 rule_value:
 (* { x : T => d } *)
 | LEFT_BRACKET ;
@@ -181,10 +205,11 @@ rule_value:
       Grammar.TermRecursiveRecord(t, ("self", d))
     }
 
-(* x => struct type A = ... ; let a = ... end *)
-| x = ID ;
-  DOUBLE_RIGHT_ARROW ;
-  STRUCT ;
+(* struct(x) type A = ... ; let a = ... end *)
+| STRUCT ;
+  LEFT_PARENT ;
+  x = ID ;
+  RIGHT_PARENT ;
   d = rule_decl ;
   END {
       Grammar.TermRecursiveRecordUntyped(x, d)
@@ -209,6 +234,7 @@ rule_value:
     }
 | t = rule_abstraction { t }
 
+(* Abstractions *)
 rule_abstraction:
 (* λ(x : S) t *)
 | ABSTRACTION ;
@@ -228,6 +254,7 @@ rule_abstraction:
           currying args t
         }
 
+(* A rule to parse the list of arguments of a function. Curryfication is used; *)
 rule_arguments_list:
 | x = ID ;
   COLON ;
@@ -236,6 +263,7 @@ rule_arguments_list:
   COMMA ;
   tail = rule_arguments_list { List.concat [head ; tail] }
 
+(* Term declaration in a structure *)
 rule_decl:
 (* type L = T *)
 | TYPE ;
@@ -251,6 +279,7 @@ rule_decl:
   t = rule_term {
           Grammar.TermFieldDeclaration(field_label, t)
         }
+(* let a : T = t *)
 | LET ;
   field_label = ID ;
   COLON ;
@@ -266,6 +295,7 @@ rule_decl:
          }
 
 (* ------------------------------- *)
+(* Types *)
 rule_type:
 | TYPE_BOTTOM { Grammar.TypeBottom }
 | TYPE_TOP { Grammar.TypeTop }
@@ -289,10 +319,11 @@ rule_type:
   END {
       Grammar.TypeRecursive("self", typ)
     }
-(* x => sig T^{x} end *)
-| var = ID ;
-  DOUBLE_RIGHT_ARROW ;
-  SIG ;
+(* sig(x) T^{x} end *)
+| SIG ;
+  LEFT_PARENT ;
+  var = ID ;
+  RIGHT_PARENT ;
   typ = rule_type_declaration ;
   END {
       Grammar.TypeRecursive(var, typ)
@@ -379,6 +410,7 @@ rule_type_declaration:
            Grammar.TypeIntersection(t1, t2)
          }
 
+(* Rule for annotations, like PPX in OCaml *)
 rule_annotation:
 | LEFT_SQUARE_BRACKET ;
   AT ;

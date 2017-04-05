@@ -54,6 +54,12 @@ module Style = struct
       style
       "%s"
       (string_of_context context)
+
+  let string_of_context_with_assert style context =
+    ANSITerminal.sprintf
+      style
+      "%s ⊦ "
+      (string_of_context style context)
 end
 
 module Pretty = struct

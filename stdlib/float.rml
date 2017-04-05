@@ -1,7 +1,5 @@
-let float = Unimplemented : sig type A end;;
-
 let float = struct
-  type T = float.A
+  type T = sig type A end
   let int_of_float = Unimplemented : self.T -> int.T
   let truncate = self.int_of_float
 end;;

@@ -217,7 +217,7 @@ module Pretty = struct
     (* ----- Unofficial terms ----- *)
     (* t : T *)
     | Grammar.TermAscription (t, typ_of_t) ->
-      binding (document_of_nominal_term t) (document_of_nominal_typ typ_of_t)
+      document_of_nominal_term t ^^ string " : " ^^ document_of_nominal_typ typ_of_t
     (* Add the unimplemented term allows to define terms without given their
        implementation. Useful for testing.
     *)
@@ -316,10 +316,9 @@ module Pretty = struct
         else (
           forall ^^
           lparen ^^
-          (binding
-             (string (show_atom x))
-             (document_of_nominal_typ typ1)
-          ) ^^
+          (string (show_atom x)) ^^
+          string ":" ^^
+          (document_of_nominal_typ typ1) ^^
           rparen
         )
       in

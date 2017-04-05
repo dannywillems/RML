@@ -5,6 +5,7 @@ let eval_opt = ref ""
 let show_derivation_tree = ref false
 let verbose = ref false
 let use_stdlib = ref false
+let print_context_in_derivation_tree = ref true
 (* ------------------------------------------------- *)
 
 (* ------------------------------------------------- *)
@@ -28,7 +29,11 @@ let typing_env = ref (ContextType.empty ())
 
 let parse_annotation annotation = match annotation with
   | Some "show_derivation_tree" ->
-    show_derivation_tree := true
+    show_derivation_tree := true;
+    print_context_in_derivation_tree := true
+  | Some "show_derivation_tree_without_context" ->
+    show_derivation_tree := true;
+    print_context_in_derivation_tree := false
   | _ -> ()
 (* ------------------------------------------------- *)
 (* Printing functions *)
@@ -54,11 +59,14 @@ let print_error lexbuf =
 
 let print_typing_derivation_tree history =
   if (!show_derivation_tree)
-  then DerivationTree.print_typing_derivation_tree history
+  then DerivationTree.print_typing_derivation_tree
+      history
 
 let print_subtyping_derivation_tree history =
   if (!show_derivation_tree)
-  then DerivationTree.print_subtyping_derivation_tree history
+  then DerivationTree.print_subtyping_derivation_tree
+      ~print_context:(!print_context_in_derivation_tree)
+      history
 
 (** [print_is_subtyppe s t raw_is_subtype is_subtype] *)
 let print_is_subtype s t raw_is_subtype is_subtype =
@@ -120,11 +128,12 @@ let check_typing lexbuf = ()
 let well_formed lexbuf = ()
 
 let read_term_file lexbuf =
-  let raw_term = Parser.top_level_term Lexer.prog lexbuf in
+  let raw_term, annotation = Parser.top_level_term Lexer.prog lexbuf in
+  parse_annotation annotation;
   match raw_term with
-  | Grammar.TopLevelLet(x, raw_term) ->
+  | Grammar.TopLevelLetTerm(x, raw_term) ->
     read_top_level_let x raw_term
-  | Grammar.TopLevelTerm(raw_term) ->
+  | Grammar.Term(raw_term) ->
     let nominal_term =
       Grammar.import_term
       (!kit_import_env)
@@ -183,11 +192,12 @@ let check_subtype_algorithms lexbuf =
     read_top_level_let var raw_term
 
 let typing lexbuf =
-  let raw_term = Parser.top_level_term Lexer.prog lexbuf in
+  let raw_term, annotation = Parser.top_level_term Lexer.prog lexbuf in
+  parse_annotation annotation;
   match raw_term with
-  | Grammar.TopLevelLet(x, raw_term) ->
+  | Grammar.TopLevelLetTerm(x, raw_term) ->
     read_top_level_let x raw_term
-  | Grammar.TopLevelTerm(raw_term) ->
+  | Grammar.Term(raw_term) ->
     let nominal_term =
       Grammar.import_term
       (!kit_import_env)
@@ -211,26 +221,15 @@ let rec execute action lexbuf =
   | Parser.Error ->
     print_error lexbuf;
     exit 1
-  | Error.Subtype(str, s, t) ->
-    print_endline str;
-    exit 1
-  | Error.AvoidanceProblem(str, atom, typ) as e ->
-    print_endline str;
-    exit 1
-  | ContextType.NotInEnvironment(key, context) ->
-    Printf.printf
-      "The key %s is not in context :\n%a\n"
-      (ANSITerminal.sprintf [ANSITerminal.blue] "%s" (AlphaLib.Atom.hint key))
-      ContextType.Pretty.print context;
-    exit 1
-  | Error.NotWellFormed(context, typ) ->
-    Printf.printf
-      "%s is not well formed.\n"
-      (Print.string_of_nominal_typ typ);
-    exit(1)
   | _ as e ->
+    let pos = lexbuf.Lexing.lex_curr_p in
+    Printf.printf
+      "In file %s %d:%d : "
+      (!file_name)
+      pos.Lexing.pos_lnum
+      (pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1);
     Error.print e;
-    execute action lexbuf
+    exit 1
 
 (* ------------------------------------------------- *)
 (* Arguments *)
@@ -268,6 +267,7 @@ let stdlib_files = [
   "stdlib/float.rml";
   "stdlib/char.rml";
   "stdlib/string.rml";
+  "stdlib/option.rml";
   "stdlib/list.rml";
   "stdlib/condition.rml";
   "stdlib/pervasives.rml"

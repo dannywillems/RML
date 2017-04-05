@@ -39,6 +39,7 @@ val create_typing_node :
   (typing_node t * Grammar.nominal_typ)
 
 val string_of_subtyping_derivation_tree :
+  ?print_context:bool ->
   int ->
   subtyping_node t ->
   string
@@ -49,6 +50,7 @@ val string_of_typing_derivation_tree :
   string
 
 val print_subtyping_derivation_tree :
+  ?print_context:bool ->
   subtyping_node t ->
   unit
 

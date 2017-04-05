@@ -65,13 +65,21 @@ let raise_type_mismatch term s t =
       )
     )
 
-let print e =
-  let string_of_e = match e with
-  | Subtype (str, _, _) -> str
-  | AvoidanceProblem (str, _, _) -> str
-  | e -> Printexc.to_string e
-  in
-  ANSITerminal.printf
-    [ANSITerminal.red]
-    "Error while evaluating: %s\n"
-    string_of_e
+let print e = match e with
+  | Subtype(str, s, t) ->
+    Printf.printf
+      "\x1b[32m%a\x1b[0m is not a subtype of \x1b[32m%a\x1b[0m"
+      (Print.Pretty.nominal_typ ()) s
+      (Print.Pretty.nominal_typ ()) t;
+  | AvoidanceProblem(str, atom, typ) ->
+    print_endline str;
+  | ContextType.NotInEnvironment(key, context) ->
+    Printf.printf
+      "The key %s is not in context :\n%a\n"
+      (ANSITerminal.sprintf [ANSITerminal.blue] "%s" (AlphaLib.Atom.hint key))
+      ContextType.Pretty.print context;
+  | NotWellFormed(context, typ) ->
+    Printf.printf
+      "%a is not well formed.\n"
+      (Print.Pretty.nominal_typ ()) typ;
+  | _ -> print_endline (Printexc.to_string e)

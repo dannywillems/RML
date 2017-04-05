@@ -35,21 +35,45 @@ let create_typing_node ~rule ~env ~term ~typ ~history =
   let typing_node = { rule; env; term; typ } in
   Node(typing_node, history), typ
 
-let rec string_of_subtyping_derivation_tree level (t : subtyping_node t) = match t with
+(* Please, improve this code, it's so ugly! *)
+let rec string_of_subtyping_derivation_tree
+    ?(print_context=true) level (t : subtyping_node t)
+  = match t with
   | Empty -> ""
   | Node (v, children) ->
-    Printf.sprintf
-      "%s%s (%s ⊦ %s <: %s)\n%s"
-      (" " ^* (level * 2))
-      (ANSITerminal.sprintf
-         (if v.is_true then [ANSITerminal.green] else [ANSITerminal.red])
-         "%s"
-         v.rule
+    let string_of_rule =
+      Printf.sprintf
+        "%s%s"
+        (" " ^* (level * 2))
+        (ANSITerminal.sprintf
+           (if v.is_true then [ANSITerminal.green] else [ANSITerminal.red])
+           "%s"
+           v.rule
+        )
+    in
+    let string_of_context =
+      if print_context
+      then (
+        ContextType.Style.string_of_context_with_assert
+          [ANSITerminal.magenta]
+          v.env
       )
-      (ContextType.Style.string_of_context [ANSITerminal.magenta] v.env)
-      (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.s))
-      (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.t))
-      (String.concat "\n" (List.map (string_of_subtyping_derivation_tree (level + 1)) children))
+      else ""
+    in
+    let subtype =
+      Printf.sprintf
+        "%s <: %s\n%s"
+        (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.s))
+        (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.t))
+        (String.concat
+           "\n"
+           (List.map
+              (string_of_subtyping_derivation_tree (level + 1))
+              children
+           )
+        )
+    in
+    string_of_rule ^ string_of_context ^ subtype
 
 let rec string_of_typing_derivation_tree level t = match t with
   | Empty -> ""
@@ -67,8 +91,13 @@ let rec string_of_typing_derivation_tree level t = match t with
       (Print.Style.string_of_raw_typ [ANSITerminal.blue] (Grammar.show_typ v.typ))
       (String.concat "\n" (List.map (string_of_typing_derivation_tree (level + 1)) children))
 
-let print_subtyping_derivation_tree tree =
-  print_string (string_of_subtyping_derivation_tree 0 tree)
+let print_subtyping_derivation_tree ?(print_context=true) tree =
+  print_string (
+    string_of_subtyping_derivation_tree
+      ~print_context
+      0
+      tree
+  )
 
 let print_typing_derivation_tree tree =
   print_string (string_of_typing_derivation_tree 0 tree)
