@@ -57,8 +57,9 @@ You can ask multiple annotations by using a comma.
 
 The list of available annotations are:
 - `show_derivation_tree` to show the derivation tree. (not activated by default)
-- `no_context` will desactivate the print of the environment (i.e. pre-defined
+- `no_context` will deactivate the print of the environment (i.e. pre-defined
   values and types) when printing the derivation tree.
+- `check_well_formed` checks at runtime if types are well formed.
 
 #### Examples
 
@@ -79,4 +80,3 @@ Print the derivation tree.
 ```OCaml
 let identity = fun (x : self.T) -> x [@show_derivation_tree] ;;
 ```
-

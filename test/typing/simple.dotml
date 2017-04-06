@@ -8,7 +8,7 @@ let int = sig
 end : struct
   type T = Nothing
   let identity = fun (x : self.T) -> x
-end [@show_derivation_tree, no_context] ;;
+end [@show_derivation_tree, no_context, check_well_formed] ;;
 
 let string = sig
   type T = Nothing

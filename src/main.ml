@@ -2,10 +2,13 @@
 (* References for arguments *)
 let file_name = ref ""
 let eval_opt = ref ""
-let show_derivation_tree = ref false
 let verbose = ref false
 let use_stdlib = ref false
+
+let show_derivation_tree = ref false
 let print_context_in_derivation_tree = ref true
+let check_well_formed_ref = ref false
+let pretty_print = ref false
 (* ------------------------------------------------- *)
 
 (* ------------------------------------------------- *)
@@ -27,15 +30,27 @@ let kit_import_env : AlphaLib.KitImport.env ref = ref AlphaLib.KitImport.empty
 let typing_env = ref (ContextType.empty ())
 (* ------------------------------------------------- *)
 
+let reset_default_config () =
+    show_derivation_tree := false;
+    print_context_in_derivation_tree := true;
+    check_well_formed_ref := false;
+    pretty_print := false
+
 let parse_annotation annotation = match annotation with
   | "show_derivation_tree" ->
     show_derivation_tree := true
   | "no_context" ->
     print_context_in_derivation_tree := false
+  | "check_well_formed" ->
+    check_well_formed_ref := true
+  | "pretty_print" ->
+    pretty_print := true
   | _ -> ()
 
 let parse_annotation_list l =
+  reset_default_config ();
   List.iter parse_annotation l
+(* ------------------------------------------------- *)
 
 (* ------------------------------------------------- *)
 (* Printing functions *)
@@ -114,7 +129,11 @@ let print_is_subtype_algorithms
     "With REFL"
 
 (* ------------------------------------------------- *)
-(* Functions for actions *)
+(* Utils *)
+let check_well_formed context typ =
+  if (!check_well_formed_ref)
+  then CheckUtils.check_well_formedness context typ
+
 let read_top_level_let x raw_term =
   (* Convert raw term/type to nominal term/type using the import environment. *)
   let nominal_term =
@@ -138,7 +157,10 @@ let read_top_level_let x raw_term =
   print_endline_if_verbose "-----------------------";
   kit_import_env := extended_kit_import_env;
   typing_env := ContextType.add atom_x nominal_typ (!typing_env)
+(* ------------------------------------------------- *)
 
+(* ------------------------------------------------- *)
+(* Functions for actions *)
 let check_typing lexbuf = ()
 
 let well_formed lexbuf = ()
@@ -173,8 +195,8 @@ let check_subtype ~with_refl lexbuf =
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
     let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
-    CheckUtils.check_well_formedness (!typing_env) nominal_s;
-    CheckUtils.check_well_formedness (!typing_env) nominal_t;
+    check_well_formed (!typing_env) nominal_s;
+    check_well_formed (!typing_env) nominal_t;
     let history, is_subtype =
       Subtype.subtype ~with_refl ~context:(!typing_env) nominal_s nominal_t
     in
@@ -191,8 +213,8 @@ let check_subtype_algorithms lexbuf =
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
     let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
-    CheckUtils.check_well_formedness (!typing_env) nominal_s;
-    CheckUtils.check_well_formedness (!typing_env) nominal_t;
+    check_well_formed (!typing_env) nominal_s;
+    check_well_formed (!typing_env) nominal_t;
     let history_with_refl, is_subtype_with_refl =
       Subtype.subtype ~with_refl:true ~context:(!typing_env) nominal_s nominal_t
     in
@@ -224,6 +246,7 @@ let typing lexbuf =
         ~context:(!typing_env)
         nominal_term
     in
+    check_well_formed (!typing_env) nominal_typ;
     print_typing_derivation_tree history;
     print_term_color nominal_term;
     print_type_color nominal_typ
@@ -257,10 +280,6 @@ let args_list = [
   ("-a",
    Arg.Symbol (Action.available, (fun s -> eval_opt := s)),
    "The action to do"
-  );
-  ("--show-derivation-tree",
-   Arg.Set show_derivation_tree,
-   "Show derivation tree"
   );
   ("--use-stdlib",
    Arg.Set use_stdlib,
