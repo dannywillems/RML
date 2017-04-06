@@ -68,28 +68,46 @@ let rec string_of_subtyping_derivation_tree
         (String.concat
            "\n"
            (List.map
-              (string_of_subtyping_derivation_tree (level + 1))
+              (string_of_subtyping_derivation_tree ~print_context (level + 1))
               children
            )
         )
     in
     string_of_rule ^ string_of_context ^ subtype
 
-let rec string_of_typing_derivation_tree level t = match t with
+let rec string_of_typing_derivation_tree ?(print_context=true) level t = match t with
   | Empty -> ""
   | Node(v, children) ->
     let string_of_term_or_decl = match v.term with
       | Declaration decl -> (Print.string_of_nominal_decl decl)
       | Term term -> (Print.string_of_nominal_term term)
     in
-    Printf.sprintf
-      "%s%s (%s ⊦ %s : %s)\n%s"
-      (" " ^* (level * 2))
-      v.rule
-      (ContextType.Style.string_of_context [ANSITerminal.magenta] v.env)
-      (ANSITerminal.sprintf [ANSITerminal.cyan] "%s" string_of_term_or_decl)
-      (Print.Style.string_of_raw_typ [ANSITerminal.blue] (Grammar.show_typ v.typ))
-      (String.concat "\n" (List.map (string_of_typing_derivation_tree (level + 1)) children))
+    let string_of_rule =
+      Printf.sprintf
+        "%s%s ("
+        (" " ^* (level * 2))
+        (Printf.sprintf
+           "%s"
+           v.rule
+        )
+    in
+    let string_of_context =
+      if print_context
+      then (
+        ContextType.Style.string_of_context_with_assert
+          [ANSITerminal.magenta]
+          v.env
+      )
+      else ""
+    in
+    let typing =
+      Printf.sprintf
+        "%s : %s)\n%s"
+        (ANSITerminal.sprintf [ANSITerminal.cyan] "%s" string_of_term_or_decl)
+        (Print.Style.string_of_raw_typ [ANSITerminal.blue] (Grammar.show_typ v.typ))
+        (String.concat "\n" (List.map (string_of_typing_derivation_tree ~print_context (level + 1)) children))
+    in
+    string_of_rule ^ string_of_context ^ typing
 
 let print_subtyping_derivation_tree ?(print_context=true) tree =
   print_string (
@@ -99,5 +117,5 @@ let print_subtyping_derivation_tree ?(print_context=true) tree =
       tree
   )
 
-let print_typing_derivation_tree tree =
-  print_string (string_of_typing_derivation_tree 0 tree)
+let print_typing_derivation_tree ?(print_context=true) tree =
+  print_string (string_of_typing_derivation_tree ~print_context 0 tree)

@@ -28,13 +28,15 @@ let typing_env = ref (ContextType.empty ())
 (* ------------------------------------------------- *)
 
 let parse_annotation annotation = match annotation with
-  | Some "show_derivation_tree" ->
-    show_derivation_tree := true;
-    print_context_in_derivation_tree := true
-  | Some "show_derivation_tree_without_context" ->
-    show_derivation_tree := true;
+  | "show_derivation_tree" ->
+    show_derivation_tree := true
+  | "no_context" ->
     print_context_in_derivation_tree := false
   | _ -> ()
+
+let parse_annotation_list l =
+  List.iter parse_annotation l
+
 (* ------------------------------------------------- *)
 (* Printing functions *)
 let print_info string =
@@ -45,10 +47,19 @@ let print_term_color t =
     "\x1b[32m%a\x1b[0m\n"
     (Print.Pretty.nominal_term ()) t
 
+let print_term_color_if_verbose t =
+  if (!verbose) then print_term_color t
+
 let print_type_color t =
   Printf.printf
     "\x1b[36m%a\x1b[0m\n"
     (Print.Pretty.nominal_typ ()) t
+
+let print_type_color_if_verbose t =
+  if (!verbose) then print_type_color t
+
+let print_endline_if_verbose s =
+  if (!verbose) then print_endline s
 
 let print_error lexbuf =
   let pos = lexbuf.Lexing.lex_curr_p in
@@ -59,14 +70,19 @@ let print_error lexbuf =
 
 let print_typing_derivation_tree history =
   if (!show_derivation_tree)
-  then DerivationTree.print_typing_derivation_tree
+  then (
+    DerivationTree.print_typing_derivation_tree
+      ~print_context:(!print_context_in_derivation_tree)
       history
+  )
 
 let print_subtyping_derivation_tree history =
   if (!show_derivation_tree)
-  then DerivationTree.print_subtyping_derivation_tree
+  then (
+    DerivationTree.print_subtyping_derivation_tree
       ~print_context:(!print_context_in_derivation_tree)
       history
+  )
 
 (** [print_is_subtyppe s t raw_is_subtype is_subtype] *)
 let print_is_subtype s t raw_is_subtype is_subtype =
@@ -116,10 +132,10 @@ let read_top_level_let x raw_term =
       (!kit_import_env)
       x
   in
-  print_term_color nominal_term;
-  print_type_color nominal_typ;
+  print_term_color_if_verbose nominal_term;
+  print_type_color_if_verbose nominal_typ;
   print_typing_derivation_tree history;
-  print_endline "-----------------------";
+  print_endline_if_verbose "-----------------------";
   kit_import_env := extended_kit_import_env;
   typing_env := ContextType.add atom_x nominal_typ (!typing_env)
 
@@ -129,7 +145,7 @@ let well_formed lexbuf = ()
 
 let read_term_file lexbuf =
   let raw_term, annotation = Parser.top_level_term Lexer.prog lexbuf in
-  parse_annotation annotation;
+  parse_annotation_list annotation;
   match raw_term with
   | Grammar.TopLevelLetTerm(x, raw_term) ->
     read_top_level_let x raw_term
@@ -152,7 +168,7 @@ let eval lexbuf = ()
 *)
 let check_subtype ~with_refl lexbuf =
   let (raw_is_subtype, raw_couple, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
-  parse_annotation annotation;
+  parse_annotation_list annotation;
   match raw_couple with
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
@@ -170,7 +186,7 @@ let check_subtype ~with_refl lexbuf =
 
 let check_subtype_algorithms lexbuf =
   let (raw_is_subtype, raw_couples, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
-  parse_annotation annotation;
+  parse_annotation_list annotation;
   match raw_couples with
   | Grammar.CoupleTypes(raw_s, raw_t) ->
     let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
@@ -193,7 +209,7 @@ let check_subtype_algorithms lexbuf =
 
 let typing lexbuf =
   let raw_term, annotation = Parser.top_level_term Lexer.prog lexbuf in
-  parse_annotation annotation;
+  parse_annotation_list annotation;
   match raw_term with
   | Grammar.TopLevelLetTerm(x, raw_term) ->
     read_top_level_let x raw_term
