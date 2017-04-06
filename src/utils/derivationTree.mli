@@ -45,6 +45,7 @@ val string_of_subtyping_derivation_tree :
   string
 
 val string_of_typing_derivation_tree :
+  ?print_context:bool ->
   int ->
   typing_node t ->
   string
@@ -55,5 +56,6 @@ val print_subtyping_derivation_tree :
   unit
 
 val print_typing_derivation_tree :
+  ?print_context:bool ->
   typing_node t ->
   unit

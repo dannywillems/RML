@@ -7,6 +7,8 @@ RML mixes ML Records and ML modules in a single type called recursive records
 with dependent types. RML is simple lambda-calculus with subtyping and
 parametric polymorphism, recursive type, record and dependent type.
 
+Everything is written in OCaml.
+
 ## Examples
 
 ```
@@ -43,3 +45,38 @@ For example, you can try the subtyping algorithm on the file `test/subtype_simpl
 ```
 
 A verbose mode is available for some action to see the derivation tree. Use `--show-derivation-tree` to activate this mode.
+
+
+## Annotations
+
+Like in OCaml with PPX, you can add some annotations to activate or desactivate some options.
+For example, you can add `[@show_derivation_tree]` to the end of an expression
+(before `;;`) to ask to show the typing or sub-typing derivation tree (i.e. to
+see how the algorithms infer the type or decide if the types are sub-type).
+You can ask multiple annotations by using a comma.
+
+The list of available annotations are:
+- `show_derivation_tree` to show the derivation tree. (not activated by default)
+- `no_context` will desactivate the print of the environment (i.e. pre-defined
+  values and types) when printing the derivation tree.
+
+#### Examples
+
+Print the derivation tree without the context.
+```OCaml
+let y = sig
+  type T = Nothing
+  val x : Nothing
+  val f : self.T -> self.T
+end : struct
+  type T = Nothing
+  let x = Unimplemented
+  let f = fun (x : self.T) -> x
+end [@show_derivation_tree, no_context];;
+```
+
+Print the derivation tree.
+```OCaml
+let identity = fun (x : self.T) -> x [@show_derivation_tree] ;;
+```
+

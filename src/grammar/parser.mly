@@ -56,8 +56,8 @@
 (* Use for tests *)
 %token NOT_SUBTYPE
 
-%start <Grammar.raw_top_level_term * Grammar.ppx_annotation option> top_level_term
-%start <bool * Grammar.raw_top_level_subtype * Grammar.ppx_annotation option> top_level_subtype
+%start <Grammar.raw_top_level_term * Grammar.ppx_annotation list> top_level_term
+%start <bool * Grammar.raw_top_level_subtype * Grammar.ppx_annotation list> top_level_subtype
 %%
 
 (* ------------------------------------------ *)
@@ -67,11 +67,11 @@
 top_level_term:
 | t = top_level_term_content ;
   SEMICOLON ;
-  SEMICOLON { (t, None) }
+  SEMICOLON { (t, []) }
 | t = top_level_term_content ;
   annotation = rule_annotation ;
   SEMICOLON ;
-  SEMICOLON { (t, Some annotation) }
+  SEMICOLON { (t, annotation) }
 | EOF { raise End_of_file }
 
 top_level_term_content:
@@ -87,13 +87,13 @@ top_level_subtype:
   SEMICOLON ;
   SEMICOLON {
       let b, term = content in
-      (b, term, None)
+      (b, term, [])
     }
 | content = top_level_subtype_content ;
   annotation = rule_annotation ;
   SEMICOLON ;
   SEMICOLON {
-      let b, term = content in (b, term, Some(annotation))
+      let b, term = content in (b, term, annotation)
     }
 | EOF { raise End_of_file }
 
@@ -414,10 +414,18 @@ rule_type_declaration:
 rule_annotation:
 | LEFT_SQUARE_BRACKET ;
   AT ;
-  content = rule_annotation_content ;
+  content = rule_annotation_list ;
   RIGHT_SQUARE_BRACKET {
       content
     }
+
+rule_annotation_list:
+| c = rule_annotation_content { [c] }
+| c1 = rule_annotation_content ;
+  COMMA ;
+  c2 = rule_annotation_list {
+           c1 :: c2
+         }
 
 rule_annotation_content:
 | content = ID { content }
