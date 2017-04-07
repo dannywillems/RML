@@ -206,14 +206,14 @@ let rec type_of_internal history context term = match term with
         ~history:[])
   (* REC-I with REC-E (both to avoid to recompute the type of x)
      REC-I
-     Γ ⊦ x : T
+     Γ ⊦ x : T^{x}
      =>
-     Γ ⊦ x : μ(x : T)
+     Γ ⊦ x : μ(z : T^{z})
 
      REC-E
-     Γ ⊦ x : μ(z : T)
+     Γ ⊦ x : μ(z : T^{z})
      =>
-     Γ ⊦ z : T
+     Γ ⊦ x : T^{x}
 
      TODO add SUB.
   | Grammar.TermVariable(x) ->
@@ -229,7 +229,7 @@ let rec type_of_internal history context term = match term with
        type_of_x, "REC-E"
      | _ ->
        Grammar.TypeRecursive(x, type_of_x), "REC-I"
-    )
+     )
     in
     DerivationTree.create_typing_node
       ~rule
