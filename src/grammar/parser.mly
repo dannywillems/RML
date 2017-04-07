@@ -164,6 +164,7 @@ rule_term:
           }
 (* Unimplemented *)
 | UNIMPLEMENTED_TERM { Grammar.TermUnimplemented }
+| sugar = rule_sugar_terms { sugar }
 
 (* ----- Beginning of DOT terms ----- *)
 (* x.a *)
@@ -256,12 +257,17 @@ rule_abstraction:
 
 (* A rule to parse the list of arguments of a function. Curryfication is used; *)
 rule_arguments_list:
+| c = rule_arguments_content {
+          [c]
+        }
+| head = rule_arguments_content
+  COMMA ;
+  tail = rule_arguments_list { head :: tail }
+
+rule_arguments_content:
 | x = ID ;
   COLON ;
-  t = rule_type { [(x, t)] }
-| head = rule_arguments_list ;
-  COMMA ;
-  tail = rule_arguments_list { List.concat [head ; tail] }
+  t = rule_type { x, t }
 
 (* Term declaration in a structure *)
 rule_decl:
@@ -294,6 +300,19 @@ rule_decl:
            Grammar.TermAggregateDeclaration(d1, d2)
          }
 
+(* Rule for sugar terms like if .. then .. else .. or unit ( () ) *)
+(* How can we exactly define pre defined terms ?
+  This solution doesn't work very well because if the variable unit is
+  redefined, it will use this definition, and not from the standard library.
+*)
+rule_sugar_terms:
+| LEFT_PARENT ;
+  RIGHT_PARENT {
+      Grammar.TermAscription(
+          Grammar.TermUnimplemented,
+          Grammar.TypeProjection("unit", "T")
+        )
+    }
 (* ------------------------------- *)
 (* Types *)
 rule_type:
