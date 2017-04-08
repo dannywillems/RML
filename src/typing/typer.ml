@@ -1,3 +1,6 @@
+let var_unpack context x t = match t with
+  | Grammar.TypeRecursive(z, type_of_z) ->
+    Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) type_of_z
 (* The main typing algorithm.
    When a type if given if the term, we check if this type is well formed.
 *)
@@ -188,7 +191,6 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ x.a : T
   *)
   | Grammar.TermFieldSelection(x, a) ->
-    (* TODO Check that x is a recursive record and contains the field a *)
     let type_of_x =
       ContextType.find x context
     in
@@ -216,6 +218,7 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ x : T^{x}
 
      TODO add SUB.
+  *)
   | Grammar.TermVariable(x) ->
     let type_of_x =
       ContextType.find x context
@@ -226,9 +229,18 @@ let rec type_of_internal history context term = match term with
        (* TODO: type_of_z must be the same than type_of_x. Or, with SUB, a
           subtype
        *)
+       let type_of_x =
+         Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) type_of_z
+       in
        type_of_x, "REC-E"
      | _ ->
-       Grammar.TypeRecursive(x, type_of_x), "REC-I"
+       let fresh_z =
+         AlphaLib.Atom.fresh "self"
+       in
+       let type_of_x =
+         Grammar.rename_typ (AlphaLib.Atom.Map.singleton x fresh_z) type_of_x
+       in
+       Grammar.TypeRecursive(fresh_z, type_of_x), "REC-I"
      )
     in
     DerivationTree.create_typing_node
@@ -237,7 +249,6 @@ let rec type_of_internal history context term = match term with
       ~term:(DerivationTree.Term(term))
       ~typ
       ~history
-  *)
 
 and type_of_decl_internal z history context decl = match decl with
   (* TYP-I

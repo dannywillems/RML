@@ -66,3 +66,7 @@ val is_type_intersection :
 
 val is_term_intersection :
   Grammar.nominal_decl -> bool
+
+val remove_top_from_intersection :
+  Grammar.nominal_typ ->
+  Grammar.nominal_typ
