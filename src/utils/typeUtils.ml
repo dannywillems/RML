@@ -207,3 +207,37 @@ let is_type_intersection = function
 let is_term_intersection = function
   | Grammar.TermAggregateDeclaration(_) -> true
   | _ -> false
+
+let remove_top_from_intersection = function
+  | Grammar.TypeIntersection(Grammar.TypeTop, t) -> t
+  | Grammar.TypeIntersection(t, Grammar.TypeTop) -> t
+  | t -> t
+
+(** Simplify the type. *)
+let rec simplify_type t = match t with
+  | Grammar.TypeIntersection(Grammar.TypeBottom, t) ->
+    Grammar.TypeBottom
+  (* Top can be removed. *)
+  | Grammar.TypeIntersection(Grammar.TypeTop, t) ->
+    simplify_type t
+  | Grammar.TypeIntersection(t, Grammar.TypeTop) ->
+    simplify_type t
+  | Grammar.TypeIntersection(Grammar.TypeRecursive(x, type_of_x), Grammar.TypeRecursive(z, type_of_z)) ->
+    let fresh_z = AlphaLib.Atom.fresh "self" in
+    let type_of_x = simplify_type type_of_x in
+    let type_of_z = simplify_type type_of_z in
+    let type_of_x =
+      Grammar.rename_typ
+        (AlphaLib.Atom.Map.singleton x fresh_z)
+        type_of_x
+    in
+    let type_of_z =
+      Grammar.rename_typ
+        (AlphaLib.Atom.Map.singleton z fresh_z)
+        type_of_z
+    in
+    Grammar.TypeIntersection(type_of_x, type_of_z)
+  (* We have two incompatible types like function and recursive records..*)
+  | Grammar.TypeIntersection(_, _) -> Grammar.TypeBottom
+  (* It's not an intersection, we only return the given type. *)
+  | t -> t

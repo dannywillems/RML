@@ -11,6 +11,24 @@ let string_of_rule_sel = function
   | SEL_SUB -> "SEL <:"
   | SUB_SEL -> "<: SEL"
 
+let rec var_unpack context x t =
+  match t with
+  | Grammar.TypeRecursive(z, t_z) ->
+    Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) t_z
+  | Grammar.TypeIntersection(Grammar.TypeTop, t) ->
+    print_endline "hello";
+    var_unpack context x t
+  | Grammar.TypeIntersection(t, Grammar.TypeTop) ->
+    var_unpack context x t
+  | Grammar.TypeProjection(x, field) ->
+    let type_of_x = ContextType.find x context in
+    (* Printf.printf "%a\n" (Print.Pretty.nominal_typ ()) type_of_x; *)
+    var_unpack context x type_of_x
+  | t ->
+    Printf.printf "%s : %s\n" (AlphaLib.Atom.show x) (Print.string_of_nominal_typ t);
+    print_endline "--------------";
+    t
+
 (* As selection rules are very close, we abstract it with this function.
 
    [rule_sel SEL_SUB history context (x, label) t] will apply the rule SEL <:
@@ -20,7 +38,9 @@ let string_of_rule_sel = function
    for t <: x.label.
 *)
 let rec rule_sel rule history context (x, label) t =
-  let type_of_x = ContextType.find x context in
+  let type_of_x =
+    var_unpack context x (ContextType.find x context)
+  in
   let l, u =
     match rule with
     | SEL_SUB -> Grammar.TypeProjection(x, label), t
@@ -41,18 +61,18 @@ let rec rule_sel rule history context (x, label) t =
   in
   match s with
   | Some s ->
-      let derivation_tree_subtype, is_subtype =
-        match rule with
-        | SEL_SUB -> subtype_internal history context s t
-        | SUB_SEL -> subtype_internal history context t s
-      in
-      DerivationTree.create_subtyping_node
-        ~rule:(string_of_rule_sel rule)
-        ~is_true:is_subtype
-        ~env:context
-        ~s:l
-        ~t:u
-        ~history:[derivation_tree_subtype]
+    let derivation_tree_subtype, is_subtype =
+      match rule with
+      | SEL_SUB -> subtype_internal history context s t
+      | SUB_SEL -> subtype_internal history context t s
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:(string_of_rule_sel rule)
+      ~is_true:is_subtype
+      ~env:context
+      ~s:l
+      ~t:u
+      ~history:[derivation_tree_subtype]
   | None ->
     DerivationTree.create_subtyping_node
       ~rule:(string_of_rule_sel rule)
@@ -288,6 +308,7 @@ and subtype_internal history context s t =
     (* We need to extend the context with the type of z because t' can use
        fields and types defined in z.
        TODO fresh z + rename
+       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
     *)
     let context' = ContextType.add z t' context in
     let history_subtype, is_subtype =
@@ -305,6 +326,7 @@ and subtype_internal history context s t =
     (* We need to extend the context with the type of z because t' can use
        fields and types defined in z.
        TODO fresh z + rename
+       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
     *)
     let context' = ContextType.add z t' context in
     let history_subtype, is_subtype =
