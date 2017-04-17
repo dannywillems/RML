@@ -322,9 +322,10 @@ module Pretty = struct
           forall ^^
           lparen ^^
           (string (show_atom x)) ^^
-          string ":" ^^
+          string " : " ^^
           (document_of_nominal_typ typ1) ^^
-          rparen
+          rparen ^^
+          string " "
         )
       in
       argument_document ^^ document_of_nominal_typ typ2
