@@ -1,6 +1,3 @@
-let var_unpack context x t = match t with
-  | Grammar.TypeRecursive(z, type_of_z) ->
-    Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) type_of_z
 (* The main typing algorithm.
    When a type if given if the term, we check if this type is well formed.
 *)
@@ -59,6 +56,7 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ y : S
      =>
      Γ ⊦ xy : [y := z]T
+     TODO : Add SUB.
   *)
   | Grammar.TermVarApplication(x, y) ->
     (* We can simply use [ContextType.find x context], but it's to get the
@@ -195,7 +193,7 @@ let rec type_of_internal history context term = match term with
       ContextType.find x context
     in
     let t =
-      TypeUtils.least_upper_bound_of_recursive_type ~label:a context type_of_x
+      TypeUtils.least_upper_bound_of_recursive_type ~x ~label:a context type_of_x
     in
     (match t with
     | None -> raise (Error.NotARecordOrUnboundField (Grammar.TermVariable x, a))
@@ -206,45 +204,13 @@ let rec type_of_internal history context term = match term with
         ~term:(DerivationTree.Term(term))
         ~typ:t
         ~history:[])
-  (* REC-I with REC-E (both to avoid to recompute the type of x)
-     REC-I
-     Γ ⊦ x : T^{x}
-     =>
-     Γ ⊦ x : μ(z : T^{z})
-
-     REC-E
-     Γ ⊦ x : μ(z : T^{z})
-     =>
-     Γ ⊦ x : T^{x}
-
-     TODO add SUB.
+  (* Integers can only be defined with ascription which gives the right type
+     (int.T). We only need to have a subtype of int.T, and Bottom does the job.
   *)
-  | Grammar.TermVariable(x) ->
-    let type_of_x =
-      ContextType.find x context
-    in
-    let (typ, rule) =
-     (match type_of_x with
-     | Grammar.TypeRecursive(z, type_of_z) ->
-       (* TODO: type_of_z must be the same than type_of_x. Or, with SUB, a
-          subtype
-       *)
-       let type_of_x =
-         Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) type_of_z
-       in
-       type_of_x, "REC-E"
-     | _ ->
-       let fresh_z =
-         AlphaLib.Atom.fresh "self"
-       in
-       let type_of_x =
-         Grammar.rename_typ (AlphaLib.Atom.Map.singleton x fresh_z) type_of_x
-       in
-       Grammar.TypeRecursive(fresh_z, type_of_x), "REC-I"
-     )
-    in
+  | Grammar.TermInteger(n) ->
+    let typ = Grammar.TypeBottom in
     DerivationTree.create_typing_node
-      ~rule
+      ~rule:"UN-INTEGER"
       ~env:context
       ~term:(DerivationTree.Term(term))
       ~typ

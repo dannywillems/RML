@@ -10,6 +10,7 @@
     The parameter [~label] is to check the type label.
 *)
 val least_upper_bound_of_recursive_type :
+  x:AlphaLib.Atom.atom ->
   label:Grammar.type_label ->
   ContextType.context ->
   Grammar.nominal_typ ->
@@ -25,6 +26,7 @@ val least_upper_bound_of_recursive_type :
     The parameter [~label] is to check the type label.
 *)
 val greatest_lower_bound_of_recursive_type :
+  x:AlphaLib.Atom.atom ->
   label:Grammar.type_label ->
   ContextType.context ->
   Grammar.nominal_typ ->

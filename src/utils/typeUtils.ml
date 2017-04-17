@@ -4,7 +4,16 @@ type direction =
   | Upper
   | Lower
 
-let rec best_bound_of_recursive_type ~direction ~label context t = match t with
+let var_unpack x z t =
+  (*
+   REC-I
+   Γ ⊦ x : μ(z : T^{z})
+   =>
+   Γ ⊦ x : T^{x}
+  *)
+  Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) t
+
+let rec best_bound_of_recursive_type ~direction ~x ~label context t = match t with
   (* Bottom type : ⟂ *)
   (* The least upper bound is the type declaration { A : Bottom .. Bottom }.
   And there is no greatest lower bound in the form { A : L .. U } *)
@@ -23,18 +32,17 @@ let rec best_bound_of_recursive_type ~direction ~label context t = match t with
   (* No comparable *)
   | Grammar.TypeDependentFunction(_) ->
     None
-  (* { L : S..T } --> (L, S, T) *)
-  (* The type of the given variable is a module. *)
+  (* { L : S..T } --> S (resp. T) if direction is upper (resp. lower) *)
+  (* The type of the given variable is a type declaration. *)
   | Grammar.TypeDeclaration(l, s, t) ->
     if String.equal l label then
       match direction with
       | Lower -> Some s
       | Upper -> Some t
     else None
-  (* x.L *)
-  (* Else, it's a path selection type. *)
-  | Grammar.TypeProjection(x, label_selected) ->
-    let type_of_x = ContextType.find x context in
+  (* x.L, a path selection. We must call recursively. *)
+  | Grammar.TypeProjection(y, label_y) ->
+    let type_of_y = ContextType.find y context in
     (* Recursive call to the algorithm. It is supposed to return the greatest
        lower bound (resp. the least upper bound) of x wrt the label given by
        [label_selected].
@@ -43,31 +51,48 @@ let rec best_bound_of_recursive_type ~direction ~label context t = match t with
     let u' =
       best_bound_of_recursive_type
         ~direction
-        ~label:label_selected
+        ~x:y
+        ~label:label_y
         context
-        type_of_x
+        type_of_y
     in
     (match u' with
-    | Some u' -> best_bound_of_recursive_type ~direction ~label context u'
+    | Some u' -> best_bound_of_recursive_type ~direction ~x ~label context u'
     | None -> None
     )
   (* ----- Beginning of DOT types ----- *)
   (* { z => T^{z} } *)
   | Grammar.TypeRecursive(z, t) ->
-    best_bound_of_recursive_type ~direction ~label context t
+    (* First, we unpack the type of x *)
+    let type_of_x = var_unpack x z t in
+    (* And we do a recursive call to the algorithm. *)
+    best_bound_of_recursive_type ~direction ~x ~label context type_of_x
+    (*
+    let t =
+      best_bound_of_recursive_type ~direction ~x:z ~label context t
+    in
+    (match t with
+     | None -> None
+     | Some t -> Some (Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) t)
+    )
+    *)
+
   (* T ∧ T *)
   | Grammar.TypeIntersection(t1, t2) ->
     let best_bound_for_t1 =
-      best_bound_of_recursive_type ~direction ~label context t1
+      best_bound_of_recursive_type ~direction ~x ~label context t1
     in
     let best_bound_for_t2 =
-      best_bound_of_recursive_type ~direction ~label context t2
+      best_bound_of_recursive_type ~direction ~x ~label context t2
     in
     (match (best_bound_for_t1, best_bound_for_t2) with
     | (None, None) -> None
     | (Some t, None) | (None, Some t) -> Some t
     (* If a same field is defined two times, we take the last definition, i.e.
-       in the type in the right *)
+       in the type in the right.
+       Normally, this case can not be produced because in the typing algorithm,
+       we need to have different domains when doing an intersection.
+    *)
     | (Some _, Some t) -> Some t)
   (* { a : T } *)
   | Grammar.TypeFieldDeclaration(a, t) ->
@@ -75,11 +100,11 @@ let rec best_bound_of_recursive_type ~direction ~label context t = match t with
     then Some t
     else None
 
-let least_upper_bound_of_recursive_type ~label context t =
-  best_bound_of_recursive_type ~direction:Upper ~label context t
+let least_upper_bound_of_recursive_type ~x ~label context t =
+  best_bound_of_recursive_type ~direction:Upper ~x ~label context t
 
-let greatest_lower_bound_of_recursive_type ~label context t =
-  best_bound_of_recursive_type ~direction:Lower ~label context t
+let greatest_lower_bound_of_recursive_type ~x ~label context t =
+  best_bound_of_recursive_type ~direction:Lower ~x ~label context t
 
 let rec least_upper_bound_of_dependent_function context t = match t with
   | Grammar.TypeDependentFunction(s, (x, t)) ->
@@ -97,7 +122,7 @@ let rec least_upper_bound_of_dependent_function context t = match t with
       ContextType.find x context
     in
     let least_upper_bound =
-      least_upper_bound_of_recursive_type ~label context type_of_x
+      least_upper_bound_of_recursive_type ~x ~label context type_of_x
     in
     (match least_upper_bound with
     | None -> None
@@ -121,7 +146,7 @@ let rec labels_of_recursive_type context recursive_type =
   | Grammar.TypeProjection(x, l) ->
     let type_of_x = ContextType.find x context in
     let u =
-      least_upper_bound_of_recursive_type ~label:l context type_of_x
+      least_upper_bound_of_recursive_type ~x ~label:l context type_of_x
     in
     (match u with
     | None -> SetFieldDeclaration.empty
