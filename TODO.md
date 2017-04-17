@@ -1,7 +1,7 @@
 ## Basic types and functions:
 
-- [ ] Integer.
-- [ ] Boolean.
+- [x] Integer.
+- [x] Boolean.
 - [ ] test (`if .. then .. else ..`)
 
 ## Grammar.
@@ -14,7 +14,7 @@
 - [x] Add `(term : Type)` with the typing rule: `Γ ⊦ t : T => Γ ⊦ (t : T) : T`
 - [x] Add `let x = t`.
 
-- [ ] Reorganize the grammar because it's very ugly! `let x : T = t` is
+- [x] Reorganize the grammar because it's very ugly! `let x : T = t` is
   equivalent to `let x = (t : T)`.
 
 ## Subtyping.
@@ -22,12 +22,12 @@
 - [ ] Check all results.
 - [x] Automatic verification for tests.
 - [x] Add an history to get the derivation tree.
-- [ ] Use `SUB` in select rules.
+- [x] Use `SUB` in select rules.
 - [x] Add an action to check if each algorithm outputs the same result.
   representation of a variable when an error occurs and is raised.
 - [x] Trick when `SEL <:` and `<: SEL` can be both used.
 - [x] Add `let x = t`.
-- [ ] check well formedness.
+- [x] check well formedness.
 
 #### Not important.
 
@@ -112,5 +112,6 @@ It implies to remember the variable binding in the module.
   It can be files. If `File` is a file, then we can add a directory to search it
   with the argument `-I`.
 - [ ] `open M` = for all labels `l` in `M`, add `M.l` in the environment with the name `l`
-- [ ] `t => struct .. end` --> `struct(t) .. end`
+- [x] `t => struct .. end` --> `struct(t) .. end`
 - [x] function with multiple arguments.
+- [ ] infix operators.
