@@ -315,7 +315,8 @@ let stdlib_files = [
   "stdlib/option.rml";
   "stdlib/list.rml";
   "stdlib/condition.rml";
-  "stdlib/pervasives.rml"
+  "stdlib/pervasives.rml";
+  "stdlib/point.rml";
 ]
 
 let rec add_in_environment files = match files with
