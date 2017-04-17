@@ -50,6 +50,8 @@ let rec string_of_raw_term t = match t with
       "%s.%s"
       x
       a
+  | Grammar.TermInteger(n) ->
+    string_of_int n
 
 (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
 and string_of_raw_decl t = match t with
@@ -246,7 +248,10 @@ module Pretty = struct
     (* x.a *)
     | Grammar.TermFieldSelection (x, a) ->
       (string (show_atom x)) ^^
+      string "." ^^
       string a
+    | Grammar.TermInteger(n) ->
+      string (string_of_int n)
 
   (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
   and document_of_nominal_term_declaration ?(remove_identity_of_atom=true) t =
