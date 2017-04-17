@@ -82,4 +82,8 @@ let print e = match e with
     Printf.printf
       "%a is not well formed.\n"
       (Print.Pretty.nominal_typ ()) typ;
+  | NotADependentFunction(typ) ->
+    Printf.printf
+      "%a is not a dependent function.\n"
+      (Print.Pretty.nominal_typ ()) typ
   | _ -> print_endline (Printexc.to_string e)
