@@ -12,7 +12,7 @@
   let rec sugar_list l = match l with
     | [] -> Grammar.TermAscription(
                 Grammar.TermUnimplemented,
-                Grammar.TypeProjection("list", "empty")
+                GrammarTypeProjection("list", "empty")
               )
     | head :: tail ->
        Grammar.Grammar.TermFieldSelection("list", "cons")
@@ -22,19 +22,19 @@
   let make_integer n =
     Grammar.TermAscription(
         Grammar.TermInteger(n),
-        Grammar.TypeProjection("int", "t")
+        Grammar.TypeProjection("Int", "t")
       )
 
   let make_string s =
     Grammar.TermAscription(
         Grammar.TermInteger(s),
-        Grammar.TypeProjection("string", "t")
+        Grammar.TypeProjection("String", "t")
       )
 
   let make_unit () =
     Grammar.TermAscription(
         Grammar.TermUnimplemented,
-        Grammar.TypeProjection("unit", "t")
+        Grammar.TypeProjection("Unit", "t")
       )
 %}
 
@@ -114,7 +114,7 @@ top_level_term:
 
 top_level_term_content:
 | t = rule_term { Grammar.Term(t) }
-| content = top_level_let {
+| content = rule_let_binding {
                 let x, t = content in
                 Grammar.TopLevelLetTerm(x, t)
               }
@@ -140,7 +140,7 @@ top_level_subtype:
    of T and the second is the opposite.
  *)
 top_level_subtype_content:
-| content = top_level_let {
+| content = rule_let_binding {
                   let x, t = content in
                   (false, Grammar.TopLevelLetSubtype(x, t))
                 }
@@ -155,21 +155,42 @@ top_level_subtype_content:
           (false, Grammar.CoupleTypes(s, t))
         }
 
-(* A top level let declaration. It can be in the form let x = t
+(* ------------------------------------------ *)
+
+(* A let binding. It can be in the form let x = t
    or let x : T = t
+   Let binding to modules can be declared with a uppercase letter (but it's not
+   mandatory).
 *)
-top_level_let:
+rule_let_binding:
+(* let x = t *)
 | LET ;
   x = ID ;
   EQUAL ;
   t = rule_term { x, t }
+(* let x : T = t *)
 | LET ;
   x = ID ;
   COLON ;
   typ = rule_type ;
   EQUAL ;
   term = rule_term { x, Grammar.TermAscription(term, typ) }
-(* ------------------------------------------ *)
+(* let M = t *)
+| LET ;
+  x = ID_CAPITALIZE ;
+  EQUAL ;
+  m = rule_module {
+          x, m
+        }
+(* let M : T = t *)
+| LET ;
+  x = ID_CAPITALIZE ;
+  COLON ;
+  typ = rule_type ;
+  EQUAL ;
+  m = rule_module {
+          x, Grammar.TermAscription(m, typ)
+        }
 
 (* Rules for terms *)
 rule_term:
@@ -186,8 +207,15 @@ rule_term_without_parent:
   a = ID {
           Grammar.TermFieldSelection(x, a)
         }
+(* Field selection: M.a *)
+| x = ID_CAPITALIZE ;
+  DOT ;
+  a = ID {
+          Grammar.TermFieldSelection(x, a)
+        }
 (* Sugar which doesn't need parenthesis. *)
 | t = rule_sugar_term_without_parent { t }
+| t = rule_record { t }
 (* Nested parenthesis *)
 | LEFT_PARENT ;
   t = rule_term_without_parent ;
@@ -199,15 +227,8 @@ rule_term_without_parent:
 rule_term_with_parent:
 (* Applications *)
 | app = rule_application { app }
-(* let x = t in u --> (t, (x, u))*)
-| LET ;
-  x = ID ;
-  EQUAL ;
-  t = rule_term ;
-  IN ;
-  u = rule_term {
-          Grammar.TermLet(t,(x, u))
-        }
+(* Let binding for module or simple terms *)
+| let_binding = rule_term_let_binding { let_binding }
 (* Values *)
 | v = rule_value { v }
 (* ----- Unofficial terms ----- *)
@@ -218,13 +239,18 @@ rule_term_with_parent:
             Grammar.TermAscription(term, typ)
           }
 
+rule_term_let_binding:
+(* let x = t in u --> (t, (x, u))*)
+| let_binding = rule_let_binding ;
+  IN ;
+  u = rule_term {
+          let x, t = let_binding in
+          Grammar.TermLet(t,(x, u))
+        }
+
 rule_application:
 (* x y *)
 | x = ID ; y = ID {
-                   (*
-                   let x = Grammar.TermVariable(x) in
-                   let y = Grammar.TermVariable(y) in
-                   *)
                    Grammar.TermVarApplication (x, y)
                  }
 
@@ -246,6 +272,27 @@ rule_application:
 (* f x y z z' ... *)
 (* TODO *)
 
+rule_record:
+| LEFT_BRACKET ;
+  d = rule_record_content ;
+  RIGHT_BRACKET {
+      Grammar.TermRecursiveRecordUntyped("'self", d)
+    }
+
+(* Content of a record *)
+rule_record_content:
+(* field = term, like in ML *)
+| field = ID ;
+  EQUAL ;
+  t = rule_term {
+          Grammar.TermFieldDeclaration(field, t)
+        }
+(* Fields in a record separated by a semicolon *)
+| d1 = rule_record_content ;
+  SEMICOLON ;
+  d2 = rule_record_content {
+           Grammar.TermAggregateDeclaration(d1, d2)
+         }
 
 rule_module:
 (* { x : T => d } *)
@@ -256,16 +303,6 @@ rule_module:
   DOUBLE_RIGHT_ARROW ;
   d = rule_decl ;
   RIGHT_BRACKET {
-      Grammar.TermRecursiveRecord(t, (x, d))
-    }
-(* x : T => struct type A = ... ; let a = ... end *)
-| x = ID ;
-  COLON ;
-  t = rule_type ;
-  DOUBLE_RIGHT_ARROW ;
-  STRUCT ;
-  d = rule_decl ;
-  END {
       Grammar.TermRecursiveRecord(t, (x, d))
     }
 
@@ -296,14 +333,6 @@ rule_module:
   d = rule_decl ;
   END {
       Grammar.TermRecursiveRecordUntyped("self", d)
-    }
-(* { x => d } *)
-| LEFT_BRACKET ;
-  x = ID ;
-  DOUBLE_RIGHT_ARROW ;
-  d = rule_decl ;
-  RIGHT_BRACKET {
-      Grammar.TermRecursiveRecordUntyped(x, d)
     }
 
 (* Rules for values *)
@@ -347,6 +376,15 @@ rule_arguments_content:
 
 (* Term declaration in a structure *)
 rule_decl:
+| t = rule_decl_field { t }
+| t = rule_decl_type { t }
+(* d ∧ d' *)
+| d1 = rule_decl ;
+  d2 = rule_decl {
+           Grammar.TermAggregateDeclaration(d1, d2)
+         }
+
+rule_decl_type:
 (* type t = T *)
 | TYPE ;
   type_label = ID ;
@@ -354,27 +392,13 @@ rule_decl:
   typ = rule_type {
             Grammar.TermTypeDeclaration(type_label, typ)
           }
+
+rule_decl_field:
 (* let a = t *)
-| LET ;
-  field_label = ID ;
-  EQUAL ;
-  t = rule_term {
-          Grammar.TermFieldDeclaration(field_label, t)
+| let_binding = rule_let_binding {
+          let (x, t) = let_binding in
+          Grammar.TermFieldDeclaration(x, t)
         }
-(* let a : T = t *)
-| LET ;
-  field_label = ID ;
-  COLON ;
-  typ = rule_type ;
-  EQUAL ;
-  t = rule_term {
-          Grammar.TermFieldDeclaration(field_label, Grammar.TermAscription(t, typ))
-        }
-(* d ∧ d' *)
-| d1 = rule_decl ;
-  d2 = rule_decl {
-           Grammar.TermAggregateDeclaration(d1, d2)
-         }
 
 (* Rule for sugar terms like if .. then .. else .. or unit ( () ) *)
 (* How can we exactly define pre defined terms ?
@@ -419,7 +443,7 @@ rule_sugar_term_infix:
           let n = make_integer n in
           Grammar.TermVarApplication(
               Grammar.TermVarApplication(
-                  Grammar.TermFieldSelection("int", "plus"),
+                  Grammar.TermFieldSelection("Int", "plus"),
                   m
                 ),
               n
@@ -440,6 +464,7 @@ rule_sugar_term_with_parent:
 
 (* ------------------------------- *)
 (* Types *)
+
 rule_type:
 | TYPE_BOTTOM { Grammar.TypeBottom }
 | TYPE_TOP { Grammar.TypeTop }
@@ -448,15 +473,30 @@ rule_type:
   t2 = rule_type {
            Grammar.TypeIntersection(t1, t2)
          }
+(* x.t -> Lowercase must be used for records, not modules. *)
+| var = ID ;
+  DOT ;
+  type_label = ID {
+                   Grammar.TypeProjection(var, type_label)
+                 }
+(* M.t -> must be used for modules *)
+| var = ID_CAPITALIZE ;
+  DOT ;
+  type_label = ID {
+                   Grammar.TypeProjection(var, type_label)
+                 }
+(* Record *)
+| t = rule_type_record { t }
+(* Modules *)
+| t = rule_type_module_signature { t }
+(* Abstraction *)
+| t = rule_type_abstraction { t }
+(* (T) *)
+| LEFT_PARENT ;
+  t = rule_type ;
+  RIGHT_PARENT { t }
 
-(* { z => T^{z} } *)
-| LEFT_BRACKET ;
-  var = ID ;
-  DOUBLE_RIGHT_ARROW ;
-  typ = rule_type_declaration;
-  RIGHT_BRACKET {
-      Grammar.TypeRecursive(var, typ)
-    }
+rule_type_module_signature:
 (* sig T^{self} end *)
 | SIG ;
   typ = rule_type_declaration;
@@ -472,12 +512,8 @@ rule_type:
   END {
       Grammar.TypeRecursive(var, typ)
     }
-(* x.t *)
-| var = ID ;
-  DOT ;
-  type_label = ID {
-                   Grammar.TypeProjection(var, type_label)
-                 }
+
+rule_type_abstraction:
 (* S -> T --> ∀(_ : S) T *)
 | s = rule_type ;
   ARROW_RIGHT ;
@@ -494,13 +530,41 @@ rule_type:
   t = rule_type {
           Grammar.TypeDependentFunction(s, (x, t))
         }
-(* (T) *)
-| LEFT_PARENT ;
-  t = rule_type ;
-  RIGHT_PARENT { t }
 
+(* A record is a module without type and without recursive variable.
+   The id "'self" is used to avoid to define recursive records because ' is
+   forbidden an identifier.
+ *)
+rule_type_record:
+| LEFT_BRACKET ;
+  typ = rule_type_record_declaration_field;
+  RIGHT_BRACKET {
+      Grammar.TypeRecursive("'self", typ)
+    }
+
+rule_type_record_declaration_field:
+| field_label = ID ;
+  COLON ;
+  t = rule_type {
+          Grammar.TypeFieldDeclaration(field_label, t)
+        }
+| d1 = rule_type_record_declaration_field ;
+  SEMICOLON ;
+  d2 = rule_type_record_declaration_field {
+           Grammar.TypeIntersection(d1, d2)
+         }
+(* ----------------------------------------------------------------- *)
 (* The content of a signature *)
 rule_type_declaration:
+| t = rule_type_declaration_type { t }
+| t = rule_type_declaration_field { t }
+(* T ∧ T *)
+| t1 = rule_type_declaration ;
+  t2 = rule_type_declaration {
+           Grammar.TypeIntersection(t1, t2)
+         }
+
+rule_type_declaration_type:
 (* type t : S..T --> (L, S, T) *)
 | TYPE ;
   type_label = ID ;
@@ -541,6 +605,8 @@ rule_type_declaration:
                        Grammar.TypeTop
                      )
                  }
+
+rule_type_declaration_field:
 (* val a : T *)
 | VAL ;
   field_label = ID ;
@@ -548,12 +614,9 @@ rule_type_declaration:
   t = rule_type {
           Grammar.TypeFieldDeclaration(field_label, t)
         }
-(* T ∧ T *)
-| t1 = rule_type_declaration ;
-  t2 = rule_type_declaration {
-           Grammar.TypeIntersection(t1, t2)
-         }
+(* ----------------------------------------------------------------- *)
 
+(* ----------------------------------------------------------------- *)
 (* Rule for annotations, like PPX in OCaml *)
 rule_annotation:
 | LEFT_SQUARE_BRACKET ;
@@ -573,3 +636,4 @@ rule_annotation_list:
 
 rule_annotation_content:
 | content = ID { content }
+(* ----------------------------------------------------------------- *)
