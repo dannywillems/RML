@@ -28,6 +28,11 @@ let alpha_lowercase = ['a' - 'z']
 
 let lowercase_ident =
   (alpha_lowercase | '_')+ (alpha_num | '_' | '\'')*
+let integer = ['1' - '9']+ ['0' - '9']
+
+let plus = "+"
+let minus = "-"
+let times = "*"
 
 let let_ = "let"
 let in_ = "in"
@@ -63,6 +68,11 @@ rule prog = parse
       comment lexbuf;
       prog lexbuf
     }
+
+  | integer as n { Parser.INTEGER (int_of_string n) }
+  | plus { Parser.PLUS }
+  | minus { Parser.MINUS }
+  | times { Parser.TIMES }
 
   | '.' { Parser.DOT }
   | ',' { Parser.COMMA }
