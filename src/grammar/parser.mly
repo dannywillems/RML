@@ -36,6 +36,12 @@
         Grammar.TermUnimplemented,
         Grammar.TypeProjection("Unit", "t")
       )
+
+  let current_integer = ref 0
+  let fresh_variable () =
+    let name = "'" ^ "var" ^ (string_of_int (!current_integer)) in
+    incr current_integer;
+    name
 %}
 
 %token COLON
@@ -253,7 +259,18 @@ rule_application:
 | x = ID ; y = ID {
                    Grammar.TermVarApplication (x, y)
                  }
+(* term y --> let variable = term in variable y *)
+| term = rule_term_for_application ;
+  y = ID {
+          let variable = fresh_variable () in
+          let app = Grammar.TermVarApplication(variable, y) in
+          Grammar.TermLet(term, (variable, app))
+        }
 
+(* Term which can be used for application. *)
+rule_term_for_application:
+| t = rule_term_without_parent { t }
+| LEFT_PARENT ; t = rule_term_with_parent ; RIGHT_PARENT { t }
 (*
 | t = rule_term ; u = rule_term {
       Grammar.TermLet(
