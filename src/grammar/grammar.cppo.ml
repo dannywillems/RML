@@ -32,6 +32,8 @@ and ('bn, 'fn) term =
   | TermFieldSelection of 'fn * field_label
   (* Unofficial -- ν(x) d *)
   | TermRecursiveRecordUntyped of ('bn, ('bn, 'fn) decl) abs
+  (* Unofficial -- Integers. Is always associated with Ascription. *)
+  | TermInteger of int
 
 
 (* Objects. Type tag becomes DeclarationType (instead of TermTypeTag) *)
