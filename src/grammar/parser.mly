@@ -7,6 +7,17 @@
     | head :: tail ->
        let x, s = head in
        Grammar.TermAbstraction(s, (x, currying tail return))
+
+  (*
+  let rec sugar_list l = match l with
+    | [] -> Grammar.TermAscription(
+                Grammar.TermUnimplemented,
+                Grammar.TypeProjection("list", "empty")
+              )
+    | head :: tail ->
+       Grammar.Grammar.TermFieldSelection("list", "cons")
+         )
+   *)
 %}
 
 %token COLON
@@ -39,6 +50,15 @@
 
 %token <string> ID
 %token <string> ID_CAPITALIZE
+
+%token <int> INTEGER
+%token PLUS
+%token MINUS
+%token TIMES
+
+%token IF
+%token THEN
+%token ELSE
 
 %token ABSTRACTION
 %token FUN
@@ -135,10 +155,32 @@ top_level_let:
 
 (* Rules for terms *)
 rule_term:
+| t = rule_term_without_parent { t }
+| t = rule_term_with_parent { t }
+
+(* Terms which doesn't need parenthesis *)
+rule_term_without_parent:
 (* x *)
-| id = ID { Grammar.TermVariable ( id ) }
-(* x y *)
-| x = ID ; y = ID { Grammar.TermVarApplication (x, y) }
+| id = ID { Grammar.TermVariable (id) }
+(* Field selection: x.a *)
+| x = ID ;
+  DOT ;
+  a = ID {
+          Grammar.TermFieldSelection(x, a)
+        }
+(* Sugar which doesn't need parenthesis. *)
+| t = rule_sugar_term_without_parent { t }
+(* Nested parenthesis *)
+| LEFT_PARENT ;
+  t = rule_term_without_parent ;
+  RIGHT_PARENT { t }
+(* ----- Unofficial terms ----- *)
+(* Unimplemented *)
+| UNIMPLEMENTED_TERM { Grammar.TermUnimplemented }
+
+rule_term_with_parent:
+(* Applications *)
+| app = rule_application { app }
 (* let x = t in u --> (t, (x, u))*)
 | LET ;
   x = ID ;
@@ -148,13 +190,8 @@ rule_term:
   u = rule_term {
           Grammar.TermLet(t,(x, u))
         }
-(* (t) *)
-| LEFT_PARENT ;
-  t = rule_term ;
-  RIGHT_PARENT { t }
-(* v *)
+(* Values *)
 | v = rule_value { v }
-
 (* ----- Unofficial terms ----- *)
 (* t : T *)
 | term = rule_term ;
@@ -162,20 +199,37 @@ rule_term:
   typ = rule_type {
             Grammar.TermAscription(term, typ)
           }
-(* Unimplemented *)
-| UNIMPLEMENTED_TERM { Grammar.TermUnimplemented }
-| sugar = rule_sugar_terms { sugar }
 
-(* ----- Beginning of DOT terms ----- *)
-(* x.a *)
-| x = ID ;
-  DOT ;
-  a = ID {
-          Grammar.TermFieldSelection(x, a)
-        }
+rule_application:
+(* x y *)
+| x = ID ; y = ID {
+                   (*
+                   let x = Grammar.TermVariable(x) in
+                   let y = Grammar.TermVariable(y) in
+                   *)
+                   Grammar.TermVarApplication (x, y)
+                 }
 
-(* Rules for values *)
-rule_value:
+(*
+| t = rule_term ; u = rule_term {
+      Grammar.TermLet(
+          t,
+          ("f",
+           Grammar.TermLet(
+             u,
+             ("g",
+              Grammar.TermVarApplication("f", "g")
+             )
+           )
+          )
+        )
+    }
+*)
+(* f x y z z' ... *)
+(* TODO *)
+
+
+rule_module:
 (* { x : T => d } *)
 | LEFT_BRACKET ;
   x = ID ;
@@ -233,6 +287,10 @@ rule_value:
   RIGHT_BRACKET {
       Grammar.TermRecursiveRecordUntyped(x, d)
     }
+
+(* Rules for values *)
+rule_value:
+| t = rule_module { t }
 | t = rule_abstraction { t }
 
 (* Abstractions *)
@@ -305,7 +363,12 @@ rule_decl:
   This solution doesn't work very well because if the variable unit is
   redefined, it will use this definition, and not from the standard library.
 *)
-rule_sugar_terms:
+rule_sugar_term:
+| t = rule_sugar_term_without_parent { t }
+(* | t = rule_sugar_term_with_parent { t } *)
+
+rule_sugar_term_without_parent:
+(* Unit *)
 | LEFT_PARENT ;
   RIGHT_PARENT {
       Grammar.TermAscription(
@@ -313,6 +376,64 @@ rule_sugar_terms:
           Grammar.TypeProjection("unit", "T")
         )
     }
+(* For integers *)
+| n = INTEGER {
+          Grammar.TermAscription(
+              Grammar.TermInteger(n),
+              Grammar.TypeProjection("int", "T")
+            )
+        }
+| LEFT_PARENT ;
+  t = rule_sugar_term_without_parent ;
+  RIGHT_PARENT { t }
+
+(*
+(* For lists *)
+| l = rule_sugar_term_list { l }
+
+(* Rule to build a list with the sugar *)
+rule_sugar_term_list:
+| LEFT_SQUARE_BRACKET ;
+  l = rule_sugar_term_list_content ;
+  RIGHT_SQUARE_BRACKET {
+    }
+*)
+
+rule_sugar_term_infix:
+| m = INTEGER ;
+  PLUS ;
+  n = INTEGER {
+          let m = Grammar.TermAscription(
+                      Grammar.TermInteger(m),
+                      Grammar.TypeProjection("int", "T")
+                    )
+          in
+          let n = Grammar.TermAscription(
+                      Grammar.TermInteger(n),
+                      Grammar.TypeProjection("int", "T")
+                    )
+          in
+          Grammar.TermVarApplication(
+              Grammar.TermVarApplication(
+                  Grammar.TermFieldSelection("int", "plus"),
+                  m
+                ),
+              n
+            )
+        }
+
+(*
+rule_sugar_term_with_parent:
+| IF ;
+  cond = rule_term ;
+  THEN ;
+  if_true = rule_term ;
+  ELSE ;
+  if_false = rule_term {
+                 condition.
+               }
+*)
+
 (* ------------------------------- *)
 (* Types *)
 rule_type:
