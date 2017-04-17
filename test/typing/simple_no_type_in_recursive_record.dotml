@@ -1,11 +1,11 @@
-let simple = struct type A = Nothing end;;
+let simple = struct type t = Nothing end;;
 
 let int = struct
-  type T = Nothing
-  let identity = fun(x : self.T) -> x
+  type t = Nothing
+  let identity = fun(x : self.t) -> x
 end;;
 
 let other = struct
-  type S = self.T
-  type T = int.A
+  type s = self.t
+  type t = int.t
 end;;

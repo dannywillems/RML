@@ -1,29 +1,29 @@
-let f = fun(x : int.T, y : int.T, b : bool.T) -> b;;
+let f = fun(x : int.t, y : int.t, b : bool.t) -> b;;
 
-let simple = sig type A = Nothing end : struct type A = Nothing end;;
+let simple = sig type t = Nothing end : struct type t = Nothing end;;
 
 let int = sig
-  type T = Nothing
-  val identity : self.T -> self.T
+  type t = Nothing
+  val identity : self.t -> self.t
 end : struct
-  type T = Nothing
-  let identity = fun (x : self.T) -> x
+  type t = Nothing
+  let identity = fun (x : self.t) -> x
 end [@show_derivation_tree, no_context, check_well_formed] ;;
 
 let string = sig
-  type T = Nothing
-  val length : self.T -> int.T
+  type t = Nothing
+  val length : self.t -> int.t
 end : struct
-  type T = Nothing
-  let length = fun (str : self.T) -> Unimplemented : self.T -> int.T
+  type t = Nothing
+  let length = fun (str : self.t) -> Unimplemented : self.t -> int.t
 end;;
 
 let y = sig
-  type T = Nothing
+  type t = Nothing
   val x : Nothing
-  val f : self.T -> self.T
+  val f : self.t -> self.t
 end : struct
-  type T = Nothing
+  type t = Nothing
   let x = Unimplemented
-  let f = fun (x : self.T) -> x
+  let f = fun (x : self.t) -> x
 end [@show_derivation_tree, no_context];;

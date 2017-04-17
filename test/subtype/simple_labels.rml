@@ -1,32 +1,32 @@
 (* Abstract type with different names. *)
-sig type T end !<: sig type S end;;
+sig type t end !<: sig type s end;;
 
 (* Abstract type with same name. As the signature is not binded to a name, it's considered to be the same. *)
-sig type T end <: sig type T end;;
+sig type t end <: sig type t end;;
 
 (* Same concrete type but different type alias. *)
-sig type T = Nothing end !<: sig type S = Nothing end;;
+sig type t = Nothing end !<: sig type s = Nothing end;;
 
-sig type T = Nothing end <: sig type T = Nothing end;;
+sig type t = Nothing end <: sig type t = Nothing end;;
 
 sig
-  type T = int.T
-  val increment : int.T -> int.T
+  type t = int.t
+  val increment : int.t -> int.t
 end
 <:
 sig
-  type T = int.T
-  val increment : int.T -> int.T
+  type t = int.t
+  val increment : int.t -> int.t
 end;;
 
-sig type T : Nothing .. int.T end <: sig type T end;;
+sig type t : Nothing .. int.t end <: sig type t end;;
 
-sig type T : Nothing .. int.T end !<: sig type T = int.T end;;
+sig type t : Nothing .. int.t end !<: sig type t = int.t end;;
 
-let x = struct type T = int.T end;;
+let x = struct type t = int.t end;;
 
-let y = struct type T = int.T end;;
+let y = struct type t = int.t end;;
 
-sig type T = x.T end <: sig type T = int.T end;;
+sig type t = x.T end <: sig type t = int.t end;;
 
-sig type T = x.T end <: sig type T = y.T end;;
+sig type t = x.T end <: sig type t = y.T end;;

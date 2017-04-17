@@ -1,33 +1,33 @@
-let simple = sig type A = Nothign end : struct type A = Nothing end;;
+let simple = sig type t = Nothign end : struct type t = Nothing end;;
 
 (*
 let int =
   sig
-    type T = Nothing
-    val identity : self.T -> self.T
+    type t = Nothing
+    val identity : self.t -> self.t
   end
   :
   struct
-    type T = Nothing
-    let identity = fun (x : self.T) -> x
+    type t = Nothing
+    let identity = fun (x : self.t) -> x
   end;;
 
 let string = sig
-               type T = Nothing
-               val length : self.T -> int.T
+               type t = Nothing
+               val length : self.t -> int.t
              end : struct
-  type T = Nothing
-  let length = fun (str : self.T) -> Unimplemented : self.T -> int.T
+  type t = Nothing
+  let length = fun (str : self.t) -> Unimplemented : self.t -> int.t
 end;;
 
 let y = z : sig(z)
-          type T = Nothing
+          type t = Nothing
           val x : Nothing
-          val f : z.T -> z.T
+          val f : z.t -> z.t
         end => struct
-  type T = Nothing
+  type t = Nothing
   let x = Unimplemented
-  let f = fun (x : z.T) -> x
+  let f = fun (x : z.t) -> x
 } in y.x;;
 *)
 

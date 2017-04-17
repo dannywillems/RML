@@ -1,5 +1,5 @@
 let string = struct
-  type T = sig type A end
-  let string_of_bool : bool.T -> self.T = Unimplemented
-  let empty : self.T = Unimplemented
+  type t = sig type t end
+  let string_of_bool : bool.t -> self.t = Unimplemented
+  let empty : self.t = Unimplemented
 end;;

@@ -18,6 +18,24 @@
        Grammar.Grammar.TermFieldSelection("list", "cons")
          )
    *)
+
+  let make_integer n =
+    Grammar.TermAscription(
+        Grammar.TermInteger(n),
+        Grammar.TypeProjection("int", "t")
+      )
+
+  let make_string s =
+    Grammar.TermAscription(
+        Grammar.TermInteger(s),
+        Grammar.TypeProjection("string", "t")
+      )
+
+  let make_unit () =
+    Grammar.TermAscription(
+        Grammar.TermUnimplemented,
+        Grammar.TypeProjection("unit", "t")
+      )
 %}
 
 %token COLON
@@ -329,9 +347,9 @@ rule_arguments_content:
 
 (* Term declaration in a structure *)
 rule_decl:
-(* type L = T *)
+(* type t = T *)
 | TYPE ;
-  type_label = ID_CAPITALIZE ;
+  type_label = ID ;
   EQUAL ;
   typ = rule_type {
             Grammar.TermTypeDeclaration(type_label, typ)
@@ -371,17 +389,11 @@ rule_sugar_term_without_parent:
 (* Unit *)
 | LEFT_PARENT ;
   RIGHT_PARENT {
-      Grammar.TermAscription(
-          Grammar.TermUnimplemented,
-          Grammar.TypeProjection("unit", "T")
-        )
+      make_unit ()
     }
 (* For integers *)
 | n = INTEGER {
-          Grammar.TermAscription(
-              Grammar.TermInteger(n),
-              Grammar.TypeProjection("int", "T")
-            )
+          make_integer n
         }
 | LEFT_PARENT ;
   t = rule_sugar_term_without_parent ;
@@ -403,16 +415,8 @@ rule_sugar_term_infix:
 | m = INTEGER ;
   PLUS ;
   n = INTEGER {
-          let m = Grammar.TermAscription(
-                      Grammar.TermInteger(m),
-                      Grammar.TypeProjection("int", "T")
-                    )
-          in
-          let n = Grammar.TermAscription(
-                      Grammar.TermInteger(n),
-                      Grammar.TypeProjection("int", "T")
-                    )
-          in
+          let m = make_integer m in
+          let n = make_integer n in
           Grammar.TermVarApplication(
               Grammar.TermVarApplication(
                   Grammar.TermFieldSelection("int", "plus"),
@@ -468,10 +472,10 @@ rule_type:
   END {
       Grammar.TypeRecursive(var, typ)
     }
-(* x.L *)
+(* x.t *)
 | var = ID ;
   DOT ;
-  type_label = ID_CAPITALIZE {
+  type_label = ID {
                    Grammar.TypeProjection(var, type_label)
                  }
 (* S -> T --> ∀(_ : S) T *)
@@ -497,9 +501,9 @@ rule_type:
 
 (* The content of a signature *)
 rule_type_declaration:
-(* type L : S..T --> (L, S, T) *)
+(* type t : S..T --> (L, S, T) *)
 | TYPE ;
-  type_label = ID_CAPITALIZE ;
+  type_label = ID ;
   COLON ;
   s = rule_type ;
   DOT ;
@@ -507,30 +511,30 @@ rule_type_declaration:
   t = rule_type {
           Grammar.TypeDeclaration(type_label, s, t)
         }
-(* type L <: T --> (L, Bottom, T) *)
+(* type t <: T --> (L, Bottom, T) *)
 | TYPE ;
-  type_label = ID_CAPITALIZE ;
+  type_label = ID ;
   SUBTYPE ;
   t = rule_type {
           Grammar.TypeDeclaration(type_label, Grammar.TypeBottom, t)
         }
-(* type L :> S --> (L, S, Any) *)
+(* type t :> S --> (L, S, Any) *)
 | TYPE ;
-  type_label = ID_CAPITALIZE ;
+  type_label = ID ;
   SUPERTYPE ;
   s = rule_type {
           Grammar.TypeDeclaration(type_label, s, Grammar.TypeTop)
         }
-(* type L = S --> (L, S, S) *)
+(* type t = S --> (L, S, S) *)
 | TYPE ;
-  type_label = ID_CAPITALIZE ;
+  type_label = ID ;
   EQUAL ;
   s = rule_type {
           Grammar.TypeDeclaration(type_label, s, s)
         }
-(* type L --> (L, Nothing, Any) *)
+(* type t --> (L, Nothing, Any) *)
 | TYPE ;
-  type_label = ID_CAPITALIZE {
+  type_label = ID {
                    Grammar.TypeDeclaration(
                        type_label,
                        Grammar.TypeBottom,

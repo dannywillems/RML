@@ -1,4 +1,4 @@
 let unit = struct
-  type T = sig type A end
-  let unit = Unimplemented : self.T
+  type t = sig type t end
+  let unit = Unimplemented : self.t
 end;;

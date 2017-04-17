@@ -16,18 +16,13 @@ let rec var_unpack context x t =
   | Grammar.TypeRecursive(z, t_z) ->
     Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) t_z
   | Grammar.TypeIntersection(Grammar.TypeTop, t) ->
-    print_endline "hello";
     var_unpack context x t
   | Grammar.TypeIntersection(t, Grammar.TypeTop) ->
     var_unpack context x t
   | Grammar.TypeProjection(x, field) ->
     let type_of_x = ContextType.find x context in
-    (* Printf.printf "%a\n" (Print.Pretty.nominal_typ ()) type_of_x; *)
     var_unpack context x type_of_x
-  | t ->
-    Printf.printf "%s : %s\n" (AlphaLib.Atom.show x) (Print.string_of_nominal_typ t);
-    print_endline "--------------";
-    t
+  | t -> t
 
 (* As selection rules are very close, we abstract it with this function.
 
