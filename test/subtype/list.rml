@@ -1,17 +1,16 @@
-let empty = list.empty [@show_derivation_tree];;
+let empty = List.empty [@show_derivation_tree];;
 
 let x = 42;;
 
-let head_of_empty = empty.head [@show_derivation_tree];;
 let unit = ();;
-let must_be_unit : int.t = head_of_empty unit;;
+let must_be_unit : Int.t = empty.head unit;;
 
 (*
 let x = [42 ; 2];;
 let x = l.cons 2 (l.cons 42 l.empty);;
 
-let f = fun (x : int.t, y : int.t) ->
-  let plus_x = int.plus x;;
+let f = fun (x : Int.t, y : Int.t) ->
+  let plus_x = Int.plus x;;
   plus_x y
 ;;
 
