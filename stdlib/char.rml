@@ -1,11 +1,11 @@
-let char = struct
+let Char = struct
   type t = sig type t end
-  let code = Unimplemented : self.t -> int.t
-  let chr = Unimplemented : int.t -> self.t
+  let code = Unimplemented : self.t -> Int.t
+  let chr = Unimplemented : Int.t -> self.t
   let lowercase = Unimplemented : self.t -> self.t
   let uppercase = Unimplemented : self.t -> self.t
   let lowercase_ascii = Unimplemented : self.t -> self.t
   let uppercase_ascii = Unimplemented : self.t -> self.t
-  let compare = Unimplemented : self.t -> self.t -> int.t
-  let equal = Unimplemented : self.t -> self.t -> bool.t
+  let compare = Unimplemented : self.t -> self.t -> Int.t
+  let equal = Unimplemented : self.t -> self.t -> Bool.t
 end;;

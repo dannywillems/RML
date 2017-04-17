@@ -1,4 +1,4 @@
-let bool = struct
+let Bool = struct
   type t = sig type a end
   let true = Unimplemented : self.t
   let false = Unimplemented : self.t
