@@ -1,3 +1,25 @@
-let empty = l.empty [@show_derivation_tree];;
+let empty = list.empty [@show_derivation_tree];;
+
+let x = 42;;
+
 let head_of_empty = empty.head [@show_derivation_tree];;
-let must_be_unit : int.T = head_of_empty unit.unit;;
+let unit = ();;
+let must_be_unit : int.t = head_of_empty unit;;
+
+(*
+let x = [42 ; 2];;
+let x = l.cons 2 (l.cons 42 l.empty);;
+
+let f = fun (x : int.t, y : int.t) ->
+  let plus_x = int.plus x;;
+  plus_x y
+;;
+
+let x =
+  let cons_2 = l.cons 2 in
+  let cons_42 = l.cons 42 in
+  let cons_42_empty = cons_42 l.empty in
+  cons_2 cons_42_empty;;
+
+let x = f x (g x' y')
+*)

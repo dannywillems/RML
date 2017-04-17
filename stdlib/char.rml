@@ -1,11 +1,11 @@
 let char = struct
-  type T = sig type A end
-  let code = Unimplemented : self.T -> int.T
-  let chr = Unimplemented : int.T -> self.T
-  let lowercase = Unimplemented : self.T -> self.T
-  let uppercase = Unimplemented : self.T -> self.T
-  let lowercase_ascii = Unimplemented : self.T -> self.T
-  let uppercase_ascii = Unimplemented : self.T -> self.T
-  let compare = Unimplemented : self.T -> self.T -> int.T
-  let equal = Unimplemented : self.T -> self.T -> bool.T
+  type t = sig type t end
+  let code = Unimplemented : self.t -> int.t
+  let chr = Unimplemented : int.t -> self.t
+  let lowercase = Unimplemented : self.t -> self.t
+  let uppercase = Unimplemented : self.t -> self.t
+  let lowercase_ascii = Unimplemented : self.t -> self.t
+  let uppercase_ascii = Unimplemented : self.t -> self.t
+  let compare = Unimplemented : self.t -> self.t -> int.t
+  let equal = Unimplemented : self.t -> self.t -> bool.t
 end;;

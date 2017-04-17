@@ -1,8 +1,3 @@
-let int = Unimplemented : sig type A end;;
-
 let int = struct
-  type T = int.A
-  let add = Unimplemented : self.T -> self.T -> self.T
-  let sub = Unimplemented : self.T -> self.T -> self.T
-  let mult = Unimplemented : self.T -> self.T -> self.T
+  type t = sig type t end
 end;;

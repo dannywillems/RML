@@ -1,3 +1,8 @@
-(*
-let test = ...
-*)
+(* *)
+
+let test =
+  fun(condition : bool.t,
+      if_true : unit.t -> int.t,
+      if_false : unit.t -> int.t
+     ) -> Unimplemented
+;;
