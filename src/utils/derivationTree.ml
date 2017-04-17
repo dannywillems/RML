@@ -43,7 +43,7 @@ let rec string_of_subtyping_derivation_tree
   | Node (v, children) ->
     let string_of_rule =
       Printf.sprintf
-        "%s%s"
+        "%s%s ("
         (" " ^* (level * 2))
         (ANSITerminal.sprintf
            (if v.is_true then [ANSITerminal.green] else [ANSITerminal.red])
@@ -62,7 +62,7 @@ let rec string_of_subtyping_derivation_tree
     in
     let subtype =
       Printf.sprintf
-        "%s <: %s\n%s"
+        "%s <: %s)\n%s"
         (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.s))
         (Print.Style.string_of_raw_typ [ANSITerminal.cyan] (Grammar.show_typ v.t))
         (String.concat
