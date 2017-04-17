@@ -44,9 +44,6 @@ For example, you can try the subtyping algorithm on the file `test/subtype_simpl
 ./main.native -f test/subtype_simple.dsubml -a subtype
 ```
 
-A verbose mode is available for some action to see the derivation tree. Use `--show-derivation-tree` to activate this mode.
-
-
 ## Annotations
 
 Like in OCaml with PPX, you can add some annotations to activate or desactivate some options.
