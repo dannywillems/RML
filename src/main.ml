@@ -65,6 +65,15 @@ let print_term_color t =
 let print_term_color_if_verbose t =
   if (!verbose) then print_term_color t
 
+let print_variable_color x =
+  ANSITerminal.printf
+    [ANSITerminal.green]
+    "%s"
+    x
+
+let print_variable_color_if_verbose x =
+  if (!verbose) then print_variable_color x
+
 let print_type_color t =
   Printf.printf
     "\x1b[36m%a\x1b[0m\n"
@@ -151,7 +160,8 @@ let read_top_level_let x raw_term =
       (!kit_import_env)
       x
   in
-  print_term_color_if_verbose nominal_term;
+  print_variable_color_if_verbose x;
+  print_endline " : ";
   print_type_color_if_verbose nominal_typ;
   print_typing_derivation_tree history;
   print_endline_if_verbose "-----------------------";
