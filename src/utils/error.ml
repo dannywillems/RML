@@ -76,7 +76,7 @@ let print e = match e with
   | ContextType.NotInEnvironment(key, context) ->
     Printf.printf
       "The key %s is not in context :\n%a\n"
-      (ANSITerminal.sprintf [ANSITerminal.blue] "%s" (AlphaLib.Atom.hint key))
+      (ANSITerminal.sprintf [ANSITerminal.blue] "%s" (AlphaLib.Atom.show key))
       ContextType.Pretty.print context;
   | NotWellFormed(context, typ) ->
     Printf.printf
