@@ -255,9 +255,23 @@ rule_term_let_binding:
         }
 
 rule_application:
-(* x y *)
-| x = ID ; y = ID {
-                   Grammar.TermVarApplication (x, y)
+(* f x y z *)
+| f = ID ; args = rule_application_arguments {
+                   (* f x y z -->
+                      let f_x = f x in
+                      let f_x_y = f_x y in
+                      f_x_y_z
+                    *)
+                      let rec currying_app f args = match args with
+                        | [] -> failwith "No arguments"
+                        | [head] -> Grammar.TermVarApplication(f, head)
+                        | head :: tail ->
+                           let x = fresh_variable () in
+                           let s = Grammar.TermVarApplication(f, head) in
+                           let t = currying_app x tail in
+                           Grammar.TermLet(s, (x, t))
+                      in
+                      currying_app f args
                  }
 (* term y --> let variable = term in variable y *)
 | term = rule_term_for_application ;
@@ -267,6 +281,11 @@ rule_application:
           Grammar.TermLet(term, (variable, app))
         }
 
+rule_application_arguments:
+| x = ID { [x] }
+| x = ID ; y = rule_application_arguments {
+                   x :: y
+                 }
 (* Term which can be used for application. *)
 rule_term_for_application:
 | t = rule_term_without_parent { t }
