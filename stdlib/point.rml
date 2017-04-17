@@ -3,8 +3,6 @@ let Point2D = struct(point)
   let init = fun(x : Int.t, y : Int.t) -> { x = x ; y = y }
   let first = fun(p : point.t) -> p.x
   let second = fun(p : point.t) -> p.y
-  let dummy = fun(p1 : { x : Int.t ; y : Int.t }, p2 : point.t) ->
-    let first = point.first in
-    let second = point.second in
-    { x = first p1 ; y = second p2 }
-end;;
+  let dummy = fun(p1 : point.t, p2 : point.t) ->
+    { x = point.first p1 ; y = point.second p2 }
+end [@show_derivation_tree, no_context];;
