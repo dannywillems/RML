@@ -295,17 +295,6 @@ rule_record_content:
          }
 
 rule_module:
-(* { x : T => d } *)
-| LEFT_BRACKET ;
-  x = ID ;
-  COLON ;
-  t = rule_type ;
-  DOUBLE_RIGHT_ARROW ;
-  d = rule_decl ;
-  RIGHT_BRACKET {
-      Grammar.TermRecursiveRecord(t, (x, d))
-    }
-
 (* T : struct type A = ... ; let a = ... end *)
 | t = rule_type ;
   COLON ;
