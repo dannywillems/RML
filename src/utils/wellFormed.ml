@@ -14,10 +14,13 @@ let rec typ ?(use_subtyping=false) context nominal_typ = match nominal_typ with
     in
     typ_of_x_is_well_formed &&
     *)
-    Subtype.is_subtype
-      ~context
-      typ_of_x
-      (Grammar.TypeDeclaration(a, Grammar.TypeBottom, Grammar.TypeTop))
+    let history, is_subtype =
+      Subtype.subtype
+        ~context
+        typ_of_x
+        (Grammar.TypeDeclaration(a, Grammar.TypeBottom, Grammar.TypeTop))
+    in
+    is_subtype
   | Grammar.TypeDependentFunction(s, (x, t)) ->
     let context' = ContextType.add x s context in
     typ ~use_subtyping context s &&
