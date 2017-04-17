@@ -42,8 +42,8 @@
 - [x] least_upper_bound_of_dependent_function: call to `best_bounds` and check if it's an
   arrow. If it's `Nothing`, we need to return `Top -> Nothing` because it's the
   least upper bound which is an arrow.
-- [ ] check `best_bounds`.
-- [ ] check well formedness.
+- [x] check `best_bounds`.
+- [x] check well formedness.
 
 #### Not important.
 
