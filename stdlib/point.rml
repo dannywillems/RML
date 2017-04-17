@@ -5,4 +5,4 @@ let Point2D = struct(point)
   let second = fun(p : point.t) -> p.y
   let dummy = fun(p1 : point.t, p2 : point.t) ->
     { x = point.first p1 ; y = point.second p2 }
-end [@show_derivation_tree, no_context];;
+end;;
