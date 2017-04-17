@@ -86,4 +86,5 @@ let print e = match e with
     Printf.printf
       "%a is not a dependent function.\n"
       (Print.Pretty.nominal_typ ()) typ
+  | TypeMismatch(s, _) -> print_endline s
   | _ -> print_endline (Printexc.to_string e)
