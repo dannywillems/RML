@@ -13,7 +13,6 @@
        Grammar.Grammar.TermFieldSelection("List", "cons")
          )
   *)
-
   let make_integer n =
     Grammar.TermAscription(
         Grammar.TermInteger(n),
@@ -33,8 +32,12 @@
       )
 
   let current_integer = ref 0
-  let fresh_variable () =
-    let name = "'" ^ "var" ^ (string_of_int (!current_integer)) in
+
+  let fresh_variable term =
+    let fresh_name_term =
+      GrammarToolbox.string_of_term_for_fresh_variable term
+    in
+    let name = "'" ^ fresh_name_term ^ (string_of_int (!current_integer)) in
     incr current_integer;
     name
 
@@ -53,7 +56,7 @@
     | [] -> failwith "No arguments"
     | [head] -> Grammar.TermVarApplication(f, head)
     | head :: tail ->
-       let x = fresh_variable () in
+       let x = fresh_variable (Grammar.TermVariable(head)) in
        let s = Grammar.TermVarApplication(f, head) in
        let t = currying_app_term x tail in
        Grammar.TermLet(s, (x, t))
@@ -72,19 +75,30 @@
     | [] -> t
     | head :: tail ->
        let x, s = head in
-       let t = let_bindings_of_terms t tail in
-       Grammar.TermLet(s, (x, t))
+       if GrammarToolbox.is_raw_variable s
+       then let_bindings_of_terms t tail
+       else
+         let t = let_bindings_of_terms t tail in
+         Grammar.TermLet(s, (x, t))
 
   let rec currying_app_with_terms f terms =
     let terms_with_variables =
       List.map
-        (fun t -> (fresh_variable (), t))
+        (fun t ->
+          match t with
+          | Grammar.TermVariable(x) -> x, t
+          | _ -> fresh_variable t, t
+        )
         terms
     in
     let variables = List.map fst terms_with_variables in
+    let terms_with_variables =
+      List.filter
+        (fun (x, t) -> not (GrammarToolbox.is_raw_variable t))
+        terms_with_variables
+    in
     let t = currying_app_term f variables in
     let_bindings_of_terms t terms_with_variables
-
 %}
 
 %token COLON
@@ -309,7 +323,7 @@ rule_application:
 (* term y --> let variable = term in variable y *)
 | term = rule_term_for_application ;
   args = rule_application_arguments {
-          let f_term = fresh_variable () in
+          let f_term = fresh_variable term in
           let s = currying_app_with_terms f_term args in
           Grammar.TermLet(term, (f_term, s))
         }
