@@ -1,4 +1,4 @@
-let Point2D = struct(point)
+let module Point2D = struct(point)
   type t = { x : Int.t ; y : Int.t }
   let init = fun(x : Int.t, y : Int.t) -> { x = x ; y = y }
   let first = fun(p : point.t) -> p.x

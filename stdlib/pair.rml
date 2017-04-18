@@ -1,4 +1,4 @@
-let Pair = struct(pair)
+let module Pair = struct(pair)
   type t = sig
     val fst : Unit.t -> Int.t
     val snd : Unit.t -> Int.t

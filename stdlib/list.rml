@@ -1,4 +1,4 @@
-let List = struct(list)
+let module List = struct(list)
   type t = sig
     val head : Unit.t -> Int.t
     val tail : Unit.t -> list.t
