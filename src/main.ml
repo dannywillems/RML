@@ -190,8 +190,6 @@ let read_term_file lexbuf =
     print_term_color nominal_term;
     ()
 
-let read_type_file lexbuf = ()
-
 let eval lexbuf = ()
 
 (** Action to check the subtype algorithm (with or without REFL). It uses the
@@ -346,8 +344,6 @@ let () =
   match (Action.t_of_string (!eval_opt)) with
   | Action.Check_typing -> execute check_typing lexbuf
   | Action.WellFormed -> execute well_formed lexbuf
-  | Action.Read_term -> execute read_term_file lexbuf
-  | Action.Read_type -> execute read_type_file lexbuf
   | Action.Eval -> execute eval lexbuf
   | Action.Subtype -> execute (check_subtype ~with_refl:false) lexbuf
   | Action.Subtype_with_REFL -> execute (check_subtype ~with_refl:true) lexbuf
