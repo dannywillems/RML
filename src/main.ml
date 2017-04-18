@@ -1,6 +1,7 @@
 (* ------------------------------------------------- *)
 (* References for arguments *)
 let file_name = ref ""
+let current_file = ref ""
 let eval_opt = ref ""
 let verbose = ref false
 let use_stdlib = ref false
@@ -229,8 +230,8 @@ let rec execute action lexbuf =
   | _ as e ->
     let pos = lexbuf.Lexing.lex_curr_p in
     Printf.printf
-      "In file %s %d:%d : "
-      (!file_name)
+      "In file %s %d:%d : \n  "
+      (!current_file)
       pos.Lexing.pos_lnum
       (pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1);
     Error.print e;
@@ -279,6 +280,7 @@ let stdlib_files = [
 let rec add_in_environment files = match files with
   | [] -> ()
   | head :: tail ->
+    current_file := head;
     let channel = open_in head in
     let lexbuf = Lexing.from_channel channel in
     print_info (
@@ -292,6 +294,7 @@ let rec add_in_environment files = match files with
 
 let () =
   let lexbuf = Lexing.from_channel (open_in (!file_name)) in
+  current_file := (!file_name);
   if (!use_stdlib)
   then (
     print_info "Loading definitions from standard library.\n";
