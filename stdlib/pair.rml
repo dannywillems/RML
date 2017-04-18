@@ -8,4 +8,4 @@ let Pair = struct(pair)
        let fst = fun(u : Unit.t) -> f
        let snd = fun(u : Unit.t) -> s
      end
-end [@show_derivation_tree, no_context];;
+end;;
