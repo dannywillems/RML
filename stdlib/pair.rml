@@ -1,0 +1,11 @@
+let Pair = struct(pair)
+  type t = sig
+    val fst : Unit.t -> Int.t
+    val snd : Unit.t -> Int.t
+  end
+  let init : Int.t -> Int.t -> pair.t =
+    fun(f : Int.t, s : Int.t) -> struct
+       let fst = fun(u : Unit.t) -> f
+       let snd = fun(u : Unit.t) -> s
+     end
+end [@show_derivation_tree, no_context];;
