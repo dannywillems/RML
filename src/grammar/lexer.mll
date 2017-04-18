@@ -28,7 +28,7 @@ let alpha_lowercase = ['a' - 'z']
 
 let lowercase_ident =
   (alpha_lowercase | '_')+ (alpha_num | '_' | '\'')*
-let integer = ['1' - '9']+ ['0' - '9']
+let integer = ['0' - '9']*
 
 let plus = "+"
 let minus = "-"
@@ -86,6 +86,7 @@ rule prog = parse
   | end_ { Parser.END }
   | type_ { Parser.TYPE }
   | val_ { Parser.VAL }
+  | "module" { Parser.MODULE }
 
   | "<:" { Parser.SUBTYPE }
   | ":>" { Parser.SUPERTYPE }
