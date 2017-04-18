@@ -1,6 +1,9 @@
 TARGET := \
   main.native
 
+EXECUTABLE := \
+  rml
+
 PWD := \
   $(shell pwd)
 
@@ -30,6 +33,8 @@ MLI := \
 
 all:
 	@ $(OCAMLBUILD) $(SRC_DIR)/$(TARGET)
+	@ rm $(TARGET)
+	@ ln -s _build/$(SRC_DIR)/$(TARGET) $(PWD)/$(EXECUTABLE)
 
 test: all
 	@ ./$(TARGET)
