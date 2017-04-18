@@ -1,13 +1,21 @@
 let int_of_string : String.t -> Int.t = Unimplemented;;
 let string_of_int : Int.t -> String.t = Unimplemented;;
 
-(* Alias for float *)
+(* ----- Aliases for top level uses ----- *)
+(* Booleans *)
+let false = Bool.false;;
+let true = Bool.true;;
+let and = Bool.and;;
+let or = Bool.or;;
+let not = Bool.not;;
+
+(* Float *)
 let int_of_float = Float.int_of_float;;
 let truncate = Float.truncate;;
+(* -------------------------------------- *)
 
-(* On boolean *)
+(* -------------------------------------- *)
 let string_of_bool : Bool.t -> String.t = Unimplemented;;
-let not : Bool.t -> Bool.t = Unimplemented;;
 
 (* Mathematical functions *)
 let exp : Float.t -> Float.t = Unimplemented;;
