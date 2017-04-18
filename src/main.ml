@@ -175,28 +175,13 @@ let check_typing lexbuf = ()
 
 let well_formed lexbuf = ()
 
-let read_term_file lexbuf =
-  let raw_term, annotation = Parser.top_level_term Lexer.prog lexbuf in
-  parse_annotation_list annotation;
-  match raw_term with
-  | Grammar.TopLevelLetTerm(x, raw_term) ->
-    read_top_level_let x raw_term
-  | Grammar.Term(raw_term) ->
-    let nominal_term =
-      Grammar.import_term
-      (!kit_import_env)
-      raw_term
-    in
-    print_term_color nominal_term;
-    ()
-
 let eval lexbuf = ()
 
 (** Action to check the subtype algorithm (with or without REFL). It uses the
     syntax S <: T or S !<: T and automatically check if the answer is the same than
     we want.
 *)
-let check_subtype ~with_refl lexbuf =
+let check_subtype lexbuf =
   let (raw_is_subtype, raw_couple, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
   parse_annotation_list annotation;
   match raw_couple with
@@ -206,33 +191,10 @@ let check_subtype ~with_refl lexbuf =
     check_well_formed (!typing_env) nominal_s;
     check_well_formed (!typing_env) nominal_t;
     let history, is_subtype =
-      Subtype.subtype ~with_refl ~context:(!typing_env) nominal_s nominal_t
+      Subtype.subtype ~context:(!typing_env) nominal_s nominal_t
     in
     print_subtyping_derivation_tree history;
     print_is_subtype raw_s raw_t raw_is_subtype is_subtype;
-    print_endline "-------------------------"
-  | Grammar.TopLevelLetSubtype (var, raw_term) ->
-    read_top_level_let var raw_term
-
-let check_subtype_algorithms lexbuf =
-  let (raw_is_subtype, raw_couples, annotation) = Parser.top_level_subtype Lexer.prog lexbuf in
-  parse_annotation_list annotation;
-  match raw_couples with
-  | Grammar.CoupleTypes(raw_s, raw_t) ->
-    let nominal_s = Grammar.import_typ (!kit_import_env) raw_s in
-    let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
-    check_well_formed (!typing_env) nominal_s;
-    check_well_formed (!typing_env) nominal_t;
-    let history_with_refl, is_subtype_with_refl =
-      Subtype.subtype ~with_refl:true ~context:(!typing_env) nominal_s nominal_t
-    in
-    let history_without_refl, is_subtype_without_refl =
-      Subtype.subtype ~with_refl:false ~context:(!typing_env) nominal_s nominal_t
-    in
-    print_subtyping_derivation_tree history_with_refl;
-    print_subtyping_derivation_tree history_without_refl;
-    print_is_subtype_algorithms
-      raw_s raw_t is_subtype_with_refl is_subtype_without_refl raw_is_subtype;
     print_endline "-------------------------"
   | Grammar.TopLevelLetSubtype (var, raw_term) ->
     read_top_level_let var raw_term
@@ -345,13 +307,5 @@ let () =
   | Action.Check_typing -> execute check_typing lexbuf
   | Action.WellFormed -> execute well_formed lexbuf
   | Action.Eval -> execute eval lexbuf
-  | Action.Subtype -> execute (check_subtype ~with_refl:false) lexbuf
-  | Action.Subtype_with_REFL -> execute (check_subtype ~with_refl:true) lexbuf
-  | Action.Subtype_same_output ->
-    ANSITerminal.printf
-      [ANSITerminal.red]
-      "ERROR: Without REFL algorithm not implemented.\n"
-    (*
-    execute check_subtype_algorithms lexbuf
-    *)
+  | Action.Subtype -> execute check_subtype lexbuf
   | Action.Typing -> execute typing lexbuf
