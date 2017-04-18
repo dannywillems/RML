@@ -2,7 +2,7 @@
    This exception is raised when a type s is used as a subtype of t but s is not
    a subtype of t.
 *)
-exception Subtype of string * Grammar.nominal_typ * Grammar.nominal_typ
+exception Subtype of DerivationTree.subtyping_node DerivationTree.t * Grammar.nominal_typ * Grammar.nominal_typ
 
 (** The avoidance problem is a special case of using a variable x inside the
     type of x in a dependent function type or in the type of a let expression.
@@ -15,7 +15,7 @@ exception Subtype of string * Grammar.nominal_typ * Grammar.nominal_typ
     variable x dans le contexte globale alors que la variable n'existe que
     localement.
 *)
-exception AvoidanceProblem of string * AlphaLib.Atom.t * Grammar.nominal_typ
+exception AvoidanceProblem of string * ContextType.context * AlphaLib.Atom.t * Grammar.nominal_typ
 
 exception TypeMismatch of string * (Grammar.nominal_typ * Grammar.nominal_typ)
 
@@ -34,13 +34,15 @@ exception NotARecord of Grammar.nominal_term
 
 exception NotARecordOrUnboundField of Grammar.nominal_term * string
 
-val raise_subtype : Grammar.nominal_typ -> Grammar.nominal_typ -> unit
+val raise_subtype : DerivationTree.subtyping_node DerivationTree.t -> Grammar.nominal_typ -> Grammar.nominal_typ -> unit
 
 val raise_not_well_formed : ContextType.context -> Grammar.nominal_typ -> unit
 
 val raise_not_a_record : Grammar.nominal_term -> unit
 
 val raise_avoidance_problem :
+  string ->
+  ContextType.context ->
   AlphaLib.Atom.t ->
   Grammar.nominal_typ ->
   unit

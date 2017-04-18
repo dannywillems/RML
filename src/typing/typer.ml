@@ -9,7 +9,7 @@ let rec type_of_internal history context term = match term with
   *)
   | Grammar.TermAbstraction(s, (x, t)) ->
     CheckUtils.check_well_formedness context s;
-    CheckUtils.check_avoidance_problem x s;
+    CheckUtils.check_avoidance_problem "ALL-I" context x s;
     let context' = ContextType.add x s context in
     let u_history, u = type_of_internal history context' t in
     let typ = Grammar.TypeDependentFunction(s, (x, u)) in
@@ -32,7 +32,7 @@ let rec type_of_internal history context term = match term with
     let x_typ = t_typ in
     let context' = ContextType.add x x_typ context in
     let right_history, u_typ = type_of_internal history context' u in
-    CheckUtils.check_avoidance_problem x u_typ;
+    CheckUtils.check_avoidance_problem "LET" context x u_typ;
     DerivationTree.create_typing_node
       ~rule:"LET"
       ~env:context
