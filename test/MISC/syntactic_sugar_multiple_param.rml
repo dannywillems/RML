@@ -1,4 +1,6 @@
 let f = fun(x : Int.t, y : Int.t) -> Unimplemented;;
-let x_42 = 42 in
-let l = List.empty in
+let x_42 = 42;;
+let l = List.empty;;
+
 f x_42 x_42 [@show_derivation_tree, no_context];;
+
