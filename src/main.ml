@@ -171,10 +171,6 @@ let read_top_level_let x raw_term =
 
 (* ------------------------------------------------- *)
 (* Functions for actions *)
-let check_typing lexbuf = ()
-
-let well_formed lexbuf = ()
-
 let eval lexbuf = ()
 
 (** Action to check the subtype algorithm (with or without REFL). It uses the
@@ -304,8 +300,6 @@ let () =
     print_info "-------------------------\n\n"
   );
   match (Action.t_of_string (!eval_opt)) with
-  | Action.Check_typing -> execute check_typing lexbuf
-  | Action.WellFormed -> execute well_formed lexbuf
   | Action.Eval -> execute eval lexbuf
   | Action.Subtype -> execute check_subtype lexbuf
   | Action.Typing -> execute typing lexbuf

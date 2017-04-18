@@ -1,9 +1,7 @@
 exception Undefined_action of string
 
 type t =
-  | Check_typing
   | Eval
-  | WellFormed
   | Subtype
   | Typing
 
