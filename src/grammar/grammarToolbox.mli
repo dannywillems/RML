@@ -4,5 +4,8 @@ val ba_raw_term :
 val fa_raw_term :
   Grammar.nominal_term -> string list
 
-val remove_type_ascription_in_term :
-  Grammar.nominal_term -> Grammar.nominal_term
+val string_of_term_for_fresh_variable :
+  Grammar.raw_term -> string
+
+val is_raw_variable :
+  Grammar.raw_term -> bool
