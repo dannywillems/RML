@@ -1,13 +1,6 @@
 %{
   exception No_argument
 
-  let rec currying args return = match args with
-    | [] -> raise No_argument
-    | [(x, s)] -> Grammar.TermAbstraction(s, (x, return))
-    | head :: tail ->
-       let x, s = head in
-       Grammar.TermAbstraction(s, (x, currying tail return))
-
   (*
   let rec sugar_list l = match l with
     | [] -> Grammar.TermAscription(
@@ -42,6 +35,27 @@
     let name = "'" ^ "var" ^ (string_of_int (!current_integer)) in
     incr current_integer;
     name
+
+  let rec currying args return = match args with
+    | [] -> raise No_argument
+    | [(x, s)] -> Grammar.TermAbstraction(s, (x, return))
+    | head :: tail ->
+       let x, s = head in
+       Grammar.TermAbstraction(s, (x, currying tail return))
+
+  (* f x y z -->
+     let f_x = f x in
+     let f_x_y = f_x y in
+     f_x_y_z
+  *)
+  let rec currying_app_term f args = match args with
+    | [] -> failwith "No arguments"
+    | [head] -> Grammar.TermVarApplication(f, head)
+    | head :: tail ->
+       let x = fresh_variable () in
+       let s = Grammar.TermVarApplication(f, head) in
+       let t = currying_app_term x tail in
+       Grammar.TermLet(s, (x, t))
 %}
 
 %token COLON
@@ -257,28 +271,15 @@ rule_term_let_binding:
 rule_application:
 (* f x y z *)
 | f = ID ; args = rule_application_arguments {
-                   (* f x y z -->
-                      let f_x = f x in
-                      let f_x_y = f_x y in
-                      f_x_y_z
-                    *)
-                      let rec currying_app f args = match args with
-                        | [] -> failwith "No arguments"
-                        | [head] -> Grammar.TermVarApplication(f, head)
-                        | head :: tail ->
-                           let x = fresh_variable () in
-                           let s = Grammar.TermVarApplication(f, head) in
-                           let t = currying_app x tail in
-                           Grammar.TermLet(s, (x, t))
-                      in
-                      currying_app f args
-                 }
+                    currying_app_term f args
+                    }
+
 (* term y --> let variable = term in variable y *)
 | term = rule_term_for_application ;
-  y = ID {
-          let variable = fresh_variable () in
-          let app = Grammar.TermVarApplication(variable, y) in
-          Grammar.TermLet(term, (variable, app))
+  args = rule_application_arguments {
+          let f_term = fresh_variable () in
+          let s = currying_app_term f_term args in
+          Grammar.TermLet(term, (f_term, s))
         }
 
 rule_application_arguments:
