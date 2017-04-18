@@ -1,6 +1,31 @@
-let module Bool = struct
-  type t = sig type a end
-  let true = Unimplemented : self.t
-  let false = Unimplemented : self.t
-end;;
+(* Booleans are implemented like in System F.
+*)
+let module Bool = struct(bool)
+  type t = forall(x : sig type t end) x.t -> x.t -> x.t
 
+  let true : bool.t =
+    fun(typ : sig type t end,
+        t : typ.t,
+        f : typ.t
+       ) ->
+      t
+
+  let false : bool.t =
+    fun(typ : sig type t end,
+        t : typ.t,
+        f : typ.t
+       ) ->
+      f
+
+  let not = fun(x : bool.t) ->
+    x bool bool.false bool.true
+
+  let and =
+    fun(x : bool.t, y : bool.t) ->
+      x bool y bool.false
+
+  let or =
+    fun(x : bool.t, y : bool.t) ->
+      x bool bool.true y
+
+end [@show_derivation_tree, no_context];;
