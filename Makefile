@@ -34,6 +34,7 @@ MLI := \
 all:
 	@ $(OCAMLBUILD) $(SRC_DIR)/$(TARGET)
 	@ rm $(TARGET)
+	@ rm -f $(PWD)/$(EXECUTABLE)
 	@ ln -s _build/$(SRC_DIR)/$(TARGET) $(PWD)/$(EXECUTABLE)
 
 test: all
