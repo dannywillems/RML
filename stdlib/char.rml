@@ -1,4 +1,4 @@
-let Char = struct
+let module Char = struct
   type t = sig type t end
   let code = Unimplemented : self.t -> Int.t
   let chr = Unimplemented : Int.t -> self.t

@@ -1,4 +1,4 @@
-let Option = struct(opt)
+let module Option = struct(opt)
   type t = sig
     val content : Int.t
   end

@@ -1,4 +1,4 @@
-let Float = struct
+let module Float = struct
   type t = sig type t end
   let int_of_float : self.t -> Int.t = Unimplemented
   let truncate = self.int_of_float
