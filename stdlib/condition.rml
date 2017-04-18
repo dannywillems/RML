@@ -1,8 +1,10 @@
 (* *)
 
 let test =
-  fun(condition : Bool.t,
-      if_true : Unit.t -> Int.t,
-      if_false : Unit.t -> Int.t
-     ) -> Unimplemented
-;;
+  fun(typ : sig type t end,
+      condition : Bool.t,
+      if_true : typ.t,
+      if_false : typ.t
+     ) ->
+    condition typ if_true if_false
+[@show_derivation_tree, no_context];;
