@@ -26,10 +26,7 @@
       )
 
   let make_unit () =
-    Grammar.TermAscription(
-        Grammar.TermUnimplemented,
-        Grammar.TypeProjection("Unit", "t")
-      )
+    Grammar.TermFieldSelection("Unit", "unit")
 
   let current_integer = ref 0
 
