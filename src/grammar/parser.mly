@@ -2,15 +2,17 @@
   exception No_argument
 
   (*
+    [4 ; 5 ; 6] ->
+    let 'x = 4 in
+    let 'y = 5 in
+    let 'z = 6 in
+    List.const 'x (List.cons 'y (List.cons 'z List.empty))
   let rec sugar_list l = match l with
-    | [] -> Grammar.TermAscription(
-                Grammar.TermUnimplemented,
-                GrammarTypeProjection("list", "empty")
-              )
+    | [] -> Grammar.TermFieldSelection("List", "empty")
     | head :: tail ->
-       Grammar.Grammar.TermFieldSelection("list", "cons")
+       Grammar.Grammar.TermFieldSelection("List", "cons")
          )
-   *)
+  *)
 
   let make_integer n =
     Grammar.TermAscription(
@@ -42,11 +44,10 @@
     | head :: tail ->
        let x, s = head in
        Grammar.TermAbstraction(s, (x, currying tail return))
-
   (* f x y z -->
      let f_x = f x in
      let f_x_y = f_x y in
-     f_x_y_z
+     f_x_y z
   *)
   let rec currying_app_term f args = match args with
     | [] -> failwith "No arguments"
@@ -56,6 +57,34 @@
        let s = Grammar.TermVarApplication(f, head) in
        let t = currying_app_term x tail in
        Grammar.TermLet(s, (x, t))
+
+  (*
+     f t1 t2 t3 -->
+     let v_t1 = t1 in
+     let v_t2 = t2 in
+     let v_t3 = t3 in
+     let f_t1 = f v_t1 in
+     let f_t1_t2 = f_t1 v_t2 in
+     f_t1_t2 v_t3
+  *)
+  let rec let_bindings_of_terms t terms_with_variables =
+    match terms_with_variables with
+    | [] -> t
+    | head :: tail ->
+       let x, s = head in
+       let t = let_bindings_of_terms t tail in
+       Grammar.TermLet(s, (x, t))
+
+  let rec currying_app_with_terms f terms =
+    let terms_with_variables =
+      List.map
+        (fun t -> (fresh_variable (), t))
+        terms
+    in
+    let variables = List.map fst terms_with_variables in
+    let t = currying_app_term f variables in
+    let_bindings_of_terms t terms_with_variables
+
 %}
 
 %token COLON
@@ -85,6 +114,7 @@
 %token STRUCT
 %token TYPE
 %token VAL
+%token MODULE
 
 %token <string> ID
 %token <string> ID_CAPITALIZE
@@ -197,6 +227,7 @@ rule_let_binding:
   term = rule_term { x, Grammar.TermAscription(term, typ) }
 (* let M = t *)
 | LET ;
+  MODULE ;
   x = ID_CAPITALIZE ;
   EQUAL ;
   m = rule_module {
@@ -204,6 +235,7 @@ rule_let_binding:
         }
 (* let M : T = t *)
 | LET ;
+  MODULE ;
   x = ID_CAPITALIZE ;
   COLON ;
   typ = rule_type ;
@@ -271,43 +303,27 @@ rule_term_let_binding:
 rule_application:
 (* f x y z *)
 | f = ID ; args = rule_application_arguments {
-                    currying_app_term f args
+                    currying_app_with_terms f args
                     }
 
 (* term y --> let variable = term in variable y *)
 | term = rule_term_for_application ;
   args = rule_application_arguments {
           let f_term = fresh_variable () in
-          let s = currying_app_term f_term args in
+          let s = currying_app_with_terms f_term args in
           Grammar.TermLet(term, (f_term, s))
         }
 
 rule_application_arguments:
-| x = ID { [x] }
-| x = ID ; y = rule_application_arguments {
-                   x :: y
-                 }
+| t = rule_term_for_application { [t] }
+| t = rule_term_for_application ;
+  tail = rule_application_arguments {
+             t :: tail
+           }
 (* Term which can be used for application. *)
 rule_term_for_application:
 | t = rule_term_without_parent { t }
 | LEFT_PARENT ; t = rule_term_with_parent ; RIGHT_PARENT { t }
-(*
-| t = rule_term ; u = rule_term {
-      Grammar.TermLet(
-          t,
-          ("f",
-           Grammar.TermLet(
-             u,
-             ("g",
-              Grammar.TermVarApplication("f", "g")
-             )
-           )
-          )
-        )
-    }
-*)
-(* f x y z z' ... *)
-(* TODO *)
 
 rule_record:
 | LEFT_BRACKET ;
