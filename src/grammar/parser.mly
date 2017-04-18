@@ -510,8 +510,8 @@ rule_sugar_term_infix:
               n
             )
         }
-
 (*
+TODO: See #26
 rule_sugar_term_with_parent:
 | IF ;
   cond = rule_term ;
@@ -519,10 +519,9 @@ rule_sugar_term_with_parent:
   if_true = rule_term ;
   ELSE ;
   if_false = rule_term {
-                 condition.
+                 Grammar.Term
                }
-*)
-
+ *)
 (* ------------------------------- *)
 (* Types *)
 
