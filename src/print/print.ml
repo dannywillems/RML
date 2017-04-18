@@ -211,9 +211,9 @@ module Pretty = struct
         (string (show_atom y))
     | Grammar.TermLet (t, (x, u)) ->
       block
-        (let_ ^/^ (string (show_atom x)) ^/^ equals ^^ space)
+        (let_ ^/^ (string (show_atom x)) ^/^ equals)
         (document_of_nominal_term t)
-        (in_)
+        (space ^^ in_)
       ^/^
       document_of_nominal_term u
     (* ----- Unofficial terms ----- *)
