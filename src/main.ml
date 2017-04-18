@@ -173,7 +173,17 @@ let read_top_level_let x raw_term =
 (* Functions for actions *)
 let check_typing lexbuf = ()
 
-let well_formed lexbuf = ()
+let well_formed lexbuf =
+  let raw_is_well_formed, top_level =
+    Parser.top_level_well_formed Lexer.prog lexbuf
+  in
+  match top_level with
+  | Grammar.Type raw_typ ->
+    let nominal_typ = Grammar.import_typ (!kit_import_env) raw_typ in
+    let is_well_formed = WellFormed.typ (!typing_env) nominal_typ in
+    print_is_well_formed raw_is_well_formed is_well_formed raw_typ
+  | Grammar.TopLevelLetType(x, raw_term) ->
+    read_top_level_let x raw_term
 
 let eval lexbuf = ()
 

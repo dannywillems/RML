@@ -116,6 +116,7 @@
 
 %start <Grammar.raw_top_level_term * Grammar.ppx_annotation list> top_level_term
 %start <bool * Grammar.raw_top_level_subtype * Grammar.ppx_annotation list> top_level_subtype
+%start <bool * Grammar.raw_top_level_typ * Grammar.ppx_annotation list> top_level_well_formed
 %%
 
 (* ------------------------------------------ *)
@@ -139,7 +140,7 @@ top_level_term_content:
                 Grammar.TopLevelLetTerm(x, t)
               }
 
-(* Entry point for subtyping algorithm *)
+(* ---- Entry point for subtyping algorithm ----- *)
 top_level_subtype:
 | content = top_level_subtype_content ;
   SEMICOLON ;
@@ -174,6 +175,23 @@ top_level_subtype_content:
   t = rule_type {
           (false, Grammar.CoupleTypes(s, t))
         }
+
+(* ---- Entry point for well formed algorithm ----- *)
+top_level_well_formed:
+| content = top_level_well_formed_content ;
+  SEMICOLON ;
+  SEMICOLON {
+      let b 
+| EOF { raise End_of_file }
+
+top_level_well_formed_content:
+| t = top_level_let { let (var, term) = t in
+                        (true, Grammar.TopLevelLetType(var, term))
+                      }
+| EXCLAMATION ; t = rule_typ ; SEMICOLON ; SEMICOLON {
+                                               (false, Grammar.Type(t))
+                                             }
+| t = rule_typ ; SEMICOLON ; SEMICOLON { (true, Grammar.Type(t))  }
 
 (* ------------------------------------------ *)
 
