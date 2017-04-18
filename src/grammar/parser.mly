@@ -464,19 +464,27 @@ rule_sugar_term_without_parent:
 | LEFT_PARENT ;
   t = rule_sugar_term_without_parent ;
   RIGHT_PARENT { t }
-
-(*
-(* For lists *)
+(* For lists
 | l = rule_sugar_term_list { l }
+*)
 
 (* Rule to build a list with the sugar *)
+(*
 rule_sugar_term_list:
 | LEFT_SQUARE_BRACKET ;
   l = rule_sugar_term_list_content ;
-  RIGHT_SQUARE_BRACKET {
+  {
     }
-*)
 
+rule_sugar_term_list_content:
+| RIGHT_SQUARE_BRACKET { [Grammar.TermFieldSelection("List", "empty")] }
+| t = rule_term_for_application ;
+  SEMICOLON ;
+  tail = rule_sugar_term_list_content {
+             let cons = Grammar.TermFieldSelection("List", "cons")
+             t :: tail
+           }
+*)
 rule_sugar_term_infix:
 | m = INTEGER ;
   PLUS ;
