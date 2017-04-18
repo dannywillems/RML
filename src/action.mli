@@ -4,8 +4,6 @@ type t =
   | Check_typing
   | Eval
   | WellFormed
-  | Read_term
-  | Read_type
   | Subtype
   | Subtype_with_REFL
   | Subtype_same_output

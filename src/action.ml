@@ -4,8 +4,6 @@ type t =
   | Check_typing
   | Eval
   | WellFormed
-  | Read_term
-  | Read_type
   | Subtype
   | Subtype_with_REFL
   | Subtype_same_output
@@ -13,8 +11,6 @@ type t =
 
 let t_of_string = function
   | "check_typing" -> Check_typing
-  | "read_term" -> Read_term
-  | "read_type" -> Read_type
   | "eval" -> Eval
   | "subtype" -> Subtype
   | "subtype_with_REFL" -> Subtype_with_REFL
