@@ -2,17 +2,20 @@ let check_well_formedness context typ =
   if not (WellFormed.typ context typ)
   then raise (Error.NotWellFormed(context, typ))
 
-let check_avoidance_problem x s =
+let check_avoidance_problem rule context x s =
   if Grammar.occurs_typ x s
-  then Error.raise_avoidance_problem x s
+  then Error.raise_avoidance_problem rule context x s
 
 let check_type_match context term s t =
   if not (Subtype.is_subtype ~context s t)
   then Error.raise_type_mismatch term s t
 
 let check_subtype context s t =
-  if not (Subtype.is_subtype ~context s t)
-  then Error.raise_subtype s t
+  let history, is_subtype =
+    Subtype.subtype ~context s t
+  in
+  if not is_subtype
+  then Error.raise_subtype history s t
 
 let check_disjoint_domains d1 d2 =
   let domain_d1 = TypeUtils.labels_of_declaration d1 in

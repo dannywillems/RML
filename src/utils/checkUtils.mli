@@ -4,6 +4,8 @@ val check_well_formedness :
   unit
 
 val check_avoidance_problem :
+  string ->
+  ContextType.context ->
   AlphaLib.Atom.t ->
   Grammar.nominal_typ ->
   unit
