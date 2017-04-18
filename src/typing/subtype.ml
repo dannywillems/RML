@@ -345,10 +345,10 @@ and subtype_internal history context s t =
       ~t
       ~history:[]
 
-let subtype ?(with_refl=false) ?(context = ContextType.empty ()) s t =
+let subtype ?(context = ContextType.empty ()) s t =
   subtype_internal [] context s t
 (* subtype_internal (ContextType.empty ()) s t *)
 
-let is_subtype ?(with_refl=false) ?(context = ContextType.empty ()) s t =
-  let _, b = subtype ~with_refl ~context s t in
+let is_subtype ?(context = ContextType.empty ()) s t =
+  let _, b = subtype ~context s t in
   b

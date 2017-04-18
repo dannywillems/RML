@@ -18,7 +18,6 @@
     the rules.
 *)
 val subtype :
-  ?with_refl:bool ->
   ?context:ContextType.context ->
   Grammar.nominal_typ ->
   Grammar.nominal_typ ->
@@ -27,7 +26,6 @@ val subtype :
 (** [is_subtype ~with_refl ~context s t] returns [true] is [s] is a subtype of [t]. Arguments are the same than {!subtype}.
 *)
 val is_subtype :
-  ?with_refl:bool ->
   ?context:ContextType.context ->
   Grammar.nominal_typ ->
   Grammar.nominal_typ ->
