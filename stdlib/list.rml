@@ -1,15 +1,20 @@
-let module List = struct(list)
+let module List = fun(typ : sig type t end) -> struct(list)
   type t = sig
-    val head : Unit.t -> Int.t
+    val head : Unit.t -> typ.t
     val tail : Unit.t -> list.t
+    (* We add size to define easily is_empty *)
+    val size : Int.t
   end
   let empty : list.t = struct
     let head = fun (x : Unit.t) -> Unimplemented (* Must fail... *)
     let tail = fun (x : Unit.t) -> Unimplemented (* Must fail... *)
+    let size = Int.zero
   end
-  let cons : Int.t -> list.t -> list.t =
-    fun(x : Int.t, l : list.t) -> struct
+  let cons = fun(x : typ.t, l : list.t) -> struct
       let head = fun(x' : Unit.t) -> x
       let tail = fun(l' : Unit.t) -> l
+      let size = Int.succ l.size
     end
+  let is_empty = fun(l : list.t) ->
+    Int.equal 0 l.size
 end;;
