@@ -162,7 +162,7 @@ let read_top_level_let x raw_term =
       x
   in
   print_variable_color_if_verbose x;
-  print_endline " : ";
+  print_endline_if_verbose " : ";
   print_type_color_if_verbose nominal_typ;
   print_typing_derivation_tree history;
   print_endline_if_verbose "-----------------------";
@@ -265,13 +265,13 @@ let () =
 let stdlib_files = [
   "stdlib/unit.rml";
   "stdlib/bool.rml";
+  "stdlib/condition.rml";
   "stdlib/int.rml";
   "stdlib/float.rml";
   "stdlib/char.rml";
   "stdlib/string.rml";
   "stdlib/option.rml";
   "stdlib/list.rml";
-  "stdlib/condition.rml";
   "stdlib/pervasives.rml";
   "stdlib/point.rml";
   "stdlib/pair.rml";
