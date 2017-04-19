@@ -28,4 +28,4 @@ let module Bool = struct(bool)
     fun(x : bool.t, y : bool.t) ->
       x bool bool.true y
 
-end [@show_derivation_tree, no_context];;
+end;;
