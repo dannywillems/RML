@@ -1,5 +1,3 @@
-(* *)
-
 let test =
   fun(typ : sig type t end,
       condition : Bool.t,
