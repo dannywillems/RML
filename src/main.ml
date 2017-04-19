@@ -294,7 +294,6 @@ let rec add_in_environment files = match files with
 
 let () =
   let lexbuf = Lexing.from_channel (open_in (!file_name)) in
-  current_file := (!file_name);
   if (!use_stdlib)
   then (
     print_info "Loading definitions from standard library.\n";
@@ -302,6 +301,7 @@ let () =
     print_info "\nStandard library loaded.\n";
     print_info "-------------------------\n\n"
   );
+  current_file := (!file_name);
   match (Action.t_of_string (!eval_opt)) with
   | Action.Eval -> execute eval lexbuf
   | Action.Subtype -> execute check_subtype lexbuf
