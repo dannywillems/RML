@@ -1,3 +1,3 @@
-Int.t !<: Unit.t;;
+Unit.t !<: Int.t [@show_derivation_tree, no_context];;
 
-Char.t !<: Unit.t [@show_derivation_tree, no_context];;
+Int.t !<: Unit.t [@show_derivation_tree, no_context];;
