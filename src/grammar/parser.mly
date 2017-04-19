@@ -264,6 +264,8 @@ rule_term:
 rule_term_without_parent:
 (* x *)
 | id = ID { Grammar.TermVariable (id) }
+(* Int, String, ... Modules in general) *)
+| m = ID_CAPITALIZE { Grammar.TermVariable(m) }
 (* Field selection: x.a *)
 | x = ID ;
   DOT ;
@@ -331,6 +333,7 @@ rule_application_arguments:
   tail = rule_application_arguments {
              t :: tail
            }
+
 (* Term which can be used for application. *)
 rule_term_for_application:
 | t = rule_term_without_parent { t }
