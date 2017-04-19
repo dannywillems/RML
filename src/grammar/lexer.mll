@@ -44,7 +44,6 @@ let end_ = "end"
 let type_ = "type"
 let val_ = "val"
 
-let lambda = "lambda"
 let fun_ = "fun"
 
 let forall = "forall"
@@ -109,7 +108,6 @@ rule prog = parse
   | unimplemented { Parser.UNIMPLEMENTED_TERM}
 
   | fun_ { Parser.FUN }
-  | lambda { Parser.ABSTRACTION }
   | ':' { Parser.COLON }
   | "->" { Parser.ARROW_RIGHT }
 
