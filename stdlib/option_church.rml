@@ -1,0 +1,9 @@
+let module Option = fun(elem : sig type t end) -> struct(opt)
+  type t = forall(b : sig type t end) (elem.t -> b.t) -> b.t -> b.t
+
+  let some : elem.t -> opt.t =
+    fun(x : elem.t) -> fun(b : sig type t end, s : (elem.t -> b.t), n : b.t) -> s x
+
+  let none : opt.t =
+    fun(b : sig type t end, s : (elem.t -> b.t), n : b.t) -> n
+end;;
