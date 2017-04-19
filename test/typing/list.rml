@@ -1,0 +1,29 @@
+let int_list = List Int [@show_derivation_tree, no_context];;
+
+let l_42 = int_list.cons 42 int_list.empty  [@show_derivation_tree, no_context];;
+
+let head_of_l_42 = l_42.head () [@show_derivation_tree, no_context];;
+
+let l_longer = int_list.cons 45 (int_list.cons 42 int_list.empty);;
+
+l_longer.head ();;
+
+l_longer.head Int [@show_derivation_tree, no_context];;
+
+(*
+let x = [42 ; 2];;
+let x = l.cons 2 (l.cons 42 l.empty);;
+
+let f = fun (x : Int.t, y : Int.t) ->
+  let plus_x = Int.plus x;;
+  plus_x y
+;;
+
+let x =
+  let cons_2 = l.cons 2 in
+  let cons_42 = l.cons 42 in
+  let cons_42_empty = cons_42 l.empty in
+  cons_2 cons_42_empty;;
+
+let x = f x (g x' y')
+*)
