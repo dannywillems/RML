@@ -115,28 +115,10 @@ let print_is_subtype s t raw_is_subtype is_subtype =
     (if raw_is_subtype = is_subtype then success_style else error_style)
     "%s - %s is%s a subtype of %s\n"
     (if raw_is_subtype = is_subtype then "✓" else "❌")
-    (Print.string_of_raw_typ s)
+    (Print.string_of_nominal_typ s)
     (if raw_is_subtype then "" else " not")
-    (Print.string_of_raw_typ t);
+    (Print.string_of_nominal_typ t);
   if raw_is_subtype <> is_subtype then exit(1)
-
-let print_is_subtype_algorithms
-    raw_s raw_t is_subtype_with_refl is_subtype_without_refl raw_is_subtype
-  =
-  Printf.printf
-    "%s <: %s\n"
-    (Print.string_of_raw_typ raw_s)
-    (Print.string_of_raw_typ raw_t);
-  ANSITerminal.printf
-    (if is_subtype_without_refl = raw_is_subtype then success_style else error_style)
-    "    %s %s\n"
-    (if is_subtype_without_refl = raw_is_subtype then "✓" else "❌")
-    "Without REFL";
-  ANSITerminal.printf
-    (if is_subtype_with_refl = raw_is_subtype then success_style else error_style)
-    "    %s %s\n"
-    (if is_subtype_with_refl = raw_is_subtype then "✓" else "❌")
-    "With REFL"
 
 (* ------------------------------------------------- *)
 (* Utils *)
@@ -191,7 +173,22 @@ let check_subtype lexbuf =
       Subtype.subtype ~context:(!typing_env) nominal_s nominal_t
     in
     print_subtyping_derivation_tree history;
-    print_is_subtype raw_s raw_t raw_is_subtype is_subtype;
+    print_is_subtype nominal_s nominal_t raw_is_subtype is_subtype;
+    print_endline "-------------------------"
+  | Grammar.CoupleTerms(raw_s, raw_t) ->
+    let nominal_s = Grammar.import_term (!kit_import_env) raw_s in
+    let nominal_t = Grammar.import_term (!kit_import_env) raw_t in
+    let history_s, type_of_s = Typer.type_of ~context:(!typing_env) nominal_s in
+    let history_t, type_of_t = Typer.type_of ~context:(!typing_env) nominal_t in
+    print_typing_derivation_tree history_s;
+    print_typing_derivation_tree history_t;
+    check_well_formed (!typing_env) type_of_s;
+    check_well_formed (!typing_env) type_of_t;
+    let history, is_subtype =
+      Subtype.subtype ~context:(!typing_env) type_of_s type_of_t
+    in
+    print_subtyping_derivation_tree history;
+    print_is_subtype type_of_s type_of_t raw_is_subtype is_subtype;
     print_endline "-------------------------"
   | Grammar.TopLevelLetSubtype (var, raw_term) ->
     read_top_level_let var raw_term
