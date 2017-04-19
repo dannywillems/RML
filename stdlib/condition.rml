@@ -5,4 +5,4 @@ let test =
       if_false : typ.t
      ) ->
     condition typ if_true if_false
-[@show_derivation_tree, no_context];;
+;;
