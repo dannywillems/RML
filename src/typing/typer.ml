@@ -203,7 +203,7 @@ let rec type_of_internal history context term = match term with
         ~env:context
         ~term:(DerivationTree.Term(term))
         ~typ:t
-        ~history:[])
+        ~history)
   (* Integers can only be defined with ascription which gives the right type
      (int.T). We only need to have a subtype of int.T, and Bottom does the job.
   *)
