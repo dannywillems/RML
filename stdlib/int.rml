@@ -1,3 +1,8 @@
-let module Int = struct
-  type t = sig type t end
-end;;
+(* Encoding Integers like System F *)
+let module Int = struct(int)
+  type t = forall(typ : sig type t end) (typ.t -> typ.t) -> typ.t -> typ.t
+  let zero = fun(typ : sig type t end, s : typ.t -> typ.t, z : typ.t) -> z
+  let succ = fun(n : int.t, typ : sig type t end, s : typ.t -> typ.t, z : typ.t) -> s (n typ s z)
+  let cplus = fun(m : int.t, n : int.t) -> m int int.succ n
+  let equal : int.t -> int.t -> Bool.t = Unimplemented
+end [@show_derivation_tree, no_context];;
