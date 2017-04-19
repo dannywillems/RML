@@ -17,6 +17,11 @@ let module Bool = struct(bool)
        ) ->
       f
 
+  (*
+  let not' : bool.t -> bool.t = fun(x : bool.t, typ : sig type t end, t : typ.t, f : typ.t) ->
+    x typ f t
+  *)
+
   let not = fun(x : bool.t) ->
     x bool bool.false bool.true
 
