@@ -244,7 +244,7 @@ rule_let_binding:
   m = rule_module {
           x, m
         }
-(* let M : T = t *)
+(* let module M : T = t *)
 | LET ;
   MODULE ;
   x = ID_CAPITALIZE ;
@@ -252,6 +252,24 @@ rule_let_binding:
   typ = rule_type ;
   EQUAL ;
   m = rule_module {
+          x, Grammar.TermAscription(m, typ)
+        }
+
+(* let module M : T = t *)
+| LET ;
+  MODULE ;
+  x = ID_CAPITALIZE ;
+  EQUAL ;
+  m = rule_functor {
+          x, m
+        }
+| LET ;
+  MODULE ;
+  x = ID_CAPITALIZE ;
+  COLON ;
+  typ = rule_type ;
+  EQUAL ;
+  m = rule_functor {
           x, Grammar.TermAscription(m, typ)
         }
 
@@ -398,15 +416,7 @@ rule_value:
 
 (* Abstractions *)
 rule_abstraction:
-(* λ(x : S) t *)
-| ABSTRACTION ;
-  LEFT_PARENT ;
-  args = rule_arguments_list
-  RIGHT_PARENT ;
-  t = rule_term {
-          currying args t
-        }
-(* fun (x : T) -> t *)
+(* fun (x : T) -> t (Old : λ(x : S) t ) *)
 | FUN ;
   LEFT_PARENT ;
   args = rule_arguments_list ;
@@ -414,6 +424,31 @@ rule_abstraction:
   ARROW_RIGHT ;
   t = rule_term {
           currying args t
+        }
+
+(* Allow to write:
+   - fun(x : sig type t end) -> struct ... end
+   - fun(x : sig type t end, x' : sig type t end) -> struct ... end
+*)
+rule_functor:
+| FUN ;
+  LEFT_PARENT ;
+  args = rule_arguments_list ;
+  RIGHT_PARENT ;
+  ARROW_RIGHT ;
+  m = rule_module {
+          currying args m
+        }
+(* Sequence of functor.
+   - fun(x : sig type t end) -> fun(x' : sig type t end) -> struct ... end
+*)
+| FUN ;
+  LEFT_PARENT ;
+  args = rule_arguments_list ;
+  RIGHT_PARENT ;
+  ARROW_RIGHT ;
+  f = rule_functor {
+          currying args f
         }
 
 (* A rule to parse the list of arguments of a function. Curryfication is used; *)
