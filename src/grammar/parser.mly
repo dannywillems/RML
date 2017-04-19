@@ -215,6 +215,17 @@ top_level_subtype_content:
   t = rule_type {
           (false, Grammar.CoupleTypes(s, t))
         }
+| s = rule_term ;
+  SUBTYPE ;
+  t = rule_term {
+          (true, Grammar.CoupleTerms(s, t))
+        }
+
+| s = rule_term ;
+  NOT_SUBTYPE ;
+  t = rule_term {
+          (false, Grammar.CoupleTerms(s, t))
+        }
 
 (* ------------------------------------------ *)
 
@@ -255,7 +266,9 @@ rule_let_binding:
           x, Grammar.TermAscription(m, typ)
         }
 
-(* let module M : T = t *)
+(* Syntax for functors.
+   let module M : T = fun(x : sig type t end) -> struct ... end
+*)
 | LET ;
   MODULE ;
   x = ID_CAPITALIZE ;
