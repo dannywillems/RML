@@ -268,10 +268,13 @@ let stdlib_files = [
   "stdlib/char.rml";
   "stdlib/string.rml";
   "stdlib/option.rml";
+  "stdlib/option_church.rml";
   "stdlib/list.rml";
   "stdlib/pervasives.rml";
   "stdlib/point.rml";
   "stdlib/pair.rml";
+  "stdlib/map.rml";
+  "stdlib/graph.rml";
 ]
 
 let rec add_in_environment files = match files with
