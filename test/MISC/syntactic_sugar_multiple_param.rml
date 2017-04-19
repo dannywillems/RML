@@ -1,10 +1,9 @@
 let f = fun(x : Int.t, y : Int.t) -> 42;;
 let x_42 = 42;;
-let l = List.empty;;
 
-f x_42 x_42 [@show_derivation_tree, no_context];;
-f x_42 [@show_derivation_tree, no_context];;
-f 42 [@show_derivation_tree, no_context];;
-f (let x = 42 in f x 42) [@show_derivation_tree, no_context];;
-f (let x = 42 in x) 32 [@show_derivation_tree, no_context];;
-f 0 32 [@show_derivation_tree, no_context];;
+f x_42 x_42;;
+f x_42;;
+f 42;;
+f (let x = 42 in f x 42);;
+f (let x = 42 in x) 32;;
+f 0 32;;
