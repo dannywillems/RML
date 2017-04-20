@@ -1,13 +1,12 @@
 let module GraphSig =
-  sig type t = sig type node val succ : self.node -> self.node end end :
   struct
     type t = sig
-      type node = Any
+      type node
       val succ : self.node -> self.node
     end
   end;;
 
-let module GraphInt : GraphSig.t = struct
+let module GraphInt = GraphSig.t : struct
   type node = Int.t
   let succ = Int.succ
 end;;
