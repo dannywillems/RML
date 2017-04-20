@@ -1,24 +1,32 @@
-let empty = List.empty [@show_derivation_tree];;
+let module A = struct
+  type t = Any
+end;;
 
-let x = 42;;
+let module N = struct
+  type t = Nothing
+end;;
 
-let unit = ();;
-let must_be_unit : Int.t = empty.head unit;;
+let module NA = struct
+  type t = Nothing -> Any
+end;;
+
+let module AA = struct
+  type t = Any -> Nothing
+end;;
+
+let list_a = List A;;
+let list_n = List N;;
 
 (*
-let x = [42 ; 2];;
-let x = l.cons 2 (l.cons 42 l.empty);;
-
-let f = fun (x : Int.t, y : Int.t) ->
-  let plus_x = Int.plus x;;
-  plus_x y
-;;
-
-let x =
-  let cons_2 = l.cons 2 in
-  let cons_42 = l.cons 42 in
-  let cons_42_empty = cons_42 l.empty in
-  cons_2 cons_42_empty;;
-
-let x = f x (g x' y')
+  The subtyping algorithm produces a stack overflow because the question is
+  cyclic: the question `list_a.t <: list_n.t` will appear in the question
+  `list_a.t.tail |: list_n.t.tail`
+list_a.t <: list_n.t [@show_derivation_tree, no_context];;
 *)
+
+List N !<: List A [@show_derivation_tree, no_context];;
+
+let nothing_any_list = List NA;;
+let any_any_list = List AA;;
+
+any_any_list !<: nothing_any_list [@show_derivation_tree, no_context];;
