@@ -127,7 +127,6 @@ let rec type_of_internal history context term = match term with
     (* As we do for the untyped introduction of a recursive type, we try to
        infer the type of z. After that, we check the type of z is a sub-type of the
        given type [typ] (with this method, we add the rule SUB at the same time).
-    *)
     let context' =
       ContextType.add z Grammar.TypeTop context
     in
@@ -135,12 +134,16 @@ let rec type_of_internal history context term = match term with
       type_of_decl_internal z history context' d
     in
     CheckUtils.check_subtype context type_of_d typ;
+    *)
     DerivationTree.create_typing_node
       ~rule:"{}-I"
       ~env:context
       ~term:(DerivationTree.Term(term))
       ~typ:typ
+      (*
       ~history:[history_d]
+      *)
+      ~history
   (* UN-{}-I
      TODO Add SUB.
      Γ ⊦ d : T
