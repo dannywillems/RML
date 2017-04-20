@@ -81,3 +81,7 @@ and string_of_decl_for_fresh_variable decl = match decl with
 let is_raw_variable t = match t with
   | Grammar.TermVariable(_) -> true
   | _ -> false
+
+let extract_variable t = match t with
+  | Grammar.TermVariable(x) -> Some x
+  | _ -> None
