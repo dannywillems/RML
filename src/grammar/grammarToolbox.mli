@@ -9,3 +9,6 @@ val string_of_term_for_fresh_variable :
 
 val is_raw_variable :
   Grammar.raw_term -> bool
+
+val extract_variable :
+  Grammar.raw_term -> string option
