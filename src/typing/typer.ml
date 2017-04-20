@@ -74,7 +74,7 @@ let rec type_of_internal history context term = match term with
     in
     (match dep_function_opt with
     | Some (s, (z, t)) ->
-      CheckUtils.check_type_match context (Grammar.TermVariable y) type_of_y s;
+      CheckUtils.check_subtype context type_of_y s;
       (* Here, we rename the variable [z] (which is the variable in the for all
          type, by the given variable [y]). We don't substitute the variable by
          the right types because it doesn't work with not well formed types (like
