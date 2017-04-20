@@ -15,13 +15,6 @@ let rec var_unpack context x t =
   match t with
   | Grammar.TypeRecursive(z, t_z) ->
     Grammar.rename_typ (AlphaLib.Atom.Map.singleton z x) t_z
-  | Grammar.TypeIntersection(Grammar.TypeTop, t) ->
-    var_unpack context x t
-  | Grammar.TypeIntersection(t, Grammar.TypeTop) ->
-    var_unpack context x t
-  | Grammar.TypeProjection(x, field) ->
-    let type_of_x = ContextType.find x context in
-    var_unpack context x type_of_x
   | t -> t
 
 (* As selection rules are very close, we abstract it with this function.
@@ -179,6 +172,42 @@ and subtype_internal history context s t =
      =>
      Γ ⊦ x.A <: U'.
   *)
+  (* UN-REC-I<: *)
+  | (Grammar.TypeRecursive(z, t'), t) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+       TODO fresh z + rename
+       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
+    *)
+    let context' = ContextType.add z t' context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' t' t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REC-I <:"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
+  (* UN-<: REC-I *)
+  | (s, Grammar.TypeRecursive(z, t')) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+       TODO fresh z + rename
+       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
+    *)
+    let context' = ContextType.add z t' context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' s t'
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-<: REC-I"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
   | (Grammar.TypeProjection(x, label), u') ->
     rule_sel SEL_SUB history context (x, label) u'
 
@@ -239,6 +268,25 @@ and subtype_internal history context s t =
      =>
      Γ ⊦ T ∧ S <: U
   *)
+  | (s, Grammar.TypeIntersection(t, u)) ->
+    let left_history_subtype, left_is_subtype =
+      subtype_internal history context s t
+    in
+    let right_history_subtype, right_is_subtype =
+      subtype_internal history context s u
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"AND <:"
+      ~is_true:(left_is_subtype && right_is_subtype)
+      ~env:context
+      ~s
+      ~t:(Grammar.TypeIntersection(t, u))
+      ~history:[left_history_subtype ; right_history_subtype]
+  (* <: AND
+     Γ ⊦ S <: T ∧ Γ ⊦ S <: U
+     =>
+     Γ ⊦ S <: T ∧ U
+  *)
   | (Grammar.TypeIntersection(s, u), t) ->
     let history_left, is_subtype_left =
       subtype_internal history context s t
@@ -266,25 +314,6 @@ and subtype_internal history context s t =
         ~history:[history_right]
     )
 
-  (* <: AND
-     Γ ⊦ S <: T ∧ Γ ⊦ S <: U
-     =>
-     Γ ⊦ S <: T ∧ U
-  *)
-  | (s, Grammar.TypeIntersection(t, u)) ->
-    let left_history_subtype, left_is_subtype =
-      subtype_internal history context s t
-    in
-    let right_history_subtype, right_is_subtype =
-      subtype_internal history context s u
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"AND <:"
-      ~is_true:true
-      ~env:context
-      ~s
-      ~t:(Grammar.TypeIntersection(t, u))
-      ~history:[left_history_subtype ; right_history_subtype]
   (* FLD <: FLD
      Γ ⊦ T <: U => Γ ⊦ { a : T } <: { a : U }
   *)
@@ -295,46 +324,10 @@ and subtype_internal history context s t =
     in
     DerivationTree.create_subtyping_node
       ~rule:"FLD <: FLD"
-      ~is_true:true
+      ~is_true:is_subtype
       ~env:context
       ~s:(Grammar.TypeFieldDeclaration(a, t))
       ~t:(Grammar.TypeFieldDeclaration(b, u))
-      ~history:[history_subtype]
-  (* UN-REC-I<: *)
-  | (Grammar.TypeRecursive(z, t'), t) ->
-    (* We need to extend the context with the type of z because t' can use
-       fields and types defined in z.
-       TODO fresh z + rename
-       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
-    *)
-    let context' = ContextType.add z t' context in
-    let history_subtype, is_subtype =
-      subtype_internal history context' t' t
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-REC-I <:"
-      ~is_true:is_subtype
-      ~env:context
-      ~s
-      ~t
-      ~history:[history_subtype]
-  (* UN-<: REC-I *)
-  | (s, Grammar.TypeRecursive(z, t')) ->
-    (* We need to extend the context with the type of z because t' can use
-       fields and types defined in z.
-       TODO fresh z + rename
-       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
-    *)
-    let context' = ContextType.add z t' context in
-    let history_subtype, is_subtype =
-      subtype_internal history context' s t'
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-<: REC-I"
-      ~is_true:is_subtype
-      ~env:context
-      ~s
-      ~t
       ~history:[history_subtype]
   | _ ->
     DerivationTree.create_subtyping_node
