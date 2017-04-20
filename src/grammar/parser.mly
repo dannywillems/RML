@@ -309,6 +309,17 @@ rule_term_without_parent:
   a = ID {
           Grammar.TermFieldSelection(x, a)
         }
+| term = rule_term_for_application ;
+  DOT ;
+  a = ID {
+          let var_opt = GrammarToolbox.extract_variable term in
+          match var_opt with
+          | None ->
+             let var = fresh_variable term in
+             Grammar.TermLet(term, (var, Grammar.TermFieldSelection(var, a)))
+          | Some var ->
+            Grammar.TermFieldSelection(var, a)
+        }
 (* Sugar which doesn't need parenthesis. *)
 | t = rule_sugar_term_without_parent { t }
 | t = rule_record { t }
