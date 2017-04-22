@@ -222,6 +222,7 @@ let rec execute action lexbuf =
   with
   | End_of_file -> ()
   | Parser.Error ->
+    print_endline (!current_file);
     print_error lexbuf;
     exit 1
   | _ as e ->
@@ -269,6 +270,7 @@ let stdlib_files = [
   "stdlib/string.rml";
   "stdlib/option.rml";
   "stdlib/option_church.rml";
+  "stdlib/comparable.rml";
   "stdlib/list.rml";
   "stdlib/pervasives.rml";
   "stdlib/point.rml";
