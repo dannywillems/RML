@@ -311,7 +311,7 @@ and subtype_internal history context s t =
         ~env:context
         ~s:(Grammar.TypeIntersection(s, u))
         ~t
-        ~history:[history_right]
+        ~history:[history_left ; history_right]
     )
 
   (* FLD <: FLD
