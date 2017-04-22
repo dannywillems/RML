@@ -1,1 +1,37 @@
-let x = () [@show_derivation_tree];;
+(* Sugar for unit *)
+let x = ();;
+
+(* Application when function is a term, no avoidance problem *)
+(struct let f = fun(x : Unit.t) -> 42 end).f ();;
+
+(* Records *)
+let record = { a = 5 };;
+
+(* Function taking a record and returning the component *)
+let fun_record = fun(r : { a : Int.t }) -> r.a in
+fun_record { a = 42 };;
+
+(* Same than the previous one but we try with a subtype of the argument. *)
+let fun_record = fun(r : { a : Int.t }) -> r.a in
+fun_record { a = 42 ; b = 42};;
+
+(* Functor *)
+let module MAKERECORD = fun(typ : sig type t = {a : Int.t} end) -> struct
+  type t = { a : typ.t ; b : typ.t }
+end;;
+
+(* Avoidance problem because the type pair_int_int.t appears in the result of the function. *)
+(*
+let pair_of_record =
+  fun(r : {a : Int.t ; b : Int.t } ) ->
+    let pair_int_int = Pair Int Int in
+    pair_int_int.init r.a r.b
+;;
+*)
+(* Avoidance problem because the type pair_int_int.t appears in the result of the function. *)
+(*
+let pair_of_record =
+  fun(left_type : sig type t end, right_type : sig type t end, r : {a : left_type.t ; b : right_type.t } ) ->
+    (Pair Int Int).init r.a r.b
+;;
+*)
