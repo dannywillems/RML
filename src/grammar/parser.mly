@@ -13,21 +13,6 @@
        Grammar.Grammar.TermFieldSelection("List", "cons")
          )
   *)
-  let make_integer n =
-    Grammar.TermAscription(
-        Grammar.TermInteger(n),
-        Grammar.TypeProjection("Int", "t")
-      )
-
-  let make_string s =
-    Grammar.TermAscription(
-        Grammar.TermInteger(s),
-        Grammar.TypeProjection("String", "t")
-      )
-
-  let make_unit () =
-    Grammar.TermFieldSelection("Unit", "unit")
-
   let current_integer = ref 0
 
   let fresh_variable term =
@@ -96,6 +81,22 @@
     in
     let t = currying_app_term f variables in
     let_bindings_of_terms t terms_with_variables
+
+  let make_integer n =
+    Grammar.TermAscription(
+        Grammar.TermInteger(n),
+        Grammar.TypeProjection("Int", "t")
+      )
+
+  let make_string s =
+    Grammar.TermAscription(
+        Grammar.TermInteger(s),
+        Grammar.TypeProjection("String", "t")
+      )
+
+  let make_unit () =
+    Grammar.TermFieldSelection("Unit", "unit")
+
 %}
 
 %token COLON
@@ -147,6 +148,9 @@
 %token IN
 
 %token ARROW_RIGHT
+
+(* Use for pairs *)
+%token STAR
 
 %token UNIMPLEMENTED_TERM
 
@@ -609,6 +613,10 @@ rule_type:
                  }
 (* Record *)
 | t = rule_type_record { t }
+(* Pairs *)
+(*
+| t = rule_pairs { t }
+*)
 (* Modules *)
 | t = rule_type_module_signature { t }
 (* Abstraction *)
@@ -736,6 +744,15 @@ rule_type_declaration_field:
   t = rule_type {
           Grammar.TypeFieldDeclaration(field_label, t)
         }
+
+(*
+rule_pairs:
+| left_term = rule_term ;
+  STAR ;
+  right_term = rule_term {
+                  make_pair left_term right_term
+                }
+*)
 (* ----------------------------------------------------------------- *)
 
 (* ----------------------------------------------------------------- *)
