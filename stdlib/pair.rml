@@ -1,10 +1,11 @@
-let module Pair = struct(pair)
+let module Pair = fun(left_typ : sig type t end,
+                      right_typ : sig type t end) -> struct(pair)
   type t = sig
-    val fst : Unit.t -> Int.t
-    val snd : Unit.t -> Int.t
+    val fst : Unit.t -> left_typ.t
+    val snd : Unit.t -> right_typ.t
   end
-  let init : Int.t -> Int.t -> pair.t =
-    fun(f : Int.t, s : Int.t) -> struct
+  let init : left_typ.t -> right_typ.t -> pair.t =
+    fun(f : left_typ.t, s : right_typ.t) -> struct
        let fst = fun(u : Unit.t) -> f
        let snd = fun(u : Unit.t) -> s
      end
