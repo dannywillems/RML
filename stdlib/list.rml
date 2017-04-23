@@ -4,17 +4,18 @@ let module List = fun(typ : sig type t end) -> struct(list)
     val tail : Unit.t -> list.t
     (* We add size to define easily is_empty *)
     val size : Int.t
+    val is_empty : Bool.t
   end
   let empty : list.t = struct
     let head = fun (x : Unit.t) -> Unimplemented (* Must fail... *)
     let tail = fun (x : Unit.t) -> Unimplemented (* Must fail... *)
     let size = Int.zero
+    let is_empty = Bool.true
   end
   let cons = fun(x : typ.t, l : list.t) -> struct
       let head = fun(x' : Unit.t) -> x
       let tail = fun(l' : Unit.t) -> l
       let size = Int.succ l.size
+      let is_empty = Bool.false
     end
-  let is_empty = fun(l : list.t) ->
-    Int.equal 0 l.size
 end;;
