@@ -1,0 +1,25 @@
+let module Sum =
+  fun(left_type : sig type t end, right_type : sig type t end) -> struct(sum)
+    type t = forall(b : sig type t end)
+             (left_type.t -> b.t) ->
+             (right_type.t -> b.t) ->
+             b.t
+
+    let left : left_type.t -> sum.t =
+      fun(x : left_type.t) ->
+      fun(b : sig type t end,
+          left : (left_type.t -> b.t),
+          right : (right_type.t -> b.t)) -> left x
+
+    let right : right_type.t -> sum.t =
+      fun(x : right_type.t) ->
+      fun(b : sig type t end,
+          left : (left_type.t -> b.t),
+          right : (right_type.t -> b.t)) -> right x
+
+    let match = fun(return_type : sig type t end,
+                    s : sum.t,
+                    is_left : left_type.t -> return_type.t,
+                    is_right : right_type.t -> return_type.t) ->
+                s return_type is_left is_right
+end;;

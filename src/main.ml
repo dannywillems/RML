@@ -270,6 +270,7 @@ let stdlib_files = [
   "stdlib/string.rml";
   "stdlib/option.rml";
   "stdlib/option_church.rml";
+  "stdlib/sum_church.rml";
   "stdlib/comparable.rml";
   "stdlib/list.rml";
   "stdlib/pervasives.rml";
