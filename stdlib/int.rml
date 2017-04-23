@@ -5,4 +5,5 @@ let module Int = struct(int)
   let succ = fun(n : int.t, typ : sig type t end, s : typ.t -> typ.t, z : typ.t) -> s (n typ s z)
   let cplus = fun(m : int.t, n : int.t) -> m int int.succ n
   let equal : int.t -> int.t -> Bool.t = Unimplemented
+  let compare : int.t -> int.t -> int.t = Unimplemented
 end;;
