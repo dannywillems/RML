@@ -6,4 +6,10 @@ let module Option = fun(elem : sig type t end) -> struct(opt)
 
   let none : opt.t =
     fun(b : sig type t end, s : (elem.t -> b.t), n : b.t) -> n
+
+  let match = fun(returned_type : sig type t end,
+                  option : opt.t,
+                  is_some : elem.t -> returned_type.t,
+                  is_none : returned_type.t) ->
+                option returned_type is_some is_none
 end;;
