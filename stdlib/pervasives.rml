@@ -11,7 +11,9 @@ let not = Bool.not;;
 
 (* Float *)
 let int_of_float = Float.int_of_float;;
+let float_of_int : Int.t -> Float.t = Unimplemented;;
 let truncate = Float.truncate;;
+
 (* -------------------------------------- *)
 
 (* -------------------------------------- *)
