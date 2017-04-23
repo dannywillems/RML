@@ -1,29 +1,99 @@
-let int_list = List Int [@show_derivation_tree, no_context];;
+(* ------------------------------------------------------------------- *)
+(* We create a list of integers List is a functor taking a module containing a
+   type t and returning amodule representing a list of the given type.
+*)
+let int_list = List Int;;
 
-let l_42 = int_list.cons 42 int_list.empty  [@show_derivation_tree, no_context];;
+(* Next, we can create list of the given type. *)
+let l_42 = int_list.cons 42 int_list.empty;;
 
-let head_of_l_42 = l_42.head () [@show_derivation_tree, no_context];;
+(* Get the head of the list *)
+l_42.head ();;
 
+(* And the tail. *)
+l_42.tail ();;
+
+(* Check if the list is empty *)
+l_42.is_empty;;
+
+(* And get the size *)
+l_42.size;;
+
+(* We can also create a longer list *)
 let l_longer = int_list.cons 45 (int_list.cons 42 int_list.empty);;
-
+(* And also get the head. *)
 l_longer.head ();;
 
-l_longer.head Int [@show_derivation_tree, no_context];;
+(* Or the tail. *)
+l_longer.tail ();;
 
-(*
-let x = [42 ; 2];;
-let x = l.cons 2 (l.cons 42 l.empty);;
+(* Check if the tail is the empty list *)
+(l_longer.tail ()).is_empty;;
 
-let f = fun (x : Int.t, y : Int.t) ->
-  let plus_x = Int.plus x;;
-  plus_x y
-;;
+(* Get the size of the tail of the tail of the list and see if it's empty *)
+((l_longer.tail ()).tail ()).is_empty;;
+(* ------------------------------------------------------------------- *)
 
-let x =
-  let cons_2 = l.cons 2 in
-  let cons_42 = l.cons 42 in
-  let cons_42_empty = cons_42 l.empty in
-  cons_2 cons_42_empty;;
 
-let x = f x (g x' y')
+(* ------------------------------------------------------------------- *)
+(* We can of course create a list of any type: we only need to embed the
+   type in a module containing a type t.
 *)
+let option_int = Option Int;;
+let option_list = List option_int;;
+
+(* Create a value of type option. *)
+let option_42 = option_int.some 42;;
+let l_option_42 = option_list.cons option_42 option_list.empty;;
+l_option_42.head ();;
+l_option_42.tail ();;
+
+(* And here another example with options *)
+option_list.cons option_int.none (option_list.cons (option_int.some 42) (option_list.cons (option_int.some 1764) option_list.empty));;
+
+(* Here an example with some (seems more complicated because Some is a functor with two parameters)
+   NB: We need to define sum_bool_float, i.e. the module for representing a sum
+   type with Bool and Float types) in a top level let binding due to the
+   avoidance problem.
+*)
+let sum_bool_float = Sum Bool Float;;
+let list_sum_bool_float = List sum_bool_float;;
+
+(* It's ML equivalent to [Some false ; Some true ; Some (float_of_int 42)] *)
+let l_sum =
+  list_sum_bool_float.cons
+    (sum_bool_float.left Bool.false)
+    (list_sum_bool_float.cons
+      (sum_bool_float.left Bool.true)
+      (list_sum_bool_float.cons
+       (sum_bool_float.right (float_of_int 42))
+       list_sum_bool_float.empty
+      )
+    );;
+
+(* In ML, it's
+   type sum_bool_float = Bool of bool | Float of float
+   type opt_int = None | Some of int
+   type l = (sum_bool_float * opt_int) list
+*)
+let pair_sum_bool_float_with_sum_option_int =
+  Pair sum_bool_float option_int;;
+
+let list_pair_sum_bool_float_with_sum_option_int = List pair_sum_bool_float_with_sum_option_int;;
+
+(* ------------------------------------------------------------------- *)
+
+
+(* ------------------------------------------------------------------- *)
+(* More complicated and interesting. We can create a list of list of int *)
+let int_list_list = List int_list;;
+
+let list_containing_l_42 = int_list_list.cons l_42 int_list_list.empty;;
+
+(* Or a list of pair of list of integers *)
+let pair_int_list = Pair int_list int_list;;
+let pair_int_list_list = List pair_int_list;;
+
+let list_pair_containing_l_42 =
+  pair_int_list_list.cons (pair_int_list.init l_42 l_42) pair_int_list_list.empty;;
+(list_pair_containing_l_42.head ()).fst ();;
