@@ -1,0 +1,6 @@
+let module ComparableSig = struct
+  type t = sig(comp)
+    type t
+    val compare : comp.t -> comp.t -> Bool.t
+  end
+end;;
