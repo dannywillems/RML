@@ -9,6 +9,9 @@
         pos with Lexing.pos_bol = lexbuf.Lexing.lex_curr_pos;
                  Lexing.pos_lnum = pos.Lexing.pos_lnum + 1
       }
+
+  let inner_comments_number = ref 0
+
 }
 
 let subtype = "<:"
@@ -125,6 +128,17 @@ rule prog = parse
   | eof { Parser.EOF }
 
 and comment = parse
-  | "*)" { () }
+  | "*)" {
+   if (!inner_comments_number) = 0
+   then ()
+   else (
+     inner_comments_number := (!inner_comments_number) - 1;
+     comment lexbuf
+   )
+  }
+  | "(*" {
+   incr inner_comments_number;
+   comment lexbuf
+  }
   | eof { raise UnterminatedComment }
   | _ { comment lexbuf }
