@@ -208,7 +208,7 @@ let rec type_of_internal history context term = match term with
         ~typ:t
         ~history)
   (* Integers can only be defined with ascription which gives the right type
-     (int.T). We only need to have a subtype of int.T, and Bottom does the job.
+     (Int.t). We only need to have a subtype of Int.t, and Bottom does the job.
   *)
   | Grammar.TermInteger(n) ->
     let typ = Grammar.TypeBottom in
