@@ -1,0 +1,43 @@
+(* Define a simple module with a top level let binding. The module name begins with an uppercase letter and can contain number and underscore. *)
+let module Point2D = struct
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : self.t, p2 : self.t) ->
+    let x' = Int.plus p1.x p2.x in
+    let y' = Int.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+(* In the previous example, the internal variable used to refer to another field
+is `self` which is the default variable name. Another name can be used as in the
+following example. *)
+(* Instead of self, the variable point is used. *)
+let module Point2D = struct(point)
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    let x' = Int.plus p1.x p2.x in
+    let y' = Int.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+(* You can also use lowercase identifier and don't use the keyword module. The
+   let module syntax is there to differentiate modules from other terms which are
+   common in OCaml. *)
+
+let point2D = struct(point)
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    let x' = Int.plus p1.x p2.x in
+    let y' = Int.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+(* Comparing module signature *)
+let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> self.t end) -> struct(point)
+  type t = { x : typ.t ; y : typ.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    let x' = typ.plus p1.x p2.x in
+    let y' = typ.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+let module Point2DInt = MakePoint2D Int [@show_derivation_tree, no_context];;

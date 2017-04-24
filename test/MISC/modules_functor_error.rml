@@ -1,0 +1,9 @@
+let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> self.t end) -> struct(point)
+  type t = { x : typ.t ; y : typ.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    let x' = typ.plus p1.x p2.x in
+    let y' = typ.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+let module Point2DString = MakePoint2D String [@show_derivation_tree, no_context];;

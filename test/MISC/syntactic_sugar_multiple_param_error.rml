@@ -1,7 +1,7 @@
 let f = fun(x : Int.t, y : Int.t) -> Unimplemented;;
-let x_42 = 42;;
-let l = List.empty;;
 
-f x_42 l [@show_derivation_tree, no_context];;
+let list_42 = (List Int).cons (42 List.empty);;
+
+f (let x = 42 in x) (List Int) [@show_derivation_tree, no_context];;
 f l x_42 [@show_derivation_tree, no_context];;
 

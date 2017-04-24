@@ -1,0 +1,6 @@
+let f = fun(x : Int.t) -> x;;
+let g = fun(x : Int.t, y : String.t) -> y;;
+let h = fun(x : Int.t, f : Int.t -> Int.t) -> f x;;
+(* Is equivalent to *)
+let h = fun(x : Int.t) -> fun(f : Int.t -> Int.t) -> f x;;
+let h' = fun(m : sig type t val add : self.t -> self.t -> Int.t end, x : m.t, y : m.t) -> m.add x y;;

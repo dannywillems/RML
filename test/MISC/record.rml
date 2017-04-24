@@ -1,0 +1,3 @@
+let x = { a = 42 ; x = 52 };;
+let f = fun(x : {a : Int.t ; b : Int.t}) -> Int.succ x.a;;
+let g = fun(x : {a : Int.t}) -> x.a in f { a = 42 ; b = 52 };;
