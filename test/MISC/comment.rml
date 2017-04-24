@@ -1,0 +1,3 @@
+(* This is a simple comment, no terms. *)
+(* You can also have comments in comments (* like this and (* like this *) *) *)
+let x = (* It's also allowed in expressions *) 42;;
