@@ -29,6 +29,7 @@ let rec typ ?(use_subtyping=false) context nominal_typ = match nominal_typ with
     typ ~use_subtyping context t1 &&
     typ ~use_subtyping context t2
   | Grammar.TypeRecursive(z, t) ->
-    typ ~use_subtyping context t
+    let context' = ContextType.add z t context in
+    typ ~use_subtyping context' t
   | Grammar.TypeFieldDeclaration(label, t) ->
     typ ~use_subtyping context t
