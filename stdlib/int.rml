@@ -6,4 +6,7 @@ let module Int = struct(int)
   let cplus = fun(m : int.t, n : int.t) -> m int int.succ n
   let equal : int.t -> int.t -> Bool.t = Unimplemented
   let compare : int.t -> int.t -> int.t = Unimplemented
+  let is_positive : int.t -> Bool.t = Unimplemented
+  let is_negative : int.t -> Bool.t = Unimplemented
+  let is_zero : int.t -> Bool.t = Unimplemented
 end;;
