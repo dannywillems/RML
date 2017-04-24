@@ -5,17 +5,17 @@ let module Bool = struct(bool)
 
   let true : bool.t =
     fun(typ : sig type t end,
-        t : typ.t,
-        f : typ.t
+        if_true : typ.t,
+        if_false : typ.t
        ) ->
-      t
+      if_true
 
   let false : bool.t =
     fun(typ : sig type t end,
-        t : typ.t,
-        f : typ.t
+        if_true : typ.t,
+        if_false : typ.t
        ) ->
-      f
+      if_false
 
   (*
   let not' : bool.t -> bool.t = fun(x : bool.t, typ : sig type t end, t : typ.t, f : typ.t) ->
