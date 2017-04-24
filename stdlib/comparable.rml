@@ -1,6 +1,7 @@
 let module ComparableSig = struct
   type t = sig(comp)
     type t
-    val compare : comp.t -> comp.t -> Bool.t
+    val compare : comp.t -> comp.t -> Int.t
+    val equal : comp.t -> comp.t -> Bool.t
   end
 end;;
