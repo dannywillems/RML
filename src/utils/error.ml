@@ -27,7 +27,6 @@ let raise_not_well_formed context typ =
   raise (NotWellFormed (context, typ))
 
 let raise_subtype history s t =
-  DerivationTree.print_subtyping_derivation_tree history;
   raise (Subtype (history, s, t))
 
 let raise_aggregate_intersection_not_empty d1 d2 =
@@ -59,8 +58,11 @@ let raise_not_a_dependent_function typ =
 let raise_not_a_record_or_unbound_field x type_of_x a =
   raise (NotARecordOrUnboundField(x, type_of_x, a))
 
-let print e = match e with
+let print show_derivation_tree print_context e = match e with
   | Subtype(history, s, t) ->
+    if show_derivation_tree
+    then
+      DerivationTree.print_subtyping_derivation_tree ~print_context history;
     Printf.printf
       "\x1b[32m%a\x1b[0m is not a subtype of \x1b[32m%a\x1b[0m\n"
       (Print.Pretty.nominal_typ ()) s

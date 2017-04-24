@@ -68,4 +68,4 @@ val raise_not_a_record_or_unbound_field :
   Grammar.field_label ->
   unit
 
-val print : exn -> unit
+val print : bool -> bool -> exn -> unit
