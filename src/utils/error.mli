@@ -32,7 +32,11 @@ exception NotWellFormed of
 
 exception NotARecord of Grammar.nominal_term
 
-exception NotARecordOrUnboundField of Grammar.nominal_term * string
+exception NotARecordOrUnboundField of
+    AlphaLib.Atom.t * Grammar.nominal_typ * string
+
+val raise_not_a_dependent_function :
+  Grammar.nominal_typ -> unit
 
 val raise_subtype : DerivationTree.subtyping_node DerivationTree.t -> Grammar.nominal_typ -> Grammar.nominal_typ -> unit
 
@@ -56,6 +60,12 @@ val raise_type_mismatch :
   Grammar.nominal_term ->
   Grammar.nominal_typ ->
   Grammar.nominal_typ ->
+  unit
+
+val raise_not_a_record_or_unbound_field :
+  AlphaLib.Atom.t ->
+  Grammar.nominal_typ ->
+  Grammar.field_label ->
   unit
 
 val print : exn -> unit

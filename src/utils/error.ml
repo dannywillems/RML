@@ -17,7 +17,8 @@ exception NotWellFormed of
 
 exception NotARecord of Grammar.nominal_term
 
-exception NotARecordOrUnboundField of Grammar.nominal_term * string
+exception NotARecordOrUnboundField of
+    AlphaLib.Atom.t * Grammar.nominal_typ * string
 
 let raise_not_a_record term =
   raise (NotARecord term)
@@ -52,6 +53,12 @@ let raise_type_mismatch term s t =
       )
     )
 
+let raise_not_a_dependent_function typ =
+  raise (NotADependentFunction(typ))
+
+let raise_not_a_record_or_unbound_field x type_of_x a =
+  raise (NotARecordOrUnboundField(x, type_of_x, a))
+
 let print e = match e with
   | Subtype(history, s, t) ->
     Printf.printf
@@ -78,4 +85,10 @@ let print e = match e with
       "%a is not a dependent function.\n"
       (Print.Pretty.nominal_typ ()) typ
   | TypeMismatch(s, _) -> print_endline s
+  | NotARecordOrUnboundField(var, type_of_var, field) ->
+    Printf.printf
+      "%s is not a field of the variable %s which is of type %s"
+      field
+      (AlphaLib.Atom.show var)
+      (Print.string_of_nominal_typ type_of_var)
   | _ -> print_endline (Printexc.to_string e)
