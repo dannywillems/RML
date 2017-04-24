@@ -157,31 +157,32 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:[left_derivation_tree ; right_derivation_tree]
-  (* SEL <:.
-     SUB is allowed for upper bound. This rule unifies official SEL <: and SUB.
-     Γ ⊦ x : { A : L .. U }
-     =>
-     Γ ⊦ x.A <: U
-     becomes
-     Γ ⊦ x : { A : L .. U } ∧ Γ ⊦ U <: U'
-     =>
-     Γ ⊦ x.A <: U'.
-
-     With [TypeUtils.least_upper_bound], the actual rule is
-     Γ ⊦ x : T ∧ Γ ⊦ T <: { A : L .. U } ∧ Γ ⊦ U <: U'
-     =>
-     Γ ⊦ x.A <: U'.
-  *)
+  (* UN-REC *)
+  | (Grammar.TypeRecursive(z, rec_t), Grammar.TypeRecursive(z', rec_t')) ->
+    let fresh_z = AlphaLib.Atom.copy z' in
+    let fresh_rec_t = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) rec_t in
+    let fresh_rec_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z' fresh_z) rec_t' in
+    let context' = ContextType.add fresh_z fresh_rec_t context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' fresh_rec_t fresh_rec_t'
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REC"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
   (* UN-REC-I<: *)
   | (Grammar.TypeRecursive(z, t'), t) ->
     (* We need to extend the context with the type of z because t' can use
        fields and types defined in z.
-       TODO fresh z + rename
-       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
     *)
-    let context' = ContextType.add z t' context in
+    let fresh_z = AlphaLib.Atom.copy z in
+    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
+    let context' = ContextType.add fresh_z fresh_t' context in
     let history_subtype, is_subtype =
-      subtype_internal history context' t' t
+      subtype_internal history context' fresh_t' t
     in
     DerivationTree.create_subtyping_node
       ~rule:"UN-REC-I <:"
@@ -194,12 +195,12 @@ and subtype_internal history context s t =
   | (s, Grammar.TypeRecursive(z, t')) ->
     (* We need to extend the context with the type of z because t' can use
        fields and types defined in z.
-       TODO fresh z + rename
-       I'm not sure a fresh z is needed because the variable z is already unique when importing the the type.
     *)
-    let context' = ContextType.add z t' context in
+    let fresh_z = AlphaLib.Atom.copy z in
+    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
+    let context' = ContextType.add fresh_z fresh_t' context in
     let history_subtype, is_subtype =
-      subtype_internal history context' s t'
+      subtype_internal history context' s fresh_t'
     in
     DerivationTree.create_subtyping_node
       ~rule:"UN-<: REC-I"
