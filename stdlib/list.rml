@@ -12,7 +12,7 @@ let module List = fun(typ : sig type t end) -> struct(list)
     let size = Int.zero
     let is_empty = Bool.true
   end
-  let cons = fun(x : typ.t, l : list.t) -> struct
+  let cons : typ.t -> list.t -> list.t = fun(x : typ.t, l : list.t) -> struct
       let head = fun(x' : Unit.t) -> x
       let tail = fun(l' : Unit.t) -> l
       let size = Int.succ l.size
