@@ -232,7 +232,7 @@ let rec execute action lexbuf =
       (!current_file)
       pos.Lexing.pos_lnum
       (pos.Lexing.pos_cnum - pos.Lexing.pos_bol + 1);
-    Error.print e;
+    Error.print (!show_derivation_tree) (!print_context_in_derivation_tree) e;
     exit 1
 
 (* ------------------------------------------------- *)
