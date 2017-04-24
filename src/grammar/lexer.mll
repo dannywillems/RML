@@ -31,6 +31,9 @@ let alpha_lowercase = ['a' - 'z']
 
 let lowercase_ident =
   (alpha_lowercase | '_')+ (alpha_num | '_' | '\'')*
+let uppercase_ident =
+  alpha_capitalize (alpha_num | '_')*
+
 let integer = ['0' - '9']*
 
 let plus = "+"
@@ -93,7 +96,6 @@ rule prog = parse
   | "<:" { Parser.SUBTYPE }
   | ":>" { Parser.SUPERTYPE }
 
-  | "=>" { Parser.DOUBLE_RIGHT_ARROW }
   | '{' { Parser.LEFT_BRACKET }
   | '}' { Parser.RIGHT_BRACKET }
 
@@ -121,7 +123,7 @@ rule prog = parse
   | top { Parser.TYPE_TOP }
   | bottom { Parser.TYPE_BOTTOM }
   (* Method and type labels, variable *)
-  | alpha_capitalize (alpha_num | ''')* as l { Parser.ID_CAPITALIZE l }
+  | uppercase_ident as l { Parser.ID_CAPITALIZE l }
   | lowercase_ident as l { Parser.ID l }
 
   | _ as l { raise (IllegalCharacter l) }
@@ -136,6 +138,9 @@ and comment = parse
      comment lexbuf
    )
   }
+  | newline { next_line lexbuf;
+              comment lexbuf
+            }
   | "(*" {
    incr inner_comments_number;
    comment lexbuf
