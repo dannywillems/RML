@@ -114,7 +114,6 @@
 %token AT
 
 %token SEMICOLON
-%token DOUBLE_RIGHT_ARROW
 %token TYPE_TOP
 %token TYPE_BOTTOM
 
@@ -139,7 +138,6 @@
 %token THEN
 %token ELSE
 
-%token ABSTRACTION
 %token FUN
 %token FORALL
 
@@ -285,6 +283,22 @@ rule_let_binding:
   m = rule_functor {
           x, Grammar.TermAscription(m, typ)
         }
+| LET ;
+  MODULE ;
+  x = ID_CAPITALIZE ;
+  EQUAL ;
+  term = rule_functor_application {
+             x, term
+           }
+| LET ;
+  MODULE ;
+  x = ID_CAPITALIZE ;
+  COLON ;
+  typ = rule_type ;
+  EQUAL ;
+  term = rule_functor_application {
+             x, Grammar.TermAscription(term, typ)
+           }
 
 (* Rules for terms *)
 rule_term:
@@ -360,7 +374,6 @@ rule_application:
 | f = ID ; args = rule_application_arguments {
                     currying_app_with_terms f args
                     }
-
 (* term y --> let variable = term in variable y *)
 | term = rule_term_for_application ;
   args = rule_application_arguments {
@@ -474,6 +487,12 @@ rule_functor:
   f = rule_functor {
           currying args f
         }
+
+rule_functor_application:
+(* MakeGraph GraphSig *)
+| f = ID_CAPITALIZE ; args = rule_application_arguments {
+                    currying_app_with_terms f args
+                    }
 
 (* A rule to parse the list of arguments of a function. Curryfication is used; *)
 rule_arguments_list:
