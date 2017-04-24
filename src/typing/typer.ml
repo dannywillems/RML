@@ -199,7 +199,7 @@ let rec type_of_internal history context term = match term with
       TypeUtils.least_upper_bound_of_recursive_type ~x ~label:a context type_of_x
     in
     (match t with
-    | None -> raise (Error.NotARecordOrUnboundField (Grammar.TermVariable x, a))
+    | None -> raise (Error.NotARecordOrUnboundField (x, type_of_x, a))
     | Some t ->
       DerivationTree.create_typing_node
         ~rule:"FLD-E"
