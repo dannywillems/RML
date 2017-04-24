@@ -10,23 +10,23 @@ sig type t = Nothing end !<: sig type s = Nothing end;;
 sig type t = Nothing end <: sig type t = Nothing end;;
 
 sig
-  type t = int.t
-  val increment : int.t -> int.t
+  type t = Int.t
+  val increment : Int.t -> Int.t
 end
 <:
 sig
   type t = int.t
-  val increment : int.t -> int.t
+  val increment : Int.t -> Int.t
 end;;
 
-sig type t : Nothing .. int.t end <: sig type t end;;
+sig type t : Nothing .. Int.t end <: sig type t end;;
 
-sig type t : Nothing .. int.t end !<: sig type t = int.t end;;
+sig type t : Nothing .. Int.t end !<: sig type t = Int.t end;;
 
-let x = struct type t = int.t end;;
+let module X = struct type t = Int.t end;;
 
-let y = struct type t = int.t end;;
+let module Y = struct type t = Int.t end;;
 
-sig type t = x.T end <: sig type t = int.t end;;
+sig type t = X.t end <: sig type t = Int.t end;;
 
-sig type t = x.T end <: sig type t = y.T end;;
+sig type t = X.t end <: sig type t = Y.T end;;
