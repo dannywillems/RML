@@ -14,19 +14,23 @@ let module AA = struct
   type t = Any -> Nothing
 end;;
 
-let list_a = List A;;
-let list_n = List N;;
-
 (*
   The subtyping algorithm produces a stack overflow because the question is
   cyclic: the question `list_a.t <: list_n.t` will appear in the question
-  `list_a.t.tail |: list_n.t.tail`
+  `list_a.t.tail <: list_n.t.tail`
 list_a.t <: list_n.t [@show_derivation_tree, no_context];;
-*)
-
-List N !<: List A [@show_derivation_tree, no_context];;
-
+  The question is produced when we want to pass a list to a function which
+  needs a list. For example,
+let list_a = List A;;
+let list_n = List N;;
+let f = fun(l : list_a.t) -> l;;
+f list_n;;
+   Same results with functions
 let nothing_any_list = List NA;;
 let any_any_list = List AA;;
 
-any_any_list !<: nothing_any_list [@show_derivation_tree, no_context];;
+(* Nothing <: Any => Any -> Any <: Nothing -> Any => List[NA] <: List[AA] *)
+any_any_list.t <: nothing_any_list.t;;
+nothing_any_list.t <: any_any_list.t;;
+*)
+
