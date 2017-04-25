@@ -336,6 +336,7 @@ rule_term_without_parent:
         }
 (* Sugar which doesn't need parenthesis. *)
 | t = rule_sugar_term_without_parent { t }
+(* Records *)
 | t = rule_record { t }
 (* Nested parenthesis *)
 | LEFT_PARENT ;
@@ -417,7 +418,7 @@ rule_record_content:
          }
 
 rule_module:
-(* T : struct type A = ... ; let a = ... end *)
+(* T : struct type A = ... let a = ... end *)
 | t = rule_type ;
   COLON ;
   STRUCT ;
