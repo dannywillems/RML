@@ -99,6 +99,7 @@ A module is a term containing a list of declarations which can be recursive (i.e
 A declaration is a type declaration (using `type`) or a field declaration (`let`).
 
 ```OCaml
+(* File test/MISC/modules_functors.rml *)
 (* Define a simple module with a top level let binding. The module name begins
    with an uppercase letter and can contain number and underscore.
 *)
@@ -134,11 +135,27 @@ let point2D = struct(point)
     let y' = Int.plus p1.y p2.y in
     { x = x' ; y = y' }
 end;;
+
+(* You can also annotated a module with it's signature. *)
+let point2D = sig
+  type t = { x : Int.t ; y : Int.t}
+  val add : self.t -> self.t -> self.t = struct(point)
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    let x' = Int.plus p1.x p2.x in
+    let y' = Int.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+
 ```
 
-Functors used the same syntax than functions. The following examples transforms our Point2D module defining points using only integers in a polymorphic points type.
+Functors use the same syntax than functions. The following example transforms
+our Point2D module defining points using only integers in a polymorphic points
+type.
 As in OCaml, we use the convention functors begin with the uppercase identifier `Make`.
 ```OCaml
+(* File test/MISC/modules_functors.rml *)
 let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> self.t end) -> struct(point)
   type t = { x : typ.t ; y : typ.t }
   let add = fun(p1 : point.t, p2 : point.t) ->
@@ -152,6 +169,24 @@ let module Point2DInt = MakePoint2D Int;;
 
 #### Field selection.
 
+You can access to fields and types of a module with the syntax `M.f` where `M` is the identifier of the module and `f` the field.
+```
+(* File test/MISC/field_selection.rml *)
+(* We build a module for a list of integers. List is a predefined functor
+   representing lists.
+*)
+let module ListInt = List Int;;
+
+(* We can use the field `cons` which add an element at the beginning to a list,
+   here the empty list, given by ListInt.empty.
+)
+let l_42 = ListInt.cons 42 ListInt.empty;;
+(* And get the head of the list *)
+l_42.head ();;
+
+(* Get the size *)
+l_42.size;;
+```
 
 #### Records.
 
@@ -167,7 +202,7 @@ let f = fun(x : {a : Int.t ; b : Int.t}) -> Int.succ x.a;;
 let g = fun(x : {a : Int.t}) -> x.a in f { a = 42 ; b = 52 };;
 ```
 
-*Implementation detail:*
+*Implementation details:*
 Records are modules which can not contain fields referring to the module itself.
 To forbid it, the variable which binds internally to the module is `'self` . As
 quotes in the beginning of a variable name are not allowed in the lexer, we are
@@ -189,20 +224,19 @@ For example, you can't
 This implies RML has a syntax which supports it.
 
 For example, you can use terms in function applications and use multiple
-arugments applications. Let bindings are created in the generated AST.
+arugments in applications. Let bindings are created in the generated AST.
 
 ## Types
 
-#### Int
+#### Int (stdlib/int.rml)
 
 Any integer can be used as usual. For example, `42`, `1764`, `0`, ...
-The `Int` module is defined in the file `stdlib/int.rml`. A part is defined with
-the Church encoding and another with `Unimplemented`.
-The type of intergers is `Int.t`.
+A part is defined with the Church encoding and another with `Unimplemented`. The
+type of integers is `Int.t`. The module for integers is `Int`.
 
-#### Unit
+#### Unit (stdlib/unit.rml)
 
-The unit term is defined in the module `Unit` in the file `stdlib/unit.rml`. The
+The unit term is defined in the module `Unit`. The
 type of `unit` is `Unit.t`. The term `unit` is `Unit.unit`. A syntactic sugar
 `()` is also available.
 
@@ -211,24 +245,128 @@ let example_unit = ();;
 let example_unit_no_sugar = Unit.unit;;
 ```
 
-#### Boolean
+#### Boolean (stdlib/bool.rml)
 
-Booleans are defined with the Church encoding in the file `stdlib/bool.rml`. The two values `true` and `false` are
+Booleans are defined with the Church encoding. The
+two values `true` and `false` are respectively `Bool.true` and `Bool.false`.
 
-#### Char, String, Float
+#### Char (stdlib/char.rml), String (stdlib/string.rml), Float (stdlib/float.rml)
 
-#### Pair
+Functions on these types are not implemented. It's just there to be able to use
+it in some functions and do some tests.
+No syntactic sugar or real syntax is given to create values of these types.
 
-#### List
+#### Pair (stdlib/pair.rml)
 
-Polymorphic lists are defined in the file ``
+Pairs are built like a functor taking two types. No syntactic sugars are
+provided for this.
 
-#### Option
+```OCaml
+(* Pair implementation *)
+let module Pair = fun(left_typ : sig type t end,
+                      right_typ : sig type t end) -> struct(pair)
+  type t = sig
+    val fst : Unit.t -> left_typ.t
+    val snd : Unit.t -> right_typ.t
+  end
+  let init : left_typ.t -> right_typ.t -> pair.t =
+    fun(f : left_typ.t, s : right_typ.t) -> struct
+       let fst = fun(u : Unit.t) -> f
+       let snd = fun(u : Unit.t) -> s
+     end
+end;;
+```
 
+#### List (stdlib/list.rml)
+
+Lists are polymorphic as in a previous example. The module `List` is a
+functor taking a module containing a type `t`.
+No syntactic sugar is provided for the moment.
+
+See `test/typing/list.rml` for good examples.
+
+#### Option (stdlib/option_church.rml)
+
+Options are defined with the Church encoding and are defined by the functor
+`Option` which needs a module containing a type `t` for the `some` term.
+You can define a `some` with `YourOption.some value` and a `none` with
+`YourOption.none`.
+
+```OCaml
+(* file test/typing/option.rml *)
+let module optionint = option int;;
+let some_42 = optionint.some 42;;
+let none_int = optionint.none;;
+
+let f = fun(opt : optionint.t) ->
+  optionint.match
+    (* the type of the match is in the given module in the type t *)
+    int
+    (* the option value *)
+    opt
+    (* some case *)
+    (fun(x : int.t) -> int.plus x 42)
+    (* none case *)
+    (42);;
+
+f some_42;;
+f none_int;;
+
+(* as match is a function, you can define patterm matching with default values
+   for some cases. in ml, it's a warning about non-exhaustive pattern mathing.
+*)
+
+let f_with_no_none_case = fun(opt : optionint.t) ->
+  optionint.match
+    (* the type of the match is in the given module in the type t *)
+    int
+    (* the option value *)
+    opt
+    (* some case *)
+    (fun(x : int.t) -> int.plus x 42);;
+    (* none case is not used. *)
+
+f_with_no_none_case none_int (int.plus 42 42);;
+```
 
 #### Sum
 
-Very close to `Option`. It also uses the Church encoding.
+Very close to `Option`. It also uses the Church encoding. Sum are polymorphic so
+as previous types, the module `Sum` is actually a functor with two types. Only
+two values can be defined (`left` and `right`) and a match can be done with
+`match` field. It takes the module containing the type `t` which must be
+returned by the pattern matching, the sum value, and two functions, one in the
+left case, one in the right case which parameter type depends on the branches
+and the returned type is the returned typed of the pattern matching.
+
+```
+(* File /test/typing/sum.rml *)
+let module SumIntFloat = Sum Int Float;;
+let sum_42_int = SumIntFloat.left 42;;
+let sum_42_float = SumIntFloat.right (float_of_int 42);;
+
+let f = fun(sum : SumIntFloat.t) ->
+  SumIntFloat.match
+    Int
+    sum
+    (fun(x : Int.t) -> x)
+    (fun(x : Float.t) -> Float.int_of_float x);;
+f sum_42_float;;
+f sum_42_int;;
+
+let module IntList = List Int;;
+let f' = fun(sum : SumIntFloat.t) ->
+  SumIntFloat.match
+    IntList
+    sum
+    (fun(x : Int.t) -> IntList.cons x IntList.empty)
+    (fun(x : Float.t) ->
+       let x = Float.int_of_float x in
+       IntList.cons x IntList.empty)
+    ;;
+f' sum_42_float;;
+f' sum_42_int;;
+```
 
 #### Basic types.
 
@@ -292,24 +430,26 @@ The list of available annotations are:
 - `show_derivation_tree` to show the derivation tree. (not activated by default)
 - `no_context` will deactivate the print of the environment (i.e. pre-defined
   values and types) when printing the derivation tree.
-- `check_well_formed` checks at runtime if types are well formed.
+- `check_well_formed` checks at runtime if types (inferred from terms) are well
+  formed. Note that the well-formed algorithm is always called on internal types
+  during sub-typing and typing algorithms.
 
 #### Examples
 
 Print the derivation tree without the context.
 ```OCaml
 let y = sig
-  type T = Nothing
+  type t = Nothing
   val x : Nothing
-  val f : self.T -> self.T
+  val f : self.t -> self.t
 end : struct
-  type T = Nothing
+  type t = Nothing
   let x = Unimplemented
-  let f = fun (x : self.T) -> x
+  let f = fun (x : self.t) -> x
 end [@show_derivation_tree, no_context];;
 ```
 
-Print the derivation tree.
+Print the derivation tree with the context.
 ```OCaml
-let identity = fun (x : self.T) -> x [@show_derivation_tree] ;;
+let identity = fun (x : Int.t) -> x [@show_derivation_tree] ;;
 ```
