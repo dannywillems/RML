@@ -1,0 +1,20 @@
+let module MakeMap = fun(t : ComparableSig.t) -> struct
+  type t = forall(value_type : sig type t end) sig(map)
+    type key
+    type t
+    val empty : map.t
+    val is_empty : map.t -> Bool.t
+    val mem : map.key -> map.t -> Bool.t
+    val add : value_type.t -> map.t -> map.t
+    val singleton : map.key -> value_type.t -> map.t
+    val remove : map.key -> map.t -> map.t
+  end
+end;;
+
+(*
+let module Map = fun(key_type : ComparableSig.t, value_type : ComparableSig.t) ->
+  MapSig.t : struct
+    type key = key_type.t
+    type t = 
+  end;;
+*)
