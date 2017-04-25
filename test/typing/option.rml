@@ -1,0 +1,34 @@
+(* file test/typing/option.rml *)
+let module OptionInt = Option Int;;
+let some_42 = OptionInt.some 42;;
+let none_int = OptionInt.none;;
+
+let f = fun(opt : OptionInt.t) ->
+  OptionInt.match
+    (* the type of the match is in the given module in the type t *)
+    Int
+    (* the option value *)
+    opt
+    (* some case *)
+    (fun(x : Int.t) -> Int.plus x 42)
+    (* none case *)
+    (42);;
+
+f some_42;;
+f none_int;;
+
+(* as match is a function, you can define patterm matching with default values
+   for some cases. in ml, it's a warning about non-exhaustive pattern mathing.
+*)
+
+let f_with_no_none_case = fun(opt : OptionInt.t) ->
+  OptionInt.match
+    (* the type of the match is in the given module in the type t *)
+    Int
+    (* the option value *)
+    opt
+    (* some case *)
+    (fun(x : Int.t) -> Int.plus x 42);;
+    (* none case is not used. *)
+
+f_with_no_none_case none_int (Int.plus 42 42);;

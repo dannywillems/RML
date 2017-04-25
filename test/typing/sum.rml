@@ -1,0 +1,39 @@
+(* We crate a Sum type for Int and Float. The left value will be Int and rhe
+   right Float.
+   It's like
+   type t = Left of int | Right of float
+*)
+let module SumIntFloat = Sum Int Float;;
+
+(* We create a value of type Sum.t by using the variant Left. *)
+let sum_42_int = SumIntFloat.left 42;;
+
+(* And we create a value of type Sum.t by using the variant Right. *)
+let sum_42_float = SumIntFloat.right (float_of_int 42);;
+
+(* We can do a pattern matching on a value of type SumintFloat.t like this. *)
+let f = fun(sum : SumIntFloat.t) ->
+  SumIntFloat.match
+    Int
+    sum
+    (* Left case. *)
+    (fun(x : Int.t) -> x)
+    (* Right case. *)
+    (fun(x : Float.t) -> Float.int_of_float x);;
+
+f sum_42_float;;
+f sum_42_int;;
+
+(* We can also change the type of the patterm matching. *)
+let module IntList = List Int;;
+let f' = fun(sum : SumIntFloat.t) ->
+  SumIntFloat.match
+    IntList
+    sum
+    (fun(x : Int.t) -> IntList.cons x IntList.empty)
+    (fun(x : Float.t) ->
+       let x = Float.int_of_float x in
+       IntList.cons x IntList.empty)
+    ;;
+f' sum_42_float;;
+f' sum_42_int;;
