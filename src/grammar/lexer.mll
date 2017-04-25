@@ -36,10 +36,6 @@ let uppercase_ident =
 
 let integer = ['0' - '9']*
 
-let plus = "+"
-let minus = "-"
-let times = "*"
-
 let let_ = "let"
 let in_ = "in"
 
@@ -75,9 +71,6 @@ rule prog = parse
     }
 
   | integer as n { Parser.INTEGER (int_of_string n) }
-  | plus { Parser.PLUS }
-  | minus { Parser.MINUS }
-  | times { Parser.TIMES }
 
   | '.' { Parser.DOT }
   | ',' { Parser.COMMA }

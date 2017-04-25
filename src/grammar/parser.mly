@@ -130,13 +130,6 @@
 %token <string> ID_CAPITALIZE
 
 %token <int> INTEGER
-%token PLUS
-%token MINUS
-%token TIMES
-
-%token IF
-%token THEN
-%token ELSE
 
 %token FUN
 %token FORALL
@@ -263,7 +256,6 @@ rule_let_binding:
   m = rule_module {
           x, Grammar.TermAscription(m, typ)
         }
-
 (* Syntax for functors.
    let module M : T = fun(x : sig type t end) -> struct ... end
 *)
@@ -540,10 +532,6 @@ rule_decl_field:
   This solution doesn't work very well because if the variable unit is
   redefined, it will use this definition, and not from the standard library.
 *)
-rule_sugar_term:
-| t = rule_sugar_term_without_parent { t }
-(* | t = rule_sugar_term_with_parent { t } *)
-
 rule_sugar_term_without_parent:
 (* Unit *)
 | LEFT_PARENT ;
@@ -557,53 +545,7 @@ rule_sugar_term_without_parent:
 | LEFT_PARENT ;
   t = rule_sugar_term_without_parent ;
   RIGHT_PARENT { t }
-(* For lists
-| l = rule_sugar_term_list { l }
-*)
 
-(* Rule to build a list with the sugar *)
-(*
-rule_sugar_term_list:
-| LEFT_SQUARE_BRACKET ;
-  l = rule_sugar_term_list_content ;
-  {
-    }
-
-rule_sugar_term_list_content:
-| RIGHT_SQUARE_BRACKET { [Grammar.TermFieldSelection("List", "empty")] }
-| t = rule_term_for_application ;
-  SEMICOLON ;
-  tail = rule_sugar_term_list_content {
-             let cons = Grammar.TermFieldSelection("List", "cons")
-             t :: tail
-           }
-*)
-rule_sugar_term_infix:
-| m = INTEGER ;
-  PLUS ;
-  n = INTEGER {
-          let m = make_integer m in
-          let n = make_integer n in
-          Grammar.TermVarApplication(
-              Grammar.TermVarApplication(
-                  Grammar.TermFieldSelection("Int", "plus"),
-                  m
-                ),
-              n
-            )
-        }
-(*
-TODO: See #26
-rule_sugar_term_with_parent:
-| IF ;
-  cond = rule_term ;
-  THEN ;
-  if_true = rule_term ;
-  ELSE ;
-  if_false = rule_term {
-                 Grammar.Term
-               }
- *)
 (* ------------------------------- *)
 (* Types *)
 
