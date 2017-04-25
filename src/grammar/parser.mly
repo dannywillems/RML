@@ -587,6 +587,10 @@ rule_type_module_signature:
   END {
       Grammar.TypeRecursive("self", typ)
     }
+| SIG ;
+  END {
+      Grammar.TypeRecursive("self", Grammar.TypeTop)
+    }
 (* sig(x) T^{x} end *)
 | SIG ;
   LEFT_PARENT ;
