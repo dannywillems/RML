@@ -1,12 +1,41 @@
-let module GraphSig =
-  struct
-    type t = sig
-      type node
-      val succ : self.node -> self.node
-    end
-  end;;
-
-let module GraphInt = GraphSig.t : struct
-  type node = Int.t
-  let succ = Int.succ
+let module GraphSig = struct
+  type t = sig(graph)
+    type node = ComparableSig.t
+    (* FIXME: For the moment, we need to specify the list of node. See 48. *)
+    (*
+    val node_list : node_list
+    *)
+  end
 end;;
+
+(*
+let module MakeGraph = fun(graph_sig : GraphSig.t) -> struct(graph)
+  type t = sig(graph')
+    type node = graph_sig.node
+    val succ : graph'.node -> graph'.node
+    val add_edge : graph'.node -> graph'.node -> graph.t
+  end
+  let empty : graph.t = struct(empty_graph)
+    type node = graph_sig.node
+    let succ : empty_graph.node -> empty_graph.node =
+      fun(node : empty_graph.node) -> Unimplemented (* Must fail... *)
+    let add_edge = fun(source : empty_graph.node, destination : empty_graph.node) ->
+      struct
+        type node = empty_graph.node
+        (*
+        let node_list = graph_sig.node_list
+        *)
+        let succ = fun(node' : empty_graph.node) ->
+          test (self.node) (self.node.equal source node') destination Unimplemented
+        let add_edge = empty_graph.add_edge
+      end
+  end
+end;;
+
+let module GraphSigInt = GraphSig.t : struct(graph)
+  type node = Int.t
+  let node_list = List Int
+end;;
+
+let module GraphInt = MakeGraph GraphSigInt;;
+*)
