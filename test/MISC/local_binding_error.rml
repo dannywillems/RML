@@ -1,0 +1,5 @@
+(* Example of the avoidance problem. *)
+let module M = struct
+  type t = Int.t
+  let x : self.t = 42
+end in M.x;;

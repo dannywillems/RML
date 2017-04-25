@@ -15,7 +15,7 @@ sig
 end
 <:
 sig
-  type t = int.t
+  type t = Int.t
   val increment : Int.t -> Int.t
 end;;
 
@@ -29,4 +29,4 @@ let module Y = struct type t = Int.t end;;
 
 sig type t = X.t end <: sig type t = Int.t end;;
 
-sig type t = X.t end <: sig type t = Y.T end;;
+sig type t = X.t end <: sig type t = Y.t end;;

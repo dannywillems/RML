@@ -1,0 +1,4 @@
+(* File test/MISC/expression.rml *)
+let x = 42;;
+let f = fun(x : Int.t) -> x;;
+let f = fun(y : Int.t) -> let x = y in x;;

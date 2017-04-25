@@ -1,0 +1,16 @@
+(* File test/MISC/field_selection.rml *)
+(* We build a module for a list of integers. List is a predefined functor
+   representing lists.
+*)
+let module ListInt = List Int;;
+
+(* We can use the field `cons` which add an element at the beginning to a list,
+   here the empty list, given by ListInt.empty.
+*)
+let l_42 = ListInt.cons 42 ListInt.empty;;
+
+(* And get the head of the list *)
+l_42.head ();;
+
+(* Get the size *)
+l_42.size;;

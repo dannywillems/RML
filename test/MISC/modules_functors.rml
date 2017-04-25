@@ -31,7 +31,30 @@ let point2D = struct(point)
     { x = x' ; y = y' }
 end;;
 
-(* Comparing module signature *)
+(* You can also annotated a module with it's signature. *)
+let point2D_with_sig = sig
+  type t
+  val add : self.t -> self.t -> self.t
+end : struct
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : self.t, p2 : self.t) ->
+    let x' = Int.plus p1.x p2.x in
+    let y' = Int.plus p1.y p2.y in
+    { x = x' ; y = y' }
+end;;
+
+(* Even if the body doesn't define a field add, it's allowed by the compiler. *)
+let point2D_with_sig_error = sig
+  type t
+  val add : self.t -> self.t -> self.t
+end : struct
+  type t = { x : Int.t ; y : Int.t }
+end;;
+
+(* We create a functor. The first argument of MakePoint2D is a module with a
+   type t and a function plus which takes two elements of type t and returns the
+   same type.
+*)
 let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> self.t end) -> struct(point)
   type t = { x : typ.t ; y : typ.t }
   let add = fun(p1 : point.t, p2 : point.t) ->
@@ -40,4 +63,7 @@ let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> sel
     { x = x' ; y = y' }
 end;;
 
-let module Point2DInt = MakePoint2D Int [@show_derivation_tree, no_context];;
+(* And we can apply a module with the signature to the functor. Int is a good
+   example.
+*)
+let module Point2DInt = MakePoint2D Int;;
