@@ -56,7 +56,6 @@ let rec type_of_internal history context term = match term with
      Γ ⊦ y : S
      =>
      Γ ⊦ xy : [y := z]T
-     TODO : Add SUB.
   *)
   | Grammar.TermVarApplication(x, y) ->
     (* We can simply use [ContextType.find x context], but it's to get the
