@@ -31,14 +31,28 @@ MLI := \
 
 .PHONY: all test clean
 
+test: all
+	./rml -f test/MISC/comment.rml -a typing --use-stdlib
+	./rml -f test/MISC/expression.rml -a typing --use-stdlib
+	./rml -f test/MISC/field_selection.rml -a typing --use-stdlib
+	./rml -f test/MISC/function.rml -a typing --use-stdlib
+	./rml -f test/MISC/let_binding.rml -a typing --use-stdlib
+	./rml -f test/MISC/local_binding.rml -a typing --use-stdlib
+	./rml -f test/MISC/modules_functors.rml -a typing --use-stdlib
+	./rml -f test/MISC/record.rml -a typing --use-stdlib
+	./rml -f test/MISC/syntactic_sugar_multiple_param.rml -a typing --use-stdlib
+	./rml -f test/subtype/stdlib.rml -a subtype --use-stdlib
+	./rml -f test/subtype/simple_labels.rml -a subtype --use-stdlib
+	./rml -f test/typing/list.rml -a typing --use-stdlib
+	./rml -f test/typing/option.rml -a typing --use-stdlib
+#	./rml -f test/typing/return_module.rml -a typing --use-stdlib
+	./rml -f test/typing/sum.rml -a typing --use-stdlib
+
 all:
 	@ $(OCAMLBUILD) $(SRC_DIR)/$(TARGET)
 	@ rm $(TARGET)
 	@ rm -f $(PWD)/$(EXECUTABLE)
 	@ ln -s _build/$(SRC_DIR)/$(TARGET) $(PWD)/$(EXECUTABLE)
-
-test: all
-	@ ./$(TARGET)
 
 mli:
 	@ $(OCAMLBUILD) $(MLI)
