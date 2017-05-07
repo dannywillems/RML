@@ -157,79 +157,21 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:[left_derivation_tree ; right_derivation_tree]
-  (* UN-REC *)
-  | (Grammar.TypeRecursive(z, rec_t), Grammar.TypeRecursive(z', rec_t')) ->
-    let fresh_z = AlphaLib.Atom.copy z' in
-    let fresh_rec_t = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) rec_t in
-    let fresh_rec_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z' fresh_z) rec_t' in
-    let context' = ContextType.add fresh_z fresh_rec_t context in
-    let history_subtype, is_subtype =
-      subtype_internal history context' fresh_rec_t fresh_rec_t'
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-REC"
-      ~is_true:is_subtype
-      ~env:context
-      ~s
-      ~t
-      ~history:[history_subtype]
-  (* UN-REC-I<: *)
-  | (Grammar.TypeRecursive(z, t'), t) ->
-    (* We need to extend the context with the type of z because t' can use
-       fields and types defined in z.
-    *)
-    let fresh_z = AlphaLib.Atom.copy z in
-    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
-    let context' = ContextType.add fresh_z fresh_t' context in
-    let history_subtype, is_subtype =
-      subtype_internal history context' fresh_t' t
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-REC-I <:"
-      ~is_true:is_subtype
-      ~env:context
-      ~s
-      ~t
-      ~history:[history_subtype]
-  (* UN-<: REC-I *)
-  | (s, Grammar.TypeRecursive(z, t')) ->
-    (* We need to extend the context with the type of z because t' can use
-       fields and types defined in z.
-    *)
-    let fresh_z = AlphaLib.Atom.copy z in
-    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
-    let context' = ContextType.add fresh_z fresh_t' context in
-    let history_subtype, is_subtype =
-      subtype_internal history context' s fresh_t'
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-<: REC-I"
-      ~is_true:is_subtype
-      ~env:context
-      ~s
-      ~t
-      ~history:[history_subtype]
-  | (Grammar.TypeProjection(x, label), u') ->
-    rule_sel SEL_SUB history context (x, label) u'
-
-  (* <: SEL.
-     SUB is allowed for lower bound. This rule unifies official <: SEL and SUB.
-     Γ ⊦ x : { A : L .. U }
-     =>
-     Γ ⊦ L <: x.A
-     becomes
-     Γ ⊦ x : { A : L' .. U } ∧ Γ ⊦ L <: L'
-     =>
-     Γ ⊦ L <: x.A
-
-     With [TypeUtils.greatest_lower_bound], the actual rule is
-     Γ ⊦ x : T ∧ Γ ⊦ { A : L' .. U } <: T ∧ Γ ⊦ L <: L'
-     =>
-     Γ ⊦ L <: x.A
+  (* FLD <: FLD
+     Γ ⊦ T <: U => Γ ⊦ { a : T } <: { a : U }
   *)
-  | (l, Grammar.TypeProjection(x, label)) ->
-    rule_sel SUB_SEL history context (x, label) l
-
+  | (Grammar.TypeFieldDeclaration(a, t), Grammar.TypeFieldDeclaration(b, u))
+    when String.equal a b ->
+    let history_subtype, is_subtype =
+      subtype_internal history context t u
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"FLD <: FLD"
+      ~is_true:is_subtype
+      ~env:context
+      ~s:(Grammar.TypeFieldDeclaration(a, t))
+      ~t:(Grammar.TypeFieldDeclaration(b, u))
+      ~history:[history_subtype]
   (* ALL <: ALL
      Γ ⊦ S2 <: S1 ∧ Γ, x : S2 ⊦ T1 <: T2 =>
      Γ ⊦ ∀(x : S1) T1 <: ∀(x : S2) T2
@@ -258,7 +200,92 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:[left_derivation_tree ; right_derivation_tree]
+  (* UN-REC
+     We compare two recursive types. We use VAR-UNPACK on both sides by renaming
+     the internal variable with a fresh atom.
+  *)
+  | (Grammar.TypeRecursive(z, rec_t), Grammar.TypeRecursive(z', rec_t')) ->
+    let fresh_z = AlphaLib.Atom.copy z' in
+    let fresh_rec_t = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) rec_t in
+    let fresh_rec_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z' fresh_z) rec_t' in
+    let context' = ContextType.add fresh_z fresh_rec_t context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' fresh_rec_t fresh_rec_t'
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REC"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
+  (* UN-REC-I<:
+     We compare a recursive type with another. We use VAR-UNPACK on the left side.
+  *)
+  | (Grammar.TypeRecursive(z, t'), t) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+    *)
+    let fresh_z = AlphaLib.Atom.copy z in
+    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
+    let context' = ContextType.add fresh_z fresh_t' context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' fresh_t' t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REC-I <:"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
+  (* UN-<: REC-I
+     We compare a recursive type with another. We use VAR-UNPACK on the right side.
+  *)
+  | (s, Grammar.TypeRecursive(z, t')) ->
+    (* We need to extend the context with the type of z because t' can use
+       fields and types defined in z.
+    *)
+    let fresh_z = AlphaLib.Atom.copy z in
+    let fresh_t' = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z fresh_z) t' in
+    let context' = ContextType.add fresh_z fresh_t' context in
+    let history_subtype, is_subtype =
+      subtype_internal history context' s fresh_t'
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-<: REC-I"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t
+      ~history:[history_subtype]
+  (* Type projection on the left with another type. *)
+  | (Grammar.TypeProjection(x, label), u') ->
+    rule_sel SEL_SUB history context (x, label) u'
+  (* <: SEL.
+     SUB is allowed for lower bound. This rule unifies official <: SEL and SUB.
+     Γ ⊦ x : { A : L .. U }
+     =>
+     Γ ⊦ L <: x.A
+     becomes
+     Γ ⊦ x : { A : L' .. U } ∧ Γ ⊦ L <: L'
+     =>
+     Γ ⊦ L <: x.A
+
+     With [TypeUtils.greatest_lower_bound], the actual rule is
+     Γ ⊦ x : T ∧ Γ ⊦ { A : L' .. U } <: T ∧ Γ ⊦ L <: L'
+     =>
+     Γ ⊦ L <: x.A
+  *)
+  (* Type projection on the right with another type. *)
+  | (l, Grammar.TypeProjection(x, label)) ->
+    rule_sel SUB_SEL history context (x, label) l
   (* ----- Beginning of DOT rules ----- *)
+  (* The order is important. First, we check AND1 <: to eliminate the interseciton on the right.
+     After that, we test case by cases when we have an intersection on the left.
+     First, recursive types must be handled because it implies to use UNPACK and
+     PACK.
+  *)
   (* AND1 <:
      Γ ⊦ S <: T ∧ Γ ⊦ T ∧ U <: T
      =>
@@ -283,6 +310,67 @@ and subtype_internal history context s t =
       ~s
       ~t:(Grammar.TypeIntersection(t, u))
       ~history:[left_history_subtype ; right_history_subtype]
+  (* UN-AND <: REC-REC
+     We need this case for the following cases for examples:
+     sig type t end INTER sig val f : Int end <: sig type t val f : Int end
+
+     The answer to this question is yes. We can use AND, UNPACK two times and
+     VAR-PACK on the intersection we got with the unpack.
+  *)
+  | (Grammar.TypeIntersection(Grammar.TypeRecursive(z1, s1), Grammar.TypeRecursive(z2, s2)), t) ->
+    let fresh_z = AlphaLib.Atom.copy z1 in
+    let fresh_s1 = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z1 fresh_z) s1 in
+    let fresh_s2 = Grammar.rename_typ (AlphaLib.Atom.Map.singleton z2 fresh_z) s2 in
+    let fresh_s = Grammar.TypeRecursive(fresh_z, Grammar.TypeIntersection(fresh_s1, fresh_s2)) in
+    let history, is_subtype =
+      subtype_internal history context fresh_s t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-AND <: REC-REC"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t:fresh_s
+      ~history:[history]
+  (* UN-AND <: REC-T
+     We need this case for the following case:
+     sig type t end INTER val f : Int <: sig type t val f : Int end
+
+     The answer to this question is yes. We can use AND, UNPACK one time and
+     VAR-PACK on the intersection we got with the unpack.
+  *)
+  | (Grammar.TypeIntersection(Grammar.TypeRecursive(z1, s1), s2), t) ->
+    let fresh_s = Grammar.TypeRecursive(z1, Grammar.TypeIntersection(s1, s2)) in
+    let history, is_subtype =
+      subtype_internal history context fresh_s t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-AND <: REC-T"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t:fresh_s
+      ~history:[history]
+  (* UN-AND <: T-REC
+     We need this case for the following case:
+     val f : Int INTER sig type t end <: sig type t val f : Int end
+
+     The answer to this question is yes. We can use AND, UNPACK one time and
+     VAR-PACK on the intersection we got with the unpack.
+  *)
+  | (Grammar.TypeIntersection(s1, Grammar.TypeRecursive(z2, s2)), t) ->
+    let fresh_s = Grammar.TypeRecursive(z2, Grammar.TypeIntersection(s1, s2)) in
+    let history, is_subtype =
+      subtype_internal history context fresh_s t
+    in
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-AND <: T-REC"
+      ~is_true:is_subtype
+      ~env:context
+      ~s
+      ~t:fresh_s
+      ~history:[history]
+
   (* <: AND
      Γ ⊦ S <: T ∧ Γ ⊦ S <: U
      =>
@@ -314,22 +402,6 @@ and subtype_internal history context s t =
         ~t
         ~history:[history_left ; history_right]
     )
-
-  (* FLD <: FLD
-     Γ ⊦ T <: U => Γ ⊦ { a : T } <: { a : U }
-  *)
-  | (Grammar.TypeFieldDeclaration(a, t), Grammar.TypeFieldDeclaration(b, u))
-    when String.equal a b ->
-    let history_subtype, is_subtype =
-      subtype_internal history context t u
-    in
-    DerivationTree.create_subtyping_node
-      ~rule:"FLD <: FLD"
-      ~is_true:is_subtype
-      ~env:context
-      ~s:(Grammar.TypeFieldDeclaration(a, t))
-      ~t:(Grammar.TypeFieldDeclaration(b, u))
-      ~history:[history_subtype]
   | _ ->
     DerivationTree.create_subtyping_node
       ~rule:"NO RULE"
