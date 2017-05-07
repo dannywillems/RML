@@ -31,6 +31,7 @@ MLI := \
 
 .PHONY: all test clean
 
+default: all
 test: all
 	./rml -f test/MISC/comment.rml -a typing --use-stdlib
 	./rml -f test/MISC/expression.rml -a typing --use-stdlib
@@ -45,7 +46,6 @@ test: all
 	./rml -f test/subtype/simple_labels.rml -a subtype --use-stdlib
 	./rml -f test/typing/list.rml -a typing --use-stdlib
 	./rml -f test/typing/option.rml -a typing --use-stdlib
-#	./rml -f test/typing/return_module.rml -a typing --use-stdlib
 	./rml -f test/typing/sum.rml -a typing --use-stdlib
 
 all:
