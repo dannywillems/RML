@@ -1,3 +1,10 @@
 let x = 42 in x;;
 let f = fun(x : Int.t) -> x in f 42;;
 let x = 42 in let y = x in y;;
+
+(* Resolve the avoidance problem with an ascription *)
+let module M = struct
+  type t = Int.t
+  let x : self.t = 42
+end in M.x : Int.t;;
+
