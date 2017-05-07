@@ -45,6 +45,7 @@ let obj = "obj"
 let end_ = "end"
 let type_ = "type"
 let val_ = "val"
+let with_ = "with"
 
 let fun_ = "fun"
 
@@ -117,6 +118,7 @@ rule prog = parse
   | top { Parser.TYPE_TOP }
   | bottom { Parser.TYPE_BOTTOM }
   | intersection { Parser.INTERSECTION }
+  | with_ { Parser.WITH }
   (* Method and type labels, variable *)
   | uppercase_ident as l { Parser.ID_CAPITALIZE l }
   | lowercase_ident as l { Parser.ID l }

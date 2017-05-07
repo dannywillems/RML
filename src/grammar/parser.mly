@@ -142,6 +142,7 @@
 %token UNIMPLEMENTED_TERM
 
 %token INTERSECTION
+%token WITH
 
 %token EOF
 
@@ -562,6 +563,11 @@ rule_type:
 | t1 = rule_type ;
   INTERSECTION ;
   t2 = rule_type {
+           Grammar.TypeIntersection(t1, t2)
+         }
+| t1 = rule_type ;
+  WITH ;
+  t2 = rule_type_declaration_type {
            Grammar.TypeIntersection(t1, t2)
          }
 (* x.t -> Lowercase must be used for records, not modules. *)
