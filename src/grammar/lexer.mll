@@ -49,6 +49,7 @@ let val_ = "val"
 let fun_ = "fun"
 
 let forall = "forall"
+let intersection = "&"
 
 let unimplemented = "Unimplemented"
 
@@ -115,6 +116,7 @@ rule prog = parse
   (* Top and bottom types *)
   | top { Parser.TYPE_TOP }
   | bottom { Parser.TYPE_BOTTOM }
+  | intersection { Parser.INTERSECTION }
   (* Method and type labels, variable *)
   | uppercase_ident as l { Parser.ID_CAPITALIZE l }
   | lowercase_ident as l { Parser.ID l }

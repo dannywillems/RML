@@ -141,6 +141,8 @@
 
 %token UNIMPLEMENTED_TERM
 
+%token INTERSECTION
+
 %token EOF
 
 (* Use for tests *)
@@ -554,6 +556,11 @@ rule_type:
 | TYPE_TOP { Grammar.TypeTop }
 (* T ∧ T *)
 | t1 = rule_type ;
+  t2 = rule_type {
+           Grammar.TypeIntersection(t1, t2)
+         }
+| t1 = rule_type ;
+  INTERSECTION ;
   t2 = rule_type {
            Grammar.TypeIntersection(t1, t2)
          }
