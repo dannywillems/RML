@@ -86,14 +86,18 @@ let rec best_bound_of_recursive_type ~direction ~x ~label context t = match t wi
       best_bound_of_recursive_type ~direction ~x ~label context t2
     in
     (match (best_bound_for_t1, best_bound_for_t2) with
+     (* If both return None, it means we can not find a best bound, so we return None. *)
     | (None, None) -> None
+    (* If one of them is None, it means we can find a U which only satisfies one of
+    them, not both. We must return None because to return the found U, it must
+    be OK for both as it's an intersection. *)
     | (Some t, None) | (None, Some t) -> Some t
     (* If a same field is defined two times, we take the last definition, i.e.
        in the type in the right.
        Normally, this case can not be produced because in the typing algorithm,
        we need to have different domains when doing an intersection.
     *)
-    | (Some _, Some t) -> Some t)
+    | (Some s, Some t) -> Some t)
   (* { a : T } *)
   | Grammar.TypeFieldDeclaration(a, t) ->
     if String.equal a label
