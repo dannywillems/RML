@@ -1,0 +1,23 @@
+let module List = struct(sci)
+  type list = sig
+    type t
+    val is_empty : Bool.t
+    val head : self.t
+    val tail : sci.list with type t <: self.t
+  end
+  let nil : sci.list with type t = Nothing = struct
+    type t = Nothing
+    let is_empty = Bool.true
+    let head = Unimplemented
+    let tail = Unimplemented
+  end
+  let cons = fun(typ : sig type t end, head : typ.t, tail : sci.list with type t <: typ.t) ->
+  struct
+    type t = typ.t
+    let is_empty = Bool.false
+    let head = head
+    let tail = tail
+  end
+end[@show_derivation_tree, no_context];;
+
+let l_42 = List.cons Int 42 List.nil;;
