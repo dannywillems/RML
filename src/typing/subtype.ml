@@ -314,8 +314,10 @@ and subtype_internal history context s t =
      We need this case for the following cases for examples:
      sig type t end INTER sig val f : Int end <: sig type t val f : Int end
 
-     The answer to this question is yes. We can use AND, UNPACK two times and
-     VAR-PACK on the intersection we got with the unpack.
+     The answer to this question is yes. We can use UNPACK on the right side
+     followed by (<:-AND) and two VAR-PACK and finish with (AND-1-<:) and (AND-2-<:).
+
+     In a more general case, we implement it by gather the recursive type into one.
   *)
   | (Grammar.TypeIntersection(Grammar.TypeRecursive(z1, s1), Grammar.TypeRecursive(z2, s2)), t) ->
     let fresh_z = AlphaLib.Atom.copy z1 in
@@ -336,8 +338,7 @@ and subtype_internal history context s t =
      We need this case for the following case:
      sig type t end INTER val f : Int <: sig type t val f : Int end
 
-     The answer to this question is yes. We can use AND, UNPACK one time and
-     VAR-PACK on the intersection we got with the unpack.
+     We use VAR-PACK to use UN-AN-<: REC-REC..
   *)
   | (Grammar.TypeIntersection(Grammar.TypeRecursive(z1, s1), s2), t) ->
     let fresh_s = Grammar.TypeRecursive(z1, Grammar.TypeIntersection(s1, s2)) in
@@ -355,8 +356,7 @@ and subtype_internal history context s t =
      We need this case for the following case:
      val f : Int INTER sig type t end <: sig type t val f : Int end
 
-     The answer to this question is yes. We can use AND, UNPACK one time and
-     VAR-PACK on the intersection we got with the unpack.
+     We use VAR-PACK to use UN-AN-<: REC-REC..
   *)
   | (Grammar.TypeIntersection(s1, Grammar.TypeRecursive(z2, s2)), t) ->
     let fresh_s = Grammar.TypeRecursive(z2, Grammar.TypeIntersection(s1, s2)) in

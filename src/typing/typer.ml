@@ -1,5 +1,5 @@
 (* The main typing algorithm.
-   When a type if given if the term, we check if this type is well formed.
+   When a type, we check if this type is well formed.
 *)
 let rec type_of_internal history context term = match term with
   (* ALL-I
