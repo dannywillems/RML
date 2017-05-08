@@ -516,6 +516,42 @@ type t = self => sig
 end
 ```
 
+#### Intersection and sugar `with`.
+
+Intersection can also be defined with the keyword `&`. The intersection can be
+used with any type. For example `{ x : Int.t} & {y : Int.t}`.
+
+Like OCaml, the keyword `with` followed by a type declaration can also be used.
+
+```
+(* File test/typing/poly_list.rml *)
+(* Polymorphic list implementation based on WF 2016. *)
+let module List = struct(sci)
+  type list = sig
+    type t
+    val is_empty : Bool.t
+    val head : self.t
+    val tail : sci.list with type t <: self.t
+  end
+  let nil : sci.list with type t = Nothing = struct
+    type t = Nothing
+    let is_empty = Bool.true
+    let head = Unimplemented
+    let tail = Unimplemented
+  end
+  let cons = fun(typ : sig type t end, head : typ.t, tail : sci.list with type t <: typ.t) ->
+  struct
+    type t = typ.t
+    let is_empty = Bool.false
+    let head = head
+    let tail = tail
+  end
+end;;
+
+(* The following line doesn't terminate because it's an infinite derivation tree. *)'
+let l_42 = List.cons Int 42 List.nil;;
+```
+
 #### List (stdlib/list.rml)
 
 Lists are polymorphic as in a previous example. The module `List` is a
@@ -523,6 +559,12 @@ functor taking a module containing a type `t`.
 No syntactic sugar is provided for the moment.
 
 See `test/typing/list.rml` for good examples.
+
+Another implementation, based
+on
+[Wadler Fest 2016](https://www.cs.purdue.edu/homes/rompf/papers/amin-wf16.pdf)
+is also provided in `test/typing/poly_list.rml` but the algorithm doesn't terminate due to infinite derivation
+tree.
 
 #### Option (stdlib/option_church.rml)
 

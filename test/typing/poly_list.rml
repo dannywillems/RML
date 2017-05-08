@@ -18,6 +18,6 @@ let module List = struct(sci)
     let head = head
     let tail = tail
   end
-end[@show_derivation_tree, no_context];;
+end;;
 
 let l_42 = List.cons Int 42 List.nil;;
