@@ -1,4 +1,4 @@
-let module List = struct(sci)
+let module ListWith = struct(sci)
   type list = sig
     type t
     val is_empty : Bool.t
@@ -19,5 +19,3 @@ let module List = struct(sci)
     let tail = tail
   end
 end;;
-
-let l_42 = List.cons Int 42 List.nil;;

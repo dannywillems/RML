@@ -555,7 +555,7 @@ used with any type. For example `{ x : Int.t} & {y : Int.t}`.
 Like OCaml, the keyword `with` followed by a type declaration can also be used.
 
 ```
-(* File test/typing/poly_list.rml *)
+(* File stdlib/list_with.rml *)
 (* Polymorphic list implementation based on WF 2016. *)
 let module List = struct(sci)
   type list = sig
@@ -594,7 +594,7 @@ See `test/typing/list.rml` for good examples.
 Another implementation, based
 on
 [Wadler Fest 2016](https://www.cs.purdue.edu/homes/rompf/papers/amin-wf16.pdf)
-is also provided in `test/typing/poly_list.rml` but the algorithm doesn't
+is also provided in `stdlib/list_with.rml` but the algorithm doesn't
 terminate due to infinite derivation tree.
 
 #### Option (stdlib/option_church.rml)

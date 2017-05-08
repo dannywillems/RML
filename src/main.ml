@@ -273,6 +273,7 @@ let stdlib_files = [
   "stdlib/sum_church.rml";
   "stdlib/comparable.rml";
   "stdlib/list.rml";
+  "stdlib/list_with.rml";
   "stdlib/pervasives.rml";
   "stdlib/point.rml";
   "stdlib/pair.rml";
