@@ -93,4 +93,6 @@ let print show_derivation_tree print_context e = match e with
       field
       (AlphaLib.Atom.show var)
       (Print.string_of_nominal_typ type_of_var)
+  | AggregationIntersectionNotEmpty(str, d1, d2) ->
+    print_endline str
   | _ -> print_endline (Printexc.to_string e)
