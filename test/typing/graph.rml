@@ -1,5 +1,5 @@
 let module GraphInt : Graph.graph with type node = Int.t = struct
   type node = Int.t
   let succ = fun(x : self.node) ->
-    List.cons Int (Int.succ x) List.nil
+    ListWith.cons Int (Int.succ x) ListWith.nil
 end;;
