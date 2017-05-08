@@ -516,6 +516,37 @@ type t = self => sig
 end
 ```
 
+Another implementation without functor is defined in `stdlib/pair_with.rml` in the module `PairWith`. Here the definitation and an example.
+
+```
+(* File stdlib/pair_with.rml *)
+(* Pair implementation without functor. *)
+let module PairWith = struct(pair_mod)
+  type pair = sig
+    type fst_typ
+    type snd_typ
+    val fst : self.fst_typ
+    val snd : self.snd_typ
+  end
+  let init =
+    fun(
+      fst_typ : sig type t end,
+      snd_typ : sig type t end,
+      fst : fst_typ.t,
+      snd : snd_typ.t) ->
+    struct
+      type fst_typ = fst_typ.t
+      type snd_typ = snd_typ.t
+      let fst = fst
+      let snd = snd
+    end
+end;;
+
+(* File test/typing/pair_with.rml *)
+let int_42_42 = PairWith.init Int Int 42 42;;
+int_42_42.fst;;
+int_42_42.snd;;
+```
 #### Intersection and sugar `with`.
 
 Intersection can also be defined with the keyword `&`. The intersection can be
@@ -563,8 +594,8 @@ See `test/typing/list.rml` for good examples.
 Another implementation, based
 on
 [Wadler Fest 2016](https://www.cs.purdue.edu/homes/rompf/papers/amin-wf16.pdf)
-is also provided in `test/typing/poly_list.rml` but the algorithm doesn't terminate due to infinite derivation
-tree.
+is also provided in `test/typing/poly_list.rml` but the algorithm doesn't
+terminate due to infinite derivation tree.
 
 #### Option (stdlib/option_church.rml)
 

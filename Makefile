@@ -47,6 +47,7 @@ test: all
 	./rml -f test/typing/list.rml -a typing --use-stdlib
 	./rml -f test/typing/option.rml -a typing --use-stdlib
 	./rml -f test/typing/sum.rml -a typing --use-stdlib
+	./rml -f test/typing/pair_with.rml -a typing --use-stdlib
 
 all:
 	@ $(OCAMLBUILD) $(SRC_DIR)/$(TARGET)

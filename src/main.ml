@@ -276,6 +276,7 @@ let stdlib_files = [
   "stdlib/pervasives.rml";
   "stdlib/point.rml";
   "stdlib/pair.rml";
+  "stdlib/pair_with.rml";
   "stdlib/map.rml";
   "stdlib/graph.rml";
 ]
