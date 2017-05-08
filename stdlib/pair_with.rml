@@ -1,0 +1,20 @@
+let module PairWith = struct(pair_mod)
+  type pair = sig
+    type fst_typ
+    type snd_typ
+    val fst : self.fst_typ
+    val snd : self.snd_typ
+  end
+  let init =
+    fun(
+      fst_typ : sig type t end,
+      snd_typ : sig type t end,
+      fst : fst_typ.t,
+      snd : snd_typ.t) ->
+    struct
+      type fst_typ = fst_typ.t
+      type snd_typ = snd_typ.t
+      let fst = fst
+      let snd = snd
+    end
+end;;
