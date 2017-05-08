@@ -3,6 +3,4 @@ let module Point2D = struct(point)
   let init = fun(x : Int.t, y : Int.t) -> { x = x ; y = y }
   let first = fun(p : point.t) -> p.x
   let second = fun(p : point.t) -> p.y
-  let dummy = fun(p1 : point.t, p2 : point.t) ->
-    { x = point.first p1 ; y = point.second p2 }
 end;;
