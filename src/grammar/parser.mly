@@ -143,6 +143,7 @@
 
 %token INTERSECTION
 %token WITH
+%token AND
 
 %token EOF
 
@@ -567,9 +568,22 @@ rule_type:
          }
 | t1 = rule_type ;
   WITH ;
-  t2 = rule_type_declaration_type {
-           Grammar.TypeIntersection(t1, t2)
-         }
+  t2_list = rule_type_with_list {
+      List.fold_left
+        (fun init to_add -> Grammar.TypeIntersection(init, to_add))
+        (Grammar.TypeIntersection(t1, List.hd t2_list))
+        (List.tl t2_list)
+    }
+| LEFT_PARENT ;
+  t1 = rule_type ;
+  WITH ;
+  t2_list = rule_type_with_list ;
+  RIGHT_PARENT {
+      List.fold_left
+        (fun init to_add -> Grammar.TypeIntersection(init, to_add))
+        (Grammar.TypeIntersection(t1, List.hd t2_list))
+        (List.tl t2_list)
+    }
 (* x.t -> Lowercase must be used for records, not modules. *)
 | var = ID ;
   DOT ;
@@ -593,6 +607,11 @@ rule_type:
   t = rule_type ;
   RIGHT_PARENT { t }
 
+rule_type_with_list:
+| t = rule_type_declaration_type { [t] }
+| t1 = rule_type_declaration_type ; AND ; t2 = rule_type_with_list {
+                                                   t1 :: t2
+                                                 }
 rule_type_module_signature:
 (* sig T^{self} end *)
 | SIG ;

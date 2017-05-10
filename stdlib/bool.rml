@@ -25,7 +25,7 @@ let module Bool = struct(bool)
   let not = fun(x : bool.t) ->
     x bool bool.false bool.true
 
-  let and =
+  let and_ =
     fun(x : bool.t, y : bool.t) ->
       x bool y bool.false
 

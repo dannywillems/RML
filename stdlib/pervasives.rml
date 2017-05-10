@@ -5,7 +5,7 @@ let string_of_int : Int.t -> String.t = Unimplemented;;
 (* Booleans *)
 let false = Bool.false;;
 let true = Bool.true;;
-let and = Bool.and;;
+let and_ = Bool.and_;;
 let or = Bool.or;;
 let not = Bool.not;;
 
