@@ -97,7 +97,7 @@ let rec best_bound_of_recursive_type ~direction ~x ~label context t = match t wi
        Normally, this case can not be produced because in the typing algorithm,
        we need to have different domains when doing an intersection.
     *)
-    | (Some s, Some t) -> Some t)
+    | (Some s, Some t) -> Some (Grammar.TypeIntersection(s, t)))
   (* { a : T } *)
   | Grammar.TypeFieldDeclaration(a, t) ->
     if String.equal a label
@@ -116,11 +116,6 @@ let rec least_upper_bound_of_dependent_function context t = match t with
   | Grammar.TypeBottom -> Some (Grammar.TypeTop, ((AlphaLib.Atom.fresh "_"), Grammar.TypeBottom))
   | Grammar.TypeTop -> None
   | Grammar.TypeDeclaration(_) -> None
-  (* Si on a L = x.A, on a x de la forme { A : L .. U }. On fait alors appel à
-     least_upper_bound pour récupérer le plus petit U tel que L <: U et on
-     applique de nouveau best_tuple_of_dependent_function sur U pour récupérer le
-     plus U' tel que U' est de la forme ∀(x : S) T.
-  *)
   | Grammar.TypeProjection(x, label) ->
     let type_of_x =
       ContextType.find x context
