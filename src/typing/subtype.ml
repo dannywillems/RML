@@ -260,6 +260,21 @@ and subtype_internal history context s t =
       ~t
       ~history:[history_subtype]
   (* Type projection on the left with another type. *)
+  (* SEL <: .
+     SUB is allowed for upper bound. This rule unifies official SEL <: and SUB.
+     Γ ⊦ x : { A : L .. U }
+     =>
+     Γ ⊦ x.A <: U
+     becomes
+     Γ ⊦ x : { A : L .. U } ∧ Γ ⊦ U <: U'
+     =>
+     Γ ⊦ x.A <: U'
+
+     With [TypeUtils.greatest_lower_bound], the actual rule is
+     Γ ⊦ x : T ∧ Γ ⊦ T <: { A : L .. U }∧ Γ ⊦ u <: u'
+     =>
+     Γ ⊦ x.A <: U'
+  *)
   | (Grammar.TypeProjection(x, label), u') ->
     rule_sel SEL_SUB history context (x, label) u'
   (* <: SEL.
