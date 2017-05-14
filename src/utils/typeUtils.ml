@@ -127,7 +127,10 @@ let rec least_upper_bound_of_dependent_function context t = match t with
     | None -> None
     | Some u -> least_upper_bound_of_dependent_function context u
     )
-  | _ -> None
+  (* T ∧ T *)
+  | Grammar.TypeIntersection(t1, t2) -> None
+  | Grammar.TypeFieldDeclaration(a, t) -> None
+  | Grammar.TypeRecursive(_, _) -> None
 
 let rec labels_of_recursive_type context recursive_type =
   match recursive_type with
