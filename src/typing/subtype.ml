@@ -99,45 +99,6 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:history
-  (* UN-REFL-TYP.
-     This rule is added from the official rule to be able to remove REFL.
-     The missing typing rules was for type projections. We only need to check
-     that the variables are represented by the same atom.
-
-     NOTE: The when statement is mandatory!
-     If we don't mention it, and do the atom equality checking in the body of
-     the expression for this pattern, it won't work because the algorithm choose
-     this pattern instead of SEL <: or <: SEL.
-     Γ ⊦ x.A <: x.A.
-  *)
-  | Grammar.TypeProjection(x, label_x), Grammar.TypeProjection(y, label_y)
-    when (String.equal label_x label_y) && (AlphaLib.Atom.equal x y) ->
-    DerivationTree.create_subtyping_node
-      ~rule:"UN-REFL-TYP"
-      ~is_true:true
-      ~env:context
-      ~s
-      ~t
-      ~history
-  (* <: SEL <:
-     This pattern is used when we have x.A <: y.A. In this case, we first try
-     SEL <:. If it succeeds, we return this solution, else we try <: SEL. If <:
-     SEL succeeds, we return the solution, else it implies x.A is not a subtype
-     of y.A.
-  *)
-  | Grammar.TypeProjection(x, label_x), Grammar.TypeProjection(y, label_y) ->
-    (* We first try SEL <: *)
-    let node_sel_sub, is_subtype_sel_sub =
-      rule_sel SEL_SUB history context (x, label_x) t
-    in
-    if is_subtype_sel_sub
-    then (node_sel_sub, is_subtype_sel_sub)
-    else (
-      let node_sub_sel, is_subtype_sub_sel =
-        rule_sel SUB_SEL history context (y, label_y) s
-      in
-      node_sub_sel, is_subtype_sub_sel
-    )
   (* TYP <: TYP
      Γ ⊦ S2 <: S1 ∧ Γ ⊦ T1 <: T2 =>
      Γ ⊦ { A : S1 .. T1 } <: { A : S2 .. T2 }
@@ -200,6 +161,45 @@ and subtype_internal history context s t =
       ~s
       ~t
       ~history:[left_derivation_tree ; right_derivation_tree]
+  (* UN-REFL-TYP.
+     This rule is added from the official rule to be able to remove REFL.
+     The missing typing rules was for type projections. We only need to check
+     that the variables are represented by the same atom.
+
+     NOTE: The when statement is mandatory!
+     If we don't mention it, and do the atom equality checking in the body of
+     the expression for this pattern, it won't work because the algorithm choose
+     this pattern instead of SEL <: or <: SEL.
+     Γ ⊦ x.A <: x.A.
+  *)
+  | Grammar.TypeProjection(x, label_x), Grammar.TypeProjection(y, label_y)
+    when (String.equal label_x label_y) && (AlphaLib.Atom.equal x y) ->
+    DerivationTree.create_subtyping_node
+      ~rule:"UN-REFL-TYP"
+      ~is_true:true
+      ~env:context
+      ~s
+      ~t
+      ~history
+  (* <: SEL <:
+     This pattern is used when we have x.A <: y.A. In this case, we first try
+     SEL <:. If it succeeds, we return this solution, else we try <: SEL. If <:
+     SEL succeeds, we return the solution, else it implies x.A is not a subtype
+     of y.A.
+  *)
+  | Grammar.TypeProjection(x, label_x), Grammar.TypeProjection(y, label_y) ->
+    (* We first try SEL <: *)
+    let node_sel_sub, is_subtype_sel_sub =
+      rule_sel SEL_SUB history context (x, label_x) t
+    in
+    if is_subtype_sel_sub
+    then (node_sel_sub, is_subtype_sel_sub)
+    else (
+      let node_sub_sel, is_subtype_sub_sel =
+        rule_sel SUB_SEL history context (y, label_y) s
+      in
+      node_sub_sel, is_subtype_sub_sel
+    )
   (* UN-REC
      We compare two recursive types. We use VAR-UNPACK on both sides by renaming
      the internal variable with a fresh atom.
