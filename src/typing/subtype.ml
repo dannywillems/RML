@@ -277,6 +277,7 @@ and subtype_internal history context s t =
   *)
   | (Grammar.TypeProjection(x, label), u') ->
     rule_sel SEL_SUB history context (x, label) u'
+  (* Type projection on the right with another type. *)
   (* <: SEL.
      SUB is allowed for lower bound. This rule unifies official <: SEL and SUB.
      Γ ⊦ x : { A : L .. U }
@@ -292,7 +293,6 @@ and subtype_internal history context s t =
      =>
      Γ ⊦ L <: x.A
   *)
-  (* Type projection on the right with another type. *)
   | (l, Grammar.TypeProjection(x, label)) ->
     rule_sel SUB_SEL history context (x, label) l
   (* ----- Beginning of DOT rules ----- *)
@@ -301,15 +301,10 @@ and subtype_internal history context s t =
      First, recursive types must be handled because it implies to use UNPACK and
      PACK.
   *)
-  (* AND1 <:
-     Γ ⊦ S <: T ∧ Γ ⊦ T ∧ U <: T
+  (* <: AND
+     Γ ⊦ S <: T ∧ Γ ⊦ S <: U
      =>
-     Γ ⊦ S ∧ U <: T
-
-     AND2 <:
-     Γ ⊦ S <: U ∧ Γ ⊦ T ∧ U <: U
-     =>
-     Γ ⊦ T ∧ S <: U
+     Γ ⊦ S <: T ∧ U
   *)
   | (s, Grammar.TypeIntersection(t, u)) ->
     let left_history_subtype, left_is_subtype =
@@ -385,11 +380,15 @@ and subtype_internal history context s t =
       ~s
       ~t:fresh_s
       ~history:[history]
-
-  (* <: AND
-     Γ ⊦ S <: T ∧ Γ ⊦ S <: U
+  (* AND-1-<:
+     Γ ⊦ S <: T ∧ Γ ⊦ T ∧ U <: T
      =>
-     Γ ⊦ S <: T ∧ U
+     Γ ⊦ S ∧ U <: T
+
+     AND-2-<:
+     Γ ⊦ S <: U ∧ Γ ⊦ T ∧ U <: U
+     =>
+     Γ ⊦ T ∧ S <: U
   *)
   | (Grammar.TypeIntersection(s, u), t) ->
     let history_left, is_subtype_left =
