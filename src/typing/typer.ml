@@ -9,7 +9,6 @@ let rec type_of_internal history context term = match term with
   *)
   | Grammar.TermAbstraction(s, (x, t)) ->
     CheckUtils.check_well_formedness context s;
-    CheckUtils.check_avoidance_problem "ALL-I" context x s;
     let context' = ContextType.add x s context in
     let u_history, u = type_of_internal history context' t in
     let typ = Grammar.TypeDependentFunction(s, (x, u)) in
