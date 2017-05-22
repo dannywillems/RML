@@ -152,7 +152,7 @@ let h = fun(x : Int.t) -> fun(f : Int.t -> Int.t) -> f x;;
    the first parameter which is a module.
 *)
 let h' = fun(m : sig type t val add : self.t -> self.t -> Int.t end, x : m.t, y : m.t) -> m.add x y;;
-> ∀(m : self => sig
+> ∀(m : sig(self)
 type t = ⟂ .. ⊤
   val add : self.t -> self.t -> Int.t
 end) ∀(x : m.t) ∀(y : m.t) Int.t
@@ -180,15 +180,15 @@ let module Point2D = struct
     { x = x' ; y = y' }
 end;;
 > Point2D :
-self => sig
-type t = 'self => sig
+sig(self)
+type t = sig('self)
   val x : Int.t
     val y : Int.t
-  end .. 'self => sig
+  end .. sig('self)
   val x : Int.t
     val y : Int.t
   end
-  val add : ∀(p : self.t) ∀(p : self.t) 'self => sig
+  val add : ∀(p : self.t) ∀(p : self.t) sig('self)
   val x : Int.t
     val y : Int.t
   end
@@ -207,16 +207,16 @@ let module Point2D = struct(point)
     { x = x' ; y = y' }
 end;;
 > Point2D : 
-point => sig
-type t = 'self => sig
+sig(point)
+type t = sig('self)
   val x : Int.t
     val y : Int.t
-  end .. 'self => sig
+  end .. sig('self)
   val x : Int.t
     val y : Int.t
   end
-  val add : ∀(p : point.t) ∀(p : point.t) 'self => sig
-  val x : Int.t
+  val add : ∀(p : point.t) ∀(p : point.t) sig('self)
+    val x : Int.t
     val y : Int.t
   end
 end
@@ -234,15 +234,15 @@ let point2D = struct(point)
     { x = x' ; y = y' }
 end;;
 > point2D : 
-point => sig
-type t = 'self => sig
-  val x : Int.t
+sig(point)
+  type t = sig('self)
+    val x : Int.t
     val y : Int.t
-  end .. 'self => sig
-  val x : Int.t
+  end .. sig('self)
+    val x : Int.t
     val y : Int.t
   end
-  val add : ∀(p : point.t) ∀(p : point.t) 'self => sig
+  val add : ∀(p : point.t) ∀(p : point.t) sig('self)
   val x : Int.t
     val y : Int.t
   end
@@ -269,8 +269,8 @@ end : struct
     { x = x' ; y = y' }
 end;;
 > point2D_with_sig : 
-self => sig
-type t = ⟂ .. ⊤
+sig(self)
+  type t = ⟂ .. ⊤
   val add : self.t -> self.t -> self.t
 end
 ```
@@ -284,8 +284,8 @@ let point2D_with_sig_error = sig
 end : struct
   type t = { x : Int.t ; y : Int.t }
 end;;
-> self => sig
-type t = ⟂ .. ⊤
+sig(self)
+  type t = ⟂ .. ⊤
   val add : self.t -> self.t -> self.t
 end
 ```
@@ -308,19 +308,19 @@ let module MakePoint2D = fun(typ : sig type t val plus : self.t -> self.t -> sel
     { x = x' ; y = y' }
 end;;
 > MakePoint2D : 
-∀(typ : self => sig
-type t = ⟂ .. ⊤
+∀(typ : sig(self)
+  type t = ⟂ .. ⊤
   val plus : self.t -> self.t -> self.t
-end) point => sig
-type t = 'self => sig
-  val x : typ.t
+end) sig(point)
+  type t = sig('self)
+    val x : typ.t
     val y : typ.t
-  end .. 'self => sig
-  val x : typ.t
+  end .. sig('self)
+    val x : typ.t
     val y : typ.t
   end
-  val add : ∀(p : point.t) ∀(p : point.t) 'self => sig
-  val x : typ.t
+  val add : ∀(p : point.t) ∀(p : point.t) sig('self)
+    val x : typ.t
     val y : typ.t
   end
 end
@@ -330,16 +330,16 @@ end
 *)
 let module Point2DInt = MakePoint2D Int;;
 > Point2DInt : 
-point => sig
-type t = 'self => sig
-  val x : Int.t
+sig(point)
+  type t = sig('self)
+    val x : Int.t
     val y : Int.t
-  end .. 'self => sig
-  val x : Int.t
+  end .. sig('self)
+    val x : Int.t
     val y : Int.t
   end
-  val add : ∀(p : point.t) ∀(p : point.t) 'self => sig
-  val x : Int.t
+  val add : ∀(p : point.t) ∀(p : point.t) sig('self)
+    val x : Int.t
     val y : Int.t
   end
 end
@@ -355,14 +355,14 @@ You can access to fields and types of a module with the syntax `M.f` where `M` i
 *)
 let module ListInt = List Int;;
 > ListInt : 
-list => sig
-type t = self => sig
-  val head : Unit.t -> Int.t
+sig(list)
+  type t = sig(self)
+    val head : Unit.t -> Int.t
     val tail : Unit.t -> list.t
     val size : Int.t
     val is_empty : Bool.t
-  end .. self => sig
-  val head : Unit.t -> Int.t
+  end .. sig(self)
+    val head : Unit.t -> Int.t
     val tail : Unit.t -> list.t
     val size : Int.t
     val is_empty : Bool.t
@@ -409,29 +409,29 @@ sure fields in the records doesn't refer to other fields.
 (* File test/MISC/record.rml *)
 let x = { a = 42 ; x = 52 };;
 > x :
-'self => sig
-val a : Int.t
+sig('self)
+  val a : Int.t
   val x : Int.t
 end
 
 let f = fun(x : {a : Int.t ; b : Int.t}) -> Int.succ x.a;;
 > f : 
-∀(x : 'self => sig
-val a : Int.t
+∀(x : sig('self)
+  val a : Int.t
   val b : Int.t
-end) ∀(typ : self => sig type t = ⟂ .. ⊤ end) ∀(s : typ.t -> typ.t) ∀(z : typ.t) typ.t
+end) ∀(typ : sig(self) type t = ⟂ .. ⊤ end) ∀(s : typ.t -> typ.t) ∀(z : typ.t) typ.t
 
 let g = fun(x : {a : Int.t}) -> x.a in f { a = 42 ; b = 52 };;
-> let  g = fun (x : 'self => sig val a : Int.t end) -> x.a in
+> let  g = fun (x : sig('self) val a : Int.t end) -> x.a in
 let 
 'UN-REC_'self_AGG_F-DECL_a_F-DECL_b
 =
-'self => struct 
+struct('self)
   let a = 42 : Int.t
-    let b = 52 : Int.t
-  end in
+  let b = 52 : Int.t
+end in
 f 'UN-REC_'self_AGG_F-DECL_a_F-DECL_b
-∀(typ : self => sig type t = ⟂ .. ⊤ end) ∀(s : typ.t -> typ.t) ∀(z : typ.t) typ.t
+∀(typ : sig(self) type t = ⟂ .. ⊤ end) ∀(s : typ.t -> typ.t) ∀(z : typ.t) typ.t
 ```
 
 #### Syntactic sugar.
@@ -502,14 +502,14 @@ let module Pair = fun(left_typ : sig type t end,
      end
 end;;
 > Pair : 
-∀(left_typ : self => sig type t = ⟂ .. ⊤ end) ∀(right_typ : self => sig
+∀(left_typ : sig(self) type t = ⟂ .. ⊤ end) ∀(right_typ : sig(self)
 type t = ⟂ .. ⊤
-end) pair => sig
-type t = self => sig
-  val fst : Unit.t -> left_typ.t
+end) sig(pair)
+type t = sig(self)
+    val fst : Unit.t -> left_typ.t
     val snd : Unit.t -> right_typ.t
-  end .. self => sig
-  val fst : Unit.t -> left_typ.t
+  end .. sig(self)
+    val fst : Unit.t -> left_typ.t
     val snd : Unit.t -> right_typ.t
   end
   val init : left_typ.t -> right_typ.t -> pair.t
@@ -518,7 +518,7 @@ end
 
 Another implementation without functor is defined in `stdlib/pair_with.rml` in the module `PairWith`. Here the definitation and an example.
 
-```
+```OCaml
 (* File stdlib/pair_with.rml *)
 (* Pair implementation without functor. *)
 let module PairWith = struct(pair_mod)
@@ -607,13 +607,13 @@ You can define a `some` with `YourOption.some value` and a `none` with
 ```OCaml
 (* file test/typing/option.rml *)
 let module optionint = option int;;
-> opt => sig
-type t = ∀(b : self => sig type t = ⟂ .. ⊤ end) Int.t -> b.t -> b.t -> b.t .. ∀(b : self => sig
+> sig(opt)
+type t = ∀(b : sig(self) type t = ⟂ .. ⊤ end) Int.t -> b.t -> b.t -> b.t .. ∀(b : sig(self)
   type t = ⟂ .. ⊤
   end) Int.t -> b.t -> b.t -> b.t
   val some : Int.t -> opt.t
   val none : opt.t
-  val match : ∀(returned_type : self => sig type t = ⟂ .. ⊤ end) ∀(option : opt.t) ∀(is_some : Int.t -> returned_type.t) ∀(is_none : returned_type.t) returned_type.t
+  val match : ∀(returned_type : sig(self) type t = ⟂ .. ⊤ end) ∀(option : opt.t) ∀(is_some : Int.t -> returned_type.t) ∀(is_none : returned_type.t) returned_type.t
 end
 
 let some_42 = optionint.some 42;;
@@ -692,13 +692,13 @@ and the returned type is the returned typed of the pattern matching.
    type t = Left of int | Right of float
 *)
 let module SumIntFloat = Sum Int Float;;
-> sum => sig
-type t = ∀(b : self => sig type t = ⟂ .. ⊤ end) Int.t -> b.t -> Float.t -> b.t -> b.t .. ∀(b : self => sig
+> sig(sum)
+type t = ∀(b : sig(self) type t = ⟂ .. ⊤ end) Int.t -> b.t -> Float.t -> b.t -> b.t .. ∀(b : sig(self)
   type t = ⟂ .. ⊤
   end) Int.t -> b.t -> Float.t -> b.t -> b.t
   val left : Int.t -> sum.t
   val right : Float.t -> sum.t
-  val match : ∀(return_type : self => sig type t = ⟂ .. ⊤ end) ∀(s : sum.t) ∀(is_left : Int.t -> return_type.t) ∀(is_right : Float.t -> return_type.t) return_type.t
+  val match : ∀(return_type : sig(self) type t = ⟂ .. ⊤ end) ∀(s : sum.t) ∀(is_left : Int.t -> return_type.t) ∀(is_right : Float.t -> return_type.t) return_type.t
 end
 
 (* We create a value of type Sum.t by using the variant Left. *)
@@ -734,14 +734,14 @@ Int.t
 (* We can also change the type of the patterm matching. *)
 let module IntList = List Int;;
 > IntList : 
-list => sig
-type t = self => sig
-  val head : Unit.t -> Int.t
+sig(list)
+  type t = sig(self)
+    val head : Unit.t -> Int.t
     val tail : Unit.t -> list.t
     val size : Int.t
     val is_empty : Bool.t
-  end .. self => sig
-  val head : Unit.t -> Int.t
+  end .. sig(self)
+    val head : Unit.t -> Int.t
     val tail : Unit.t -> list.t
     val size : Int.t
     val is_empty : Bool.t
