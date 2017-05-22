@@ -108,7 +108,7 @@ and string_of_raw_typ t = match t with
   (* { z => T^{z} } *)
   | Grammar.TypeRecursive (x, typ1) ->
     Printf.sprintf
-      "%s ⇒ sig %s end"
+      "sig(%s) %s end"
       x
       (string_of_raw_typ typ1)
   (* a : T *)
@@ -239,9 +239,11 @@ module Pretty = struct
     | Grammar.TermRecursiveRecordUntyped(x, d) ->
       module_block
         (
-          (string (show_atom x)) ^^
           double_arrow_right ^^
-          struct_
+          struct_ ^^
+          (string "(") ^^
+          (string (show_atom x)) ^^
+          (string ")")
         )
         (document_of_nominal_term_declaration d)
         (end_)
@@ -340,7 +342,7 @@ module Pretty = struct
     (* { z => T^{z} } *)
     | Grammar.TypeRecursive (x, typ1) ->
       module_block
-        ((string (show_atom x)) ^^ double_arrow_right ^^ sig_)
+        (sig_ ^^ (string "(") ^^ (string (show_atom x)) ^^ (string ")"))
         (document_of_nominal_typ_declaration typ1)
         (end_)
     | _ -> document_of_nominal_typ_declaration ~remove_identity_of_atom t
