@@ -33,6 +33,8 @@ val is_empty : context -> bool
 *)
 val find : key -> context -> t
 
+val mem : key -> context -> bool
+
 (** Return a string representation of the given context.
     NOTE: Use unicode character ∅.
 *)

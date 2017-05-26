@@ -39,6 +39,9 @@ let find x context =
   with
   | Not_found -> raise (NotInEnvironment (x, context))
 
+let mem x context =
+  ContextModule.mem x context
+
 let string_of_context context =
   let s = ref "" in
   ContextModule.iter

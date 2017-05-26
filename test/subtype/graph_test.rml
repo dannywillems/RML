@@ -1,0 +1,20 @@
+sig(graph_int)
+  type node = Int.t
+  val succ : forall(x : graph_int.node) sig(self)
+    type t = Int.t
+    val is_empty : Bool.t
+    val head : Int.t
+    val tail : ListWith.list with type t <: Int.t
+  end
+end
+<:
+sig(graph)
+  type node
+  val succ : graph.node ->
+    sig(self)
+      type t = Nothing .. Any
+      val is_empty : Bool.t
+      val head : Int.t
+      val tail : ListWith.list with type t <: self.t
+    end
+end;;

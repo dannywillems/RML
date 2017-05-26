@@ -34,3 +34,6 @@ any_any_list.t <: nothing_any_list.t;;
 nothing_any_list.t <: any_any_list.t;;
 *)
 
+ListWith.list <: ListWith.list;;
+
+ListWith.list with type t = Int.t <: ListWith.list;;

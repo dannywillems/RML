@@ -169,6 +169,8 @@ let check_subtype lexbuf =
     let nominal_t = Grammar.import_typ (!kit_import_env) raw_t in
     check_well_formed (!typing_env) nominal_s;
     check_well_formed (!typing_env) nominal_t;
+    print_type_color nominal_s;
+    print_type_color nominal_t;
     let history, is_subtype =
       Subtype.subtype ~context:(!typing_env) nominal_s nominal_t
     in

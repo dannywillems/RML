@@ -1,5 +1,6 @@
-let module GraphInt : Graph.graph with type node = Int.t = struct
+let module GraphInt : Graph.graph with type node = Int.t = struct(graph_int)
   type node = Int.t
-  let succ = fun(x : self.node) ->
+  let succ = fun(x : graph_int.node)
+    ->
     ListWith.cons Int (Int.succ x) ListWith.nil
-end;;
+end[@show_derivation_tree, no_context];;

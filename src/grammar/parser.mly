@@ -210,6 +210,7 @@ top_level_subtype_content:
   t = rule_type {
           (false, Grammar.CoupleTypes(s, t))
         }
+(*
 | s = rule_term ;
   SUBTYPE ;
   t = rule_term {
@@ -221,7 +222,7 @@ top_level_subtype_content:
   t = rule_term {
           (false, Grammar.CoupleTerms(s, t))
         }
-
+*)
 (* ------------------------------------------ *)
 
 (* A let binding. It can be in the form let x = t

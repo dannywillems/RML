@@ -1,6 +1,6 @@
 let module Graph = struct
-  type graph = sig
+  type graph = sig(graph)
     type node
-    val succ : self.node -> ListWith.list with type t = self.node
+    val succ : graph.node -> ListWith.list with type t = graph.node
   end
 end;;
