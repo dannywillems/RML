@@ -257,7 +257,7 @@ let args_list = [
 ]
 
 let () =
-  Arg.parse args_list print_endline "An interpreter for RML implemented in OCaml"
+  Arg.parse args_list print_endline "An interpreter for DOT implemented in OCaml"
 (* ------------------------------------------------- *)
 
 let stdlib_files = [
