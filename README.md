@@ -276,6 +276,9 @@ end
 ```
 
 **NB: When you annotate the module with a signature, the typing algorithm is naive: it only takes the signature and doesn't perform any verification on the content of the module. The reason is the current inference algorithm on modules is very simple and will fail on some examples. For example, the following code is accepted.**
+
+This will be changed in the first release.
+
 ```OCaml
 (* Even if the body doesn't define a field add, it's allowed by the compiler. *)
 let point2D_with_sig_error = sig
@@ -815,7 +818,7 @@ Possible actions are:
 - use the typing algorithm on terms (`typing`).
 - use the subtyping algorithm on types (`subtype`).
 
-For example, you can try the subtyping algorithm on the file `test/subtype/stdlib.dsubml` by using:
+For example, you can try the subtyping algorithm on the file `test/subtype/stdlib.rml` by using:
 ```
 ./rml -f test/typing/option.dsubml -a typing --use-stdlib
 ```
