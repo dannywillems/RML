@@ -800,6 +800,15 @@ end
 
 ## Compilation.
 
+Dependencies:
+```
+opam switch create rml 4.08.0
+eval $(opam env)
+opam install ocamlfind ocamlbuild cppo cppo_ocamlbuild visitors ansiterminal pprint menhir -y
+git clone https://gitlab.inria.fr/fpottier/alphaLib /tmp/alphaLib
+cd /tmp/alphaLib && make install
+```
+
 To compile, use
 ```
 make
