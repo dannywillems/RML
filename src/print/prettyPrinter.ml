@@ -47,7 +47,7 @@ let app d1 d2 =
 (* Running a buffer printer in a fresh buffer, and sending the result to an
    output channel. *)
 
-let run (oc : out_channel) (print : Buffer.t -> 'a -> unit) (x : 'a) =
+let run oc print x =
   let b = Buffer.create 1024 in
   print b x ;
   Buffer.output_buffer oc b
@@ -56,11 +56,9 @@ let run (oc : out_channel) (print : Buffer.t -> 'a -> unit) (x : 'a) =
 
 (* Printing a document into an output channel, with fixed parameters. *)
 
-let output (oc : out_channel) (d : document) =
-  run oc (PPrintEngine.ToBuffer.pretty 0.9 80) d
+let output oc d = run oc (PPrintEngine.ToBuffer.pretty 0.9 80) d
 
-let adapt (f : 'a -> document) : out_channel -> 'a -> unit =
- fun oc x -> output oc (f x)
+let adapt f oc x = output oc (f x)
 
 let arrow_right = string " -> "
 
