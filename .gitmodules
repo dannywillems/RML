@@ -1,0 +1,3 @@
+[submodule "alphaLib"]
+	path = alphaLib
+	url = https://gitlab.inria.fr/fpottier/alphaLib

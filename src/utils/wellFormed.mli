@@ -15,7 +15,4 @@
     type.
 *)
 val typ :
-  ?use_subtyping:bool ->
-  ContextType.context ->
-  Grammar.nominal_typ ->
-  bool
+  ?use_subtyping:bool -> ContextType.context -> Grammar.nominal_typ -> bool

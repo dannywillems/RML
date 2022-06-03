@@ -1,9 +1,6 @@
 exception Undefined_action of string
 
-type t =
-  | Eval
-  | Subtype
-  | Typing
+type t = Eval | Subtype | Typing
 
 val t_of_string : string -> t
 

@@ -21,7 +21,7 @@ val subtype :
   ?context:ContextType.context ->
   Grammar.nominal_typ ->
   Grammar.nominal_typ ->
-  (DerivationTree.subtyping_node DerivationTree.t * bool)
+  DerivationTree.subtyping_node DerivationTree.t * bool
 
 (** [is_subtype ~with_refl ~context s t] returns [true] is [s] is a subtype of [t]. Arguments are the same than {!subtype}.
 *)

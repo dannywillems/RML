@@ -43,9 +43,7 @@ val least_upper_bound_of_dependent_function :
 (** [is_value term] returns [true] if [term] is a value (a lambda abstraction or
     a type tag).
 *)
-val is_value :
-  Grammar.nominal_term ->
-  bool
+val is_value : Grammar.nominal_term -> bool
 
 module SetFieldDeclaration : sig
   include Set.S with type elt = string
@@ -54,21 +52,13 @@ end
 (** [domain decl] returns all labels in the nominal term decl *)
 val domain : Grammar.nominal_term -> SetFieldDeclaration.t
 
-val labels_of_declaration :
-  Grammar.nominal_decl ->
-  SetFieldDeclaration.t
+val labels_of_declaration : Grammar.nominal_decl -> SetFieldDeclaration.t
 
 val labels_of_recursive_type :
-  ContextType.context ->
-  Grammar.nominal_typ ->
-  SetFieldDeclaration.t
+  ContextType.context -> Grammar.nominal_typ -> SetFieldDeclaration.t
 
-val is_type_intersection :
-  Grammar.nominal_typ -> bool
+val is_type_intersection : Grammar.nominal_typ -> bool
 
-val is_term_intersection :
-  Grammar.nominal_decl -> bool
+val is_term_intersection : Grammar.nominal_decl -> bool
 
-val remove_top_from_intersection :
-  Grammar.nominal_typ ->
-  Grammar.nominal_typ
+val remove_top_from_intersection : Grammar.nominal_typ -> Grammar.nominal_typ

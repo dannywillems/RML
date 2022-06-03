@@ -1,9 +1,6 @@
 exception Undefined_action of string
 
-type t =
-  | Eval
-  | Subtype
-  | Typing
+type t = Eval | Subtype | Typing
 
 let t_of_string = function
   | "eval" -> Eval
@@ -11,8 +8,4 @@ let t_of_string = function
   | "typing" -> Typing
   | s -> raise (Undefined_action s)
 
-let available = [
-  "subtype";
-  "typing";
-]
-
+let available = ["subtype"; "typing"]

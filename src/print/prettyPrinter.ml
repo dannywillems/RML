@@ -6,20 +6,18 @@ open PPrint
 let indentation = 2
 
 let block opening contents closing =
-  group (opening ^/^ nest indentation (contents) ^^ closing)
+  group (opening ^/^ nest indentation contents ^^ closing)
 
 let module_block opening contents closing =
-  group (opening ^/^ nest indentation (contents) ^/^ closing)
+  group (opening ^/^ nest indentation contents ^/^ closing)
 
 (* -------------------------------------------------------------------------- *)
 
 (* Bindings, or annotations: [x : t]. *)
 
-let spacecolon =
-  string " :"
+let spacecolon = string " :"
 
-let binding x t =
-  block (x ^^ spacecolon) (space ^^ t) empty
+let binding x t = block (x ^^ spacecolon) (space ^^ t) empty
 
 (* -------------------------------------------------------------------------- *)
 
@@ -28,11 +26,7 @@ let binding x t =
 (* We allow breaking a parenthesized thing into several lines by leaving the
    opening and closing parentheses alone on a line and indenting the content. *)
 
-let parens d =
-  block
-    lparen
-    (break 0 ^^ d)
-    (break 0 ^^ rparen)
+let parens d = block lparen (break 0 ^^ d) (break 0 ^^ rparen)
 
 (* -------------------------------------------------------------------------- *)
 
@@ -55,7 +49,7 @@ let app d1 d2 =
 
 let run (oc : out_channel) (print : Buffer.t -> 'a -> unit) (x : 'a) =
   let b = Buffer.create 1024 in
-  print b x;
+  print b x ;
   Buffer.output_buffer oc b
 
 (* -------------------------------------------------------------------------- *)
@@ -66,41 +60,28 @@ let output (oc : out_channel) (d : document) =
   run oc (PPrintEngine.ToBuffer.pretty 0.9 80) d
 
 let adapt (f : 'a -> document) : out_channel -> 'a -> unit =
-  fun oc x ->
-    output oc (f x)
+ fun oc x -> output oc (f x)
 
-let arrow_right =
-  string " -> "
+let arrow_right = string " -> "
 
-let double_arrow_right =
-  string " => "
+let double_arrow_right = string " => "
 
-let struct_ =
-  string "struct "
+let struct_ = string "struct "
 
-let end_ =
-  string "end"
+let end_ = string "end"
 
-let sig_ =
-  string "sig"
+let sig_ = string "sig"
 
-let type_ =
-  string "type "
+let type_ = string "type "
 
-let val_ =
-  string "val "
+let val_ = string "val "
 
-let fun_ =
-  string "fun "
+let fun_ = string "fun "
 
-let let_ =
-  string "let "
+let let_ = string "let "
 
-let in_ =
-  string "in"
+let in_ = string "in"
 
-let forall =
-  string "∀"
+let forall = string "∀"
 
-let unimplemented =
-  string "Unimplemented"
+let unimplemented = string "Unimplemented"
