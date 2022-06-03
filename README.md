@@ -830,7 +830,7 @@ Possible actions are:
 
 For example, you can try the subtyping algorithm on the file `test/subtype/stdlib.rml` by using:
 ```
-./rml -f test/typing/option.dsubml -a typing --use-stdlib
+./rml -f test/typing/option.rml -a typing --use-stdlib
 ```
 
 ## Annotations
