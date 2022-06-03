@@ -1,0 +1,15 @@
+abstract: "ML modules and functors as first-class citizens by unifying ML modules and ML records with path dependent types and subtyping"
+authors:
+  - family-names: Willems
+    given-names: Danny
+cff-version: 1.2.0
+date-released: 2017-05-30
+keywords:
+  - ocaml
+  - "programming languages"
+  - "dependent types"
+license: "MIT"
+message: "If you use this software, please cite it as below."
+repository-code: "https://github.com/dannywillems/RML"
+title: "RML - ML modules and functors as first-class citizens"
+version: 1.0.0
