@@ -804,7 +804,7 @@ Dependencies:
 ```
 opam switch create ./ 4.14.0
 eval $(opam env)
-opam install ocamlfind ocamlbuild cppo cppo_ocamlbuild visitors ansiterminal pprint menhir -y
+opam install ocamlfind ocamlbuild cppo cppo_ocamlbuild visitors ansiterminal pprint.20211129 menhir -y
 git submodule update --init --recursive
 cd alphaLib && make install
 cd ../
